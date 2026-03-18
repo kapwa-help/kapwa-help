@@ -32,6 +32,7 @@
     "retry": "Retry",
     "organizationCount": "{{count}} na organisasyon",
     "locationsServed": "{{count}} lokasyon na naabot",
-    "acrossDeployments": "sa {{count}} deployment"
+    "acrossDeployments": "sa {{count}} deployment",
+    "mapTilesUnavailable": "Hindi available ang map tiles kapag offline"
   }
 }

@@ -32,6 +32,7 @@
     "retry": "Retry",
     "organizationCount": "{{count}} organizations",
     "locationsServed": "{{count}} locations served",
-    "acrossDeployments": "across {{count}} deployments"
+    "acrossDeployments": "across {{count}} deployments",
+    "mapTilesUnavailable": "Map tiles unavailable offline"
   }
 }
