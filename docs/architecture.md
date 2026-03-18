@@ -93,6 +93,7 @@ The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
 - **Data flow**: On page load, cached data renders immediately. Fresh data is fetched in the background and replaces the cache on success.
 - **Offline indicator**: The hero section shows "Last Updated: [timestamp]" and appends "· Offline" when `navigator.onLine` is false.
 - **Auto-refresh**: When the browser regains connectivity (`online` event), the dashboard automatically re-fetches.
+- **Map tiles** (`vite.config.ts` runtimeCaching): OSM tiles use CacheFirst strategy (cache name: `map-tiles`, max 200 tiles, 30-day expiry). When tiles fail to load, `DeploymentMap` shows a fallback overlay after 3 consecutive `tileerror` events; the overlay clears automatically when tiles load again.
 - **Future**: Per-query caching can be added when additional pages (barangay triage board, forms) need to share cached query results.
 
 ## What's Built vs Planned
@@ -109,6 +110,7 @@ The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
 - Language switcher in Header (English / Filipino / Ilocano dropdown)
 - Interactive Leaflet map (`DeploymentMap`) with deployment markers, popups, and empty-state handling (#7)
 - Offline dashboard caching (#10) — IndexedDB stale-while-revalidate with auto-refresh
+- Offline map tile caching (#37) — Workbox CacheFirst for OSM tiles with fallback overlay
 
 **Planned (see GitHub Issues):**
 - Offline form submissions (#10, #11) — IndexedDB write queue + background sync
