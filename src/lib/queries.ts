@@ -107,6 +107,49 @@ export async function getDeploymentMapPoints() {
   }));
 }
 
+// --- Submission form queries ---
+
+export interface SubmissionInsert {
+  type: "request" | "feedback";
+  contact_name: string;
+  contact_phone: string | null;
+  barangay_id: string;
+  aid_category_id: string;
+  notes: string | null;
+  quantity_needed: number | null;
+  urgency: string | null;
+  rating: number | null;
+  issue_type: string | null;
+  lat: number | null;
+  lng: number | null;
+}
+
+export async function getBarangays() {
+  const { data, error } = await supabase
+    .from("barangays")
+    .select("id, name, municipality")
+    .order("name");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAidCategories() {
+  const { data, error } = await supabase
+    .from("aid_categories")
+    .select("id, name")
+    .order("name");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function insertSubmission(submission: SubmissionInsert) {
+  const { error } = await supabase.from("submissions").insert(submission);
+
+  if (error) throw error;
+}
+
 export async function getBeneficiariesByBarangay() {
   const { data, error } = await supabase
     .from("deployments")
