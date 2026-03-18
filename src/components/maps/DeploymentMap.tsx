@@ -27,7 +27,7 @@ type Props = {
 
 export default function DeploymentMap({ points }: Props) {
   return (
-    <div className="h-[40rem] overflow-hidden rounded-lg">
+    <div className="h-[24rem] overflow-hidden rounded-lg">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
