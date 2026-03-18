@@ -28,6 +28,7 @@
     "lastUpdated": "Last Updated",
     "loading": "Loading dashboard\u2026",
     "loadError": "Failed to load dashboard data",
+    "offline": "Offline",
     "retry": "Retry",
     "organizationCount": "{{count}} na organisasyon",
     "locationsServed": "{{count}} lokasyon na naabot",

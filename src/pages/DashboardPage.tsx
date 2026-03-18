@@ -173,7 +173,7 @@ export function DashboardPage() {
                 })}`
               : ""}
             {isOffline && (
-              <span className="ml-2 text-warning">{"\u00b7"} Offline</span>
+              <span className="ml-2 text-warning">{"\u00b7"} {t("Dashboard.offline")}</span>
             )}
           </p>
         </div>
