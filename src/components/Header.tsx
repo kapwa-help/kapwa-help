@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, Link } from "react-router";
 import { supportedLocales, type Locale } from "../i18n";
 
 const LOCALE_LABELS: Record<Locale, string> = {
@@ -54,12 +54,12 @@ export default function Header() {
               ))}
             </select>
           </div>
-          <a
-            href="#"
+          <Link
+            to={`/${locale}/submit`}
             className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary/80"
           >
-            {t("Navigation.volunteer")}
-          </a>
+            {t("Navigation.report")}
+          </Link>
         </div>
       </div>
     </header>
