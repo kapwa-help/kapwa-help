@@ -36,10 +36,11 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 export async function getCachedDashboard(): Promise<CachedDashboard | null> {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDB();
-    return new Promise((resolve) => {
-      const tx = db.transaction(STORE_NAME, "readonly");
+    db = await openDB();
+    return await new Promise<CachedDashboard | null>((resolve) => {
+      const tx = db!.transaction(STORE_NAME, "readonly");
       const store = tx.objectStore(STORE_NAME);
       const request = store.get(CACHE_KEY);
       request.onsuccess = () => resolve(request.result ?? null);
@@ -47,18 +48,23 @@ export async function getCachedDashboard(): Promise<CachedDashboard | null> {
     });
   } catch {
     return null;
+  } finally {
+    db?.close();
   }
 }
 
 export async function setCachedDashboard(
   data: CachedDashboard["data"]
 ): Promise<void> {
+  let db: IDBDatabase | null = null;
   try {
-    const db = await openDB();
+    db = await openDB();
     const tx = db.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
     store.put({ data, updatedAt: Date.now() } satisfies CachedDashboard, CACHE_KEY);
   } catch {
     // Cache write failure is non-critical — silently ignore
+  } finally {
+    db?.close();
   }
 }
