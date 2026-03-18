@@ -33,10 +33,13 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
 
-// Mock react-router (Header uses useParams/useNavigate)
+// Mock react-router (Header uses useParams/useNavigate/Link)
 vi.mock("react-router", () => ({
   useParams: () => ({ locale: "en" }),
   useNavigate: () => vi.fn(),
+  Link: ({ children, ...props }: { children: React.ReactNode; to: string; className?: string }) => (
+    <a href={props.to} className={props.className}>{children}</a>
+  ),
 }));
 
 import {
