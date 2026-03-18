@@ -1,40 +1,63 @@
-# LUaid.org - LU Disaster and Relief Operations
-A Progressive Web App for LU Disaster and Relief Operations. This is an open-source project built to track and visualize donations, volunteer deployments, and aid distribution in the wake of Typhoon Emong in La Union, Philippines. Functionality covers field operability, editorial flow, and real-time transparency. It is designed to be resilient, modular, high impact and accessible even in low-connectivity zones. We publish this software in the hopes of being useful for disaster relief operations in your location.
+# LUaid.org
 
-## Features
-- Zero-budget deployment by stitching together free-tier services/tools to support volunteer-driven initiatives
-- Offline-syncing Progressive Web App with offline form submissions and data caching for quick access on any device with or without internet
-- Realtime dashboards for donations, deployments, and aid requests/feedback
-- Map integration to visualize field operations
-- Multilanguage to support local dialects
-- CMS with WYSIWYG editor for easy content uploading/editing in multiple languages
-- User authentication and permissioning system for volunteers submitting field reports, writers' articles and site copywriting, and approvers for content submitted.
-- Approval workflow for publishing and editing content
+**Open-source disaster relief operations for La Union, Philippines.**
+
+When Typhoon Emong hit La Union in 2025, volunteers self-organized across municipalities to distribute meals, relief goods, drinking water, and medical supplies. Coordination happened over group chats. Tracking happened in spreadsheets — when it happened at all. LUaid was born out of that experience: a transparency and coordination tool built by the people who were on the ground, designed so the next disaster response starts where this one left off.
+
+LUaid is a Progressive Web App that tracks donations, volunteer deployments, and aid distribution in real time. It's built for offline-first use in low-connectivity disaster zones, runs entirely on free-tier services, and supports English, Filipino, and Ilocano.
+
+We publish this software openly in the hope that it's useful for disaster relief operations in your community too.
+
+![LUaid Dashboard](docs/dashboard-screenshot.png)
+
+## What It Does
+
+- **Transparency dashboard** — live tracking of donations, beneficiaries, volunteer counts, and deployment activity across organizations
+- **Interactive deployment map** — GPS-tagged aid deliveries visualized on a Leaflet/OpenStreetMap layer
+- **Offline-capable PWA** — the full app shell is cached on-device via service worker, works without internet
+- **Multilingual** — English, Filipino, and Ilocano with a one-click language switcher
+- **Zero-budget infrastructure** — Supabase free tier for the database, Vercel for hosting, no paid services
+
+## Quick Start
+
+```bash
+git clone https://github.com/r0droald/LUaid.git
+cd LUaid
+npm install
+npm run dev
+```
+
+You'll need a `.env.local` file with Supabase credentials — see [docs/setup.md](docs/setup.md) for the full setup guide, including shared database access and seed data details.
+
+## Tech Stack
+
+| Layer | Tool |
+|-------|------|
+| App | [Vite](https://vitejs.dev/) + [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
+| Database | [Supabase](https://supabase.com/) (Postgres + Row Level Security) |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com/) with semantic design tokens |
+| Maps | [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) |
+| i18n | [react-i18next](https://react.i18next.com/) |
+| PWA | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox) |
+| Testing | [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/) |
+
+For architecture decisions, database schema, and system design details, see [docs/architecture.md](docs/architecture.md).
 
 ## Get Involved
-We welcome contributions from developers, designers, organizers, content creators and volunteers. Check the [Projects](#) and [Issues](#) tabs to find tasks related to the building and running of LUaid.org that you'd like to help with.
 
-## Architecture & Tech Stack
-- Frontend PWA (Vercel-hosted, offline-capable)
-  - React/Next.js
-  - Caches data in IndexedDB/localStorage/JSON for dashboard/reports from Google Sheets via Sheets API, and website content from Wordpress CMS Backend via REST API (stored as JSON per language)
-  - Syncs periodically and fallbacks gracefully when offline
-  - Displays map view (embedded Google Maps/Leaflet)
-  - Serves blog/article content from WordPress API
-  - Serves multilingual content (i18n/WPML/Polylang) from offline cache
-  - Serves media(images) via Service Worker Cache API and syncs with Lazy-load + precache
-  - Updates in background when online, without interrupting the user
-  - Provides volunteer form interface that stores inputs locally when offline, then syncs to Google Sheets
-- Google Sheets
-  - Serves as a lightweight database for relief operations transparency dashboard & reports
-  - Powers dashboard metrics and is cached for offline viewing
-  - Updated from PWA frontend form submissions from volunteers in the field
-- WordPress CMS Backend (cms.LUaid.org)
-  - WYSIWYG editorial UI for writers and content approvers
-  - User login/authentication and permission levels (e.g. volunteer, writer, admin)
-  - Multilanguage support for content and dashboard UI (via WPML or Polylang)
-  - REST API (or GraphQL via WPGraphQL) exposing articles and metadata
-  - Free hosting on InfinityFree/AccuWeb/Wordpress.com/Freehostia/000webhost
+LUaid is a volunteer-driven project and we welcome help from anyone — developers, designers, writers, translators, relief coordinators, or anyone who wants to contribute. Every skill set has a place here.
+
+Check the [Issues](https://github.com/r0droald/LUaid/issues) tab to find something to work on, or open a new issue if you have ideas. If you're a developer, [docs/setup.md](docs/setup.md) will get you running locally in a few minutes.
+
+## Documentation
+
+| Doc | What's inside |
+|-----|---------------|
+| [Architecture](docs/architecture.md) | System design, database schema, query functions, key decisions, what's built vs planned |
+| [Local Setup](docs/setup.md) | Environment setup, seed data, testing, troubleshooting |
+| [Design System](docs/design-system.md) | Color tokens, typography, component patterns |
+| [Project History](docs/project-history.md) | Origin story, goals, and project direction |
 
 ## License
-This repository's source code is available under the [MIT License](LICENSE). Please feel free to use, modify, distribute, publish, sublicense and contribute to this project. We encourage community collaboration and repurposing of this work. Copyright © 2025 LUaid.org
+
+MIT License — see [LICENSE](LICENSE). We encourage community collaboration and repurposing of this work for disaster relief anywhere.
