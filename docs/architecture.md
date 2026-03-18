@@ -85,6 +85,16 @@ Real deployment data from Typhoon Emong relief operations is stored in `data/Emo
 
 Locale-based routing via react-router URL params: `/:locale` (en, fil, ilo). Translation files in `public/locales/`. Client-side language detection via `i18next-browser-languagedetector` with path-based lookup. `RootLayout` component syncs the i18n language with the URL param. A language switcher dropdown in the Header lets users switch between English, Filipino, and Ilocano — navigating to the corresponding `/:locale` route.
 
+## Offline Caching
+
+The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
+
+- **Cache utility** (`src/lib/cache.ts`): Two functions — `getCachedDashboard()` and `setCachedDashboard(data)`. Stores the entire `DashboardData` blob + timestamp in a single IndexedDB object store.
+- **Data flow**: On page load, cached data renders immediately. Fresh data is fetched in the background and replaces the cache on success.
+- **Offline indicator**: The hero section shows "Last Updated: [timestamp]" and appends "· Offline" when `navigator.onLine` is false.
+- **Auto-refresh**: When the browser regains connectivity (`online` event), the dashboard automatically re-fetches.
+- **Future**: Per-query caching can be added when additional pages (barangay triage board, forms) need to share cached query results.
+
 ## What's Built vs Planned
 
 **Built:**
@@ -98,9 +108,10 @@ Locale-based routing via react-router URL params: `/:locale` (en, fil, ilo). Tra
 - i18n wired into all dashboard components — all user-facing strings use `t()` translation keys
 - Language switcher in Header (English / Filipino / Ilocano dropdown)
 - Interactive Leaflet map (`DeploymentMap`) with deployment markers, popups, and empty-state handling (#7)
+- Offline dashboard caching (#10) — IndexedDB stale-while-revalidate with auto-refresh
 
 **Planned (see GitHub Issues):**
-- Offline sync (#10) — IndexedDB caching + background sync
+- Offline form submissions (#10, #11) — IndexedDB write queue + background sync
 - Data entry forms (#11) — replace Supabase table editor
 - Barangay triage (#15) — status board for prioritizing aid
 - CMS integration (#13) — WordPress content via REST API

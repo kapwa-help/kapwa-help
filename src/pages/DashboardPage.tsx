@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import SummaryCards from "@/components/SummaryCards";
@@ -7,6 +7,11 @@ import DeploymentHubs from "@/components/DeploymentHubs";
 import GoodsByCategory from "@/components/GoodsByCategory";
 import AidDistributionMap from "@/components/AidDistributionMap";
 import StatusFooter from "@/components/StatusFooter";
+import {
+  getCachedDashboard,
+  setCachedDashboard,
+  type DashboardData,
+} from "@/lib/cache";
 import {
   getTotalDonations,
   getTotalBeneficiaries,
@@ -18,32 +23,16 @@ import {
   getDeploymentMapPoints,
 } from "@/lib/queries";
 
-type DashboardData = {
-  totalDonations: number;
-  totalBeneficiaries: number;
-  volunteerCount: number;
-  donationsByOrg: { name: string; amount: number }[];
-  deploymentHubs: { name: string; municipality: string; count: number }[];
-  goodsByCategory: { name: string; icon: string | null; total: number }[];
-  barangays: { name: string; municipality: string; beneficiaries: number }[];
-  deploymentPoints: { lat: number; lng: number; quantity: number | null; unit: string | null; orgName: string; categoryName: string }[];
-};
-
 export function DashboardPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(timer);
-  }, []);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const hasDataRef = useRef(false);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     try {
       const [
         totalDonations,
@@ -65,7 +54,7 @@ export function DashboardPage() {
         getDeploymentMapPoints(),
       ]);
 
-      setData({
+      const freshData: DashboardData = {
         totalDonations,
         totalBeneficiaries,
         volunteerCount,
@@ -74,16 +63,52 @@ export function DashboardPage() {
         goodsByCategory,
         barangays,
         deploymentPoints,
-      });
+      };
+
+      setData(freshData);
+      setUpdatedAt(new Date());
+      setError(null);
+      hasDataRef.current = true;
+      setCachedDashboard(freshData);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load dashboard data");
+      if (!hasDataRef.current) {
+        setError(e instanceof Error ? e.message : "Failed to load dashboard data");
+      }
+      if (!navigator.onLine) {
+        setIsOffline(true);
+      }
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchData();
+    async function init() {
+      const cached = await getCachedDashboard();
+      if (cached) {
+        setData(cached.data);
+        setUpdatedAt(new Date(cached.updatedAt));
+        setLoading(false);
+        hasDataRef.current = true;
+      }
+      fetchData();
+    }
+    init();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      fetchData();
+    };
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, [fetchData]);
 
   if (loading) {
@@ -108,7 +133,10 @@ export function DashboardPage() {
     );
   }
 
-  const totalDeployments = data.deploymentHubs.reduce((sum, h) => sum + h.count, 0);
+  const totalDeployments = data.deploymentHubs.reduce(
+    (sum, h) => sum + h.count,
+    0
+  );
 
   return (
     <div className="min-h-screen bg-base">
@@ -122,15 +150,20 @@ export function DashboardPage() {
             {t("Dashboard.subtitle")}
           </p>
           <p className="mt-2 text-sm text-neutral-400">
-            {now.toLocaleString("en-PH", {
-              timeZone: "Asia/Manila",
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            })}
+            {updatedAt
+              ? `${t("Dashboard.lastUpdated")}: ${updatedAt.toLocaleString("en-PH", {
+                  timeZone: "Asia/Manila",
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })}`
+              : ""}
+            {isOffline && (
+              <span className="ml-2 text-warning">{"\u00b7"} {t("Dashboard.offline")}</span>
+            )}
           </p>
         </div>
         <SummaryCards
@@ -146,7 +179,10 @@ export function DashboardPage() {
           <DeploymentHubs hubs={data.deploymentHubs} />
           <GoodsByCategory categories={data.goodsByCategory} />
         </div>
-        <AidDistributionMap barangays={data.barangays} deploymentPoints={data.deploymentPoints} />
+        <AidDistributionMap
+          barangays={data.barangays}
+          deploymentPoints={data.deploymentPoints}
+        />
       </main>
       <StatusFooter />
     </div>

@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { DashboardPage } from "@/pages/DashboardPage";
 
+// Mock cache module
+vi.mock("@/lib/cache", () => ({
+  getCachedDashboard: vi.fn(),
+  setCachedDashboard: vi.fn(),
+}));
+
 // Mock queries module
 vi.mock("@/lib/queries", () => ({
   getTotalDonations: vi.fn(),
@@ -43,6 +49,7 @@ import {
   getBeneficiariesByBarangay,
   getDeploymentMapPoints,
 } from "@/lib/queries";
+import { getCachedDashboard, setCachedDashboard } from "@/lib/cache";
 
 const mockQueries = () => {
   vi.mocked(getTotalDonations).mockResolvedValue(500000);
@@ -70,6 +77,8 @@ describe("DashboardPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQueries();
+    vi.mocked(getCachedDashboard).mockResolvedValue(null);
+    vi.mocked(setCachedDashboard).mockResolvedValue(undefined);
   });
 
   it("shows loading state initially", () => {
@@ -115,5 +124,89 @@ describe("DashboardPage", () => {
     });
 
     expect(screen.getByRole("button", { name: "Dashboard.retry" })).toBeInTheDocument();
+  });
+
+  it("renders cached data immediately when cache exists", async () => {
+    vi.mocked(getCachedDashboard).mockResolvedValue({
+      data: {
+        totalDonations: 500000,
+        totalBeneficiaries: 1200,
+        volunteerCount: 50,
+        donationsByOrg: [
+          { name: "Red Cross", amount: 300000 },
+          { name: "LGU", amount: 200000 },
+        ],
+        deploymentHubs: [
+          { name: "Hub A", municipality: "San Fernando", count: 5 },
+        ],
+        goodsByCategory: [{ name: "Meals", icon: null, total: 800 }],
+        barangays: [
+          { name: "Catbangen", municipality: "San Fernando", beneficiaries: 400 },
+        ],
+        deploymentPoints: [
+          { lat: 16.62, lng: 120.35, quantity: 200, unit: "meals", orgName: "Red Cross", categoryName: "Meals" },
+        ],
+      },
+      updatedAt: Date.now(),
+    });
+
+    render(<DashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("₱500,000")).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByText(/Dashboard.lastUpdated/).length).toBeGreaterThan(0);
+  });
+
+  it("shows cached data when fetch fails but cache exists", async () => {
+    vi.mocked(getCachedDashboard).mockResolvedValue({
+      data: {
+        totalDonations: 500000,
+        totalBeneficiaries: 1200,
+        volunteerCount: 50,
+        donationsByOrg: [{ name: "Red Cross", amount: 300000 }],
+        deploymentHubs: [
+          { name: "Hub A", municipality: "San Fernando", count: 5 },
+        ],
+        goodsByCategory: [{ name: "Meals", icon: null, total: 800 }],
+        barangays: [
+          { name: "Catbangen", municipality: "San Fernando", beneficiaries: 400 },
+        ],
+        deploymentPoints: [],
+      },
+      updatedAt: Date.now(),
+    });
+
+    // All queries fail
+    const networkError = new Error("Network error");
+    vi.mocked(getTotalDonations).mockRejectedValue(networkError);
+    vi.mocked(getTotalBeneficiaries).mockRejectedValue(networkError);
+    vi.mocked(getVolunteerCount).mockRejectedValue(networkError);
+    vi.mocked(getDonationsByOrganization).mockRejectedValue(networkError);
+    vi.mocked(getDeploymentHubs).mockRejectedValue(networkError);
+    vi.mocked(getGoodsByCategory).mockRejectedValue(networkError);
+    vi.mocked(getBeneficiariesByBarangay).mockRejectedValue(networkError);
+    vi.mocked(getDeploymentMapPoints).mockRejectedValue(networkError);
+
+    render(<DashboardPage />);
+
+    // Should show cached data, not error state
+    await waitFor(() => {
+      expect(screen.getByText("₱500,000")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText("Dashboard.loadError")).not.toBeInTheDocument();
+  });
+
+  it("shows error state when both cache and fetch fail", async () => {
+    vi.mocked(getCachedDashboard).mockResolvedValue(null);
+    vi.mocked(getTotalDonations).mockRejectedValue(new Error("Network error"));
+
+    render(<DashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Dashboard.loadError")).toBeInTheDocument();
+    });
   });
 });

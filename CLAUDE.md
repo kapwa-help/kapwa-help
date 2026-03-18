@@ -88,6 +88,7 @@ src/
   lib/
     supabase.ts       # Supabase client (anon key via import.meta.env)
     queries.ts        # Typed query functions for dashboard sections
+    cache.ts          # IndexedDB cache for offline dashboard data
 supabase/
   schema.sql          # Database schema (5 tables)
   rls-policies.sql    # Row-level security policies (anon read)
