@@ -7,7 +7,11 @@ import DeploymentHubs from "@/components/DeploymentHubs";
 import GoodsByCategory from "@/components/GoodsByCategory";
 import AidDistributionMap from "@/components/AidDistributionMap";
 import StatusFooter from "@/components/StatusFooter";
-import { getCachedDashboard, setCachedDashboard } from "@/lib/cache";
+import {
+  getCachedDashboard,
+  setCachedDashboard,
+  type DashboardData,
+} from "@/lib/cache";
 import {
   getTotalDonations,
   getTotalBeneficiaries,
@@ -19,24 +23,6 @@ import {
   getDeploymentMapPoints,
 } from "@/lib/queries";
 
-type DashboardData = {
-  totalDonations: number;
-  totalBeneficiaries: number;
-  volunteerCount: number;
-  donationsByOrg: { name: string; amount: number }[];
-  deploymentHubs: { name: string; municipality: string; count: number }[];
-  goodsByCategory: { name: string; icon: string | null; total: number }[];
-  barangays: { name: string; municipality: string; beneficiaries: number }[];
-  deploymentPoints: {
-    lat: number;
-    lng: number;
-    quantity: number | null;
-    unit: string | null;
-    orgName: string;
-    categoryName: string;
-  }[];
-};
-
 export function DashboardPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<DashboardData | null>(null);
@@ -44,7 +30,7 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const hasFetchedRef = useRef(false);
+  const hasDataRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -82,10 +68,10 @@ export function DashboardPage() {
       setData(freshData);
       setUpdatedAt(new Date());
       setError(null);
-      hasFetchedRef.current = true;
+      hasDataRef.current = true;
       setCachedDashboard(freshData);
     } catch (e) {
-      if (!hasFetchedRef.current) {
+      if (!hasDataRef.current) {
         setError(e instanceof Error ? e.message : "Failed to load dashboard data");
       }
     } finally {
@@ -100,7 +86,7 @@ export function DashboardPage() {
         setData(cached.data);
         setUpdatedAt(new Date(cached.updatedAt));
         setLoading(false);
-        hasFetchedRef.current = true;
+        hasDataRef.current = true;
       }
       fetchData();
     }

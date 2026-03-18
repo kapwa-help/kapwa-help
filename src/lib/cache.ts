@@ -3,24 +3,26 @@ const DB_VERSION = 1;
 const STORE_NAME = "dashboard";
 const CACHE_KEY = "latest";
 
+export type DashboardData = {
+  totalDonations: number;
+  totalBeneficiaries: number;
+  volunteerCount: number;
+  donationsByOrg: { name: string; amount: number }[];
+  deploymentHubs: { name: string; municipality: string; count: number }[];
+  goodsByCategory: { name: string; icon: string | null; total: number }[];
+  barangays: { name: string; municipality: string; beneficiaries: number }[];
+  deploymentPoints: {
+    lat: number;
+    lng: number;
+    quantity: number | null;
+    unit: string | null;
+    orgName: string;
+    categoryName: string;
+  }[];
+};
+
 type CachedDashboard = {
-  data: {
-    totalDonations: number;
-    totalBeneficiaries: number;
-    volunteerCount: number;
-    donationsByOrg: { name: string; amount: number }[];
-    deploymentHubs: { name: string; municipality: string; count: number }[];
-    goodsByCategory: { name: string; icon: string | null; total: number }[];
-    barangays: { name: string; municipality: string; beneficiaries: number }[];
-    deploymentPoints: {
-      lat: number;
-      lng: number;
-      quantity: number | null;
-      unit: string | null;
-      orgName: string;
-      categoryName: string;
-    }[];
-  };
+  data: DashboardData;
   updatedAt: number;
 };
 

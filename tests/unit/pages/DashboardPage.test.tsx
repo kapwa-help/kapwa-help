@@ -179,7 +179,15 @@ describe("DashboardPage", () => {
     });
 
     // All queries fail
-    vi.mocked(getTotalDonations).mockRejectedValue(new Error("Network error"));
+    const networkError = new Error("Network error");
+    vi.mocked(getTotalDonations).mockRejectedValue(networkError);
+    vi.mocked(getTotalBeneficiaries).mockRejectedValue(networkError);
+    vi.mocked(getVolunteerCount).mockRejectedValue(networkError);
+    vi.mocked(getDonationsByOrganization).mockRejectedValue(networkError);
+    vi.mocked(getDeploymentHubs).mockRejectedValue(networkError);
+    vi.mocked(getGoodsByCategory).mockRejectedValue(networkError);
+    vi.mocked(getBeneficiariesByBarangay).mockRejectedValue(networkError);
+    vi.mocked(getDeploymentMapPoints).mockRejectedValue(networkError);
 
     render(<DashboardPage />);
 
