@@ -74,6 +74,9 @@ export function DashboardPage() {
       if (!hasDataRef.current) {
         setError(e instanceof Error ? e.message : "Failed to load dashboard data");
       }
+      if (!navigator.onLine) {
+        setIsOffline(true);
+      }
     } finally {
       setLoading(false);
     }
