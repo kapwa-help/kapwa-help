@@ -34,6 +34,12 @@ export function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -114,6 +120,17 @@ export function DashboardPage() {
           </h1>
           <p className="mt-1 text-sm text-neutral-400">
             {t("Dashboard.subtitle")}
+          </p>
+          <p className="mt-2 text-sm text-neutral-400">
+            {now.toLocaleString("en-PH", {
+              timeZone: "Asia/Manila",
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            })}
           </p>
         </div>
         <SummaryCards
