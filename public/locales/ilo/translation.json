@@ -6,7 +6,8 @@
   "Navigation": {
     "home": "Pagtaengan",
     "dashboard": "Dashboard",
-    "volunteer": "Boluntario"
+    "volunteer": "Boluntario",
+    "report": "Report"
   },
   "Dashboard": {
     "hero": "Disaster Relief Transparency",
@@ -34,5 +35,40 @@
     "locationsServed": "{{count}} a lugar a naabot",
     "acrossDeployments": "iti {{count}} a deployment",
     "mapTilesUnavailable": "Saan a magun-od dagiti map tiles no offline"
+  },
+  "SubmitForm": {
+    "title": "Submit a Report",
+    "typeRequest": "Request Aid",
+    "typeFeedback": "Give Feedback",
+    "contactName": "Your Name",
+    "contactNamePlaceholder": "Full name",
+    "contactPhone": "Phone Number",
+    "contactPhonePlaceholder": "Optional — for follow-up",
+    "barangay": "Barangay",
+    "barangayPlaceholder": "Select your barangay",
+    "aidCategory": "Type of Aid",
+    "aidCategoryPlaceholder": "Select category",
+    "notes": "Additional Notes",
+    "notesPlaceholder": "Any details that would help...",
+    "urgencyLabel": "Urgency",
+    "urgencyLow": "Low",
+    "urgencyMedium": "Medium",
+    "urgencyHigh": "High",
+    "urgencyCritical": "Critical",
+    "quantityNeeded": "Quantity Needed",
+    "quantityPlaceholder": "Estimated amount",
+    "ratingLabel": "How was the aid?",
+    "issueTypeLabel": "Any issues?",
+    "issueNone": "No issues",
+    "issueInsufficient": "Not enough",
+    "issueDamaged": "Damaged goods",
+    "issueWrongItems": "Wrong items",
+    "issueDelayed": "Delayed delivery",
+    "submit": "Submit Report",
+    "submitting": "Submitting...",
+    "successTitle": "Report Submitted",
+    "successMessage": "Thank you. Your report has been received.",
+    "submitAnother": "Submit Another Report",
+    "errorMessage": "Could not submit. Check your connection and try again."
   }
 }
