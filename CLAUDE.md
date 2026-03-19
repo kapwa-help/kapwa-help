@@ -80,7 +80,7 @@ src/
     StatusFooter.tsx
     dashboard/        # Dashboard-specific components (planned)
     forms/            # Form components (planned)
-    maps/             # Map components (DeploymentMap.tsx)
+    maps/             # Map components (DeploymentMap.tsx, MapSkeleton.tsx)
     shared/           # Shared UI components (planned)
   pages/
     DashboardPage.tsx # Live dashboard (index route)

@@ -23,6 +23,10 @@ LUaid is a Vite + React SPA that fetches data from Supabase (Postgres) client-si
 
 The Supabase anon key is safe for browser use — it relies on Row Level Security (RLS) policies to control access.
 
+### Code Splitting
+
+The DeploymentMap component (Leaflet + react-leaflet) is lazy-loaded via `React.lazy` to keep the main bundle under 600 KB. A `MapSkeleton` loading state displays while the map chunk downloads. The PWA service worker precaches all chunks, so this primarily improves first-visit performance.
+
 ## Database Schema
 
 Six tables, centered around the `deployments` table which represents individual aid delivery events.
