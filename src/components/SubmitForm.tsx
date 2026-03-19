@@ -5,6 +5,7 @@ import {
   getAidCategories,
   insertSubmission,
 } from "@/lib/queries";
+import { getCachedOptions, setCachedOptions } from "@/lib/form-cache";
 
 type SubmissionType = "request" | "feedback";
 
@@ -35,17 +36,38 @@ export default function SubmitForm() {
   } | null>(null);
 
   useEffect(() => {
-    Promise.all([getBarangays(), getAidCategories()])
-      .then(([b, c]) => {
-        setBarangays(b);
-        setCategories(c);
-      })
-      .catch(() => {
-        setError(t("SubmitForm.loadError"));
-      })
-      .finally(() => {
+    let hadCache = false;
+
+    // Step 1: Try loading from IndexedDB cache first
+    Promise.all([
+      getCachedOptions<Barangay>("barangays"),
+      getCachedOptions<AidCategory>("aid_categories"),
+    ]).then(([cachedB, cachedC]) => {
+      if (cachedB?.data.length && cachedC?.data.length) {
+        hadCache = true;
+        setBarangays(cachedB.data);
+        setCategories(cachedC.data);
         setLoading(false);
-      });
+      }
+
+      // Step 2: Fetch fresh data from Supabase in parallel
+      Promise.all([getBarangays(), getAidCategories()])
+        .then(([freshB, freshC]) => {
+          setBarangays(freshB);
+          setCategories(freshC);
+          setLoading(false);
+          // Update cache for next offline visit
+          setCachedOptions("barangays", freshB);
+          setCachedOptions("aid_categories", freshC);
+        })
+        .catch(() => {
+          if (!hadCache) {
+            setError(t("SubmitForm.loadError"));
+            setLoading(false);
+          }
+          // If cache was showing, silently ignore the fetch failure
+        });
+    });
   }, [t]);
 
   const requestLocation = () => {

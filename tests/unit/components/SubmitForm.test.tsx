@@ -16,14 +16,22 @@ vi.mock("@/lib/queries", () => ({
   insertSubmission: vi.fn(),
 }));
 
+vi.mock("@/lib/form-cache", () => ({
+  getCachedOptions: vi.fn(),
+  setCachedOptions: vi.fn(),
+}));
+
 import {
   getBarangays,
   getAidCategories,
   insertSubmission,
 } from "@/lib/queries";
+import { getCachedOptions, setCachedOptions } from "@/lib/form-cache";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(getCachedOptions).mockResolvedValue(null);
+  vi.mocked(setCachedOptions).mockResolvedValue(undefined);
   vi.mocked(getBarangays).mockResolvedValue([
     { id: "brgy-1", name: "Catbangen", municipality: "San Fernando" },
     { id: "brgy-2", name: "Pagdalagan", municipality: "San Fernando" },
@@ -200,6 +208,44 @@ describe("SubmitForm", () => {
     await waitFor(() => {
       expect(screen.getByText("SubmitForm.loadError")).toBeInTheDocument();
     });
+  });
+
+  it("renders form with cached dropdown data when Supabase fetch fails", async () => {
+    vi.mocked(getCachedOptions).mockImplementation(async (key: string) => {
+      if (key === "barangays") {
+        return {
+          data: [{ id: "brgy-1", name: "Catbangen", municipality: "San Fernando" }],
+          updatedAt: Date.now(),
+        };
+      }
+      if (key === "aid_categories") {
+        return {
+          data: [{ id: "cat-1", name: "Meals" }],
+          updatedAt: Date.now(),
+        };
+      }
+      return null;
+    });
+    vi.mocked(getBarangays).mockRejectedValue(new Error("offline"));
+    vi.mocked(getAidCategories).mockRejectedValue(new Error("offline"));
+
+    render(<SubmitForm />);
+
+    // Form should render with cached data (no loadError)
+    await waitFor(() => {
+      const barangaySelect = screen.getByRole("combobox", { name: "SubmitForm.barangay" });
+      const options = barangaySelect.querySelectorAll("option");
+      expect(options).toHaveLength(2); // placeholder + 1 cached barangay
+      expect(options[1]).toHaveTextContent("Catbangen");
+    });
+
+    const categorySelect = screen.getByRole("combobox", { name: "SubmitForm.aidCategory" });
+    const catOptions = categorySelect.querySelectorAll("option");
+    expect(catOptions).toHaveLength(2); // placeholder + 1 cached category
+    expect(catOptions[1]).toHaveTextContent("Meals");
+
+    // No error should be shown
+    expect(screen.queryByText("SubmitForm.loadError")).not.toBeInTheDocument();
   });
 
   it("resets to form view when 'submit another' is clicked", async () => {
