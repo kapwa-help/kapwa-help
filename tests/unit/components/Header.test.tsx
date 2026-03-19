@@ -25,7 +25,9 @@ describe("Header", () => {
   it("renders logo, language switcher, and volunteer button", () => {
     renderHeader();
     expect(screen.getByText("LUaid.org")).toBeInTheDocument();
-    expect(screen.getByText("Navigation.volunteer")).toBeInTheDocument();
+    const reportLink = screen.getByRole("link", { name: "Navigation.report" });
+    expect(reportLink).toBeInTheDocument();
+    expect(reportLink).toHaveAttribute("href", "/en/submit");
     expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
 

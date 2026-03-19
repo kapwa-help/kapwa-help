@@ -58,6 +58,25 @@ CREATE TABLE deployments (
   created_at      timestamptz DEFAULT now()
 );
 
+-- Submissions: aid requests and feedback from the field
+CREATE TABLE submissions (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  type            text NOT NULL CHECK (type IN ('request', 'feedback')),
+  status          text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'resolved')),
+  contact_name    text NOT NULL,
+  contact_phone   text,
+  barangay_id     uuid NOT NULL REFERENCES barangays(id),
+  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
+  notes           text,
+  quantity_needed integer,
+  urgency         text CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
+  rating          integer CHECK (rating BETWEEN 1 AND 5),
+  issue_type      text CHECK (issue_type IN ('insufficient', 'damaged', 'wrong_items', 'delayed')),
+  lat             decimal(9,6),
+  lng             decimal(9,6),
+  created_at      timestamptz DEFAULT now()
+);
+
 -- Seed aid categories
 INSERT INTO aid_categories (name, icon) VALUES
   ('Water Filtration', 'droplet'),

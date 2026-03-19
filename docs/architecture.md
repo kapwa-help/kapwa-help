@@ -25,7 +25,7 @@ The Supabase anon key is safe for browser use — it relies on Row Level Securit
 
 ## Database Schema
 
-Five tables, centered around the `deployments` table which represents individual aid delivery events.
+Six tables, centered around the `deployments` table which represents individual aid delivery events.
 
 ```
 organizations ──┬──→ donations
@@ -44,6 +44,7 @@ organizations ──┬──→ donations
 | `barangays` | Geographic aggregation | name, municipality, lat/lng, population |
 | `donations` | Monetary contributions | organization_id, amount, date |
 | `deployments` | Aid delivery events (core table) | organization_id, aid_category_id, barangay_id, quantity, unit, recipient, lat/lng, date |
+| `submissions` | Aid requests and field feedback | type (request/feedback), contact info, barangay_id, aid_category_id, urgency, rating, status |
 
 All primary keys are UUIDs — designed for future offline sync where multiple devices need collision-free IDs.
 
@@ -51,7 +52,7 @@ Full SQL schema: `supabase/schema.sql`
 
 ### Query Functions
 
-`src/lib/queries.ts` provides 8 typed functions that map to dashboard sections:
+`src/lib/queries.ts` provides 11 typed functions — 8 for the dashboard and 3 for the submit form:
 
 | Function | Returns |
 |----------|---------|
@@ -63,6 +64,9 @@ Full SQL schema: `supabase/schema.sql`
 | `getGoodsByCategory()` | Quantities grouped by aid category |
 | `getDeploymentMapPoints()` | Lat/lng points with metadata for map pins |
 | `getBeneficiariesByBarangay()` | Beneficiary totals grouped by barangay |
+| `getBarangays()` | All barangays ordered by name (for form dropdowns) |
+| `getAidCategories()` | All aid categories ordered by name (for form dropdowns) |
+| `insertSubmission(data)` | Inserts an aid request or feedback submission |
 
 ## Seed Data
 
@@ -111,11 +115,12 @@ The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
 - Interactive Leaflet map (`DeploymentMap`) with deployment markers, popups, and empty-state handling (#7)
 - Offline dashboard caching (#10) — IndexedDB stale-while-revalidate with auto-refresh
 - Offline map tile caching (#37) — Workbox CacheFirst for OSM tiles with fallback overlay
+- Submit form page (SubmitForm + SubmitPage) with aid request / feedback toggle (#11)
+- Submissions table with anon INSERT + SELECT RLS policies
 
 **Planned (see GitHub Issues):**
-- Offline form submissions (#10, #11) — IndexedDB write queue + background sync
-- Data entry forms (#11) — replace Supabase table editor
-- Barangay triage (#15) — status board for prioritizing aid
+- Offline form submissions (#10) — IndexedDB write queue + background sync for submit form
+- Barangay triage (#15) — status board reading from submissions table
 - CMS integration (#13) — WordPress content via REST API
 
 ## Further Reading

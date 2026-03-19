@@ -84,14 +84,15 @@ src/
     shared/           # Shared UI components (planned)
   pages/
     DashboardPage.tsx # Live dashboard (index route)
+    SubmitPage.tsx    # Aid request / feedback form (/:locale/submit)
   hooks/              # Custom React hooks
   lib/
     supabase.ts       # Supabase client (anon key via import.meta.env)
-    queries.ts        # Typed query functions for dashboard sections
+    queries.ts        # Typed query functions for dashboard + submit form
     cache.ts          # IndexedDB cache for offline dashboard data
 supabase/
-  schema.sql          # Database schema (5 tables)
-  rls-policies.sql    # Row-level security policies (anon read)
+  schema.sql          # Database schema (6 tables)
+  rls-policies.sql    # Row-level security policies (anon read + submissions insert)
   seed-kml.ts         # KML parser → Supabase seed script
 data/                 # Real relief operation data (KML exports)
 public/
