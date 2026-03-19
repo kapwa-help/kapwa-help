@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams, Link } from "react-router";
+import { useNavigate, useParams, useLocation, Link } from "react-router";
 import { supportedLocales, type Locale } from "../i18n";
 import { useOutbox } from "@/lib/outbox-context";
 
@@ -31,10 +31,12 @@ export default function Header() {
   const { t } = useTranslation();
   const { locale } = useParams<{ locale: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { pendingCount } = useOutbox();
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    navigate(`/${e.target.value}`);
+    const subPath = locale ? location.pathname.replace(`/${locale}`, "") : "";
+    navigate(`/${e.target.value}${subPath}`);
   };
 
   return (
