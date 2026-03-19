@@ -121,8 +121,6 @@ export interface SubmissionInsert {
   urgency: string | null;
   rating: number | null;
   issue_type: string | null;
-  lat: number | null;
-  lng: number | null;
 }
 
 export async function getBarangays() {

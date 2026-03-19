@@ -21,8 +21,6 @@ const samplePayload: SubmissionInsert = {
   urgency: "high",
   rating: null,
   issue_type: null,
-  lat: null,
-  lng: null,
 };
 
 beforeEach(() => {
