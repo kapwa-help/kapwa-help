@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "translate": "tsx scripts/translate.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
@@ -38,8 +39,10 @@
     "eslint": "^9",
     "fake-indexeddb": "^6.2.5",
     "globals": "^17.4.0",
+    "google-translate-api-x": "^10.7.2",
     "jsdom": "^28.1.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",
