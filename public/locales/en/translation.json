@@ -75,7 +75,6 @@
     "locationCaptured": "Location captured",
     "loadingOptions": "Loading…",
     "savedTitle": "Report saved!",
-    "savedMessage": "Will send when you're back online.",
-    "pendingCount": "{{count}} pending"
+    "savedMessage": "Will send when you're back online."
   }
 }
