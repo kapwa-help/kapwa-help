@@ -80,7 +80,7 @@ src/
     StatusFooter.tsx
     dashboard/        # Dashboard-specific components (planned)
     forms/            # Form components (planned)
-    maps/             # Map components (DeploymentMap.tsx)
+    maps/             # Map components (DeploymentMap.tsx, MapSkeleton.tsx)
     shared/           # Shared UI components (planned)
   pages/
     DashboardPage.tsx # Live dashboard (index route)
@@ -90,6 +90,8 @@ src/
     supabase.ts       # Supabase client (anon key via import.meta.env)
     queries.ts        # Typed query functions for dashboard + submit form
     cache.ts          # IndexedDB cache for offline dashboard data
+    form-cache.ts     # IndexedDB cache for form dropdown options (offline submit)
+    outbox-context.tsx # React context + provider for offline submission queue
 supabase/
   schema.sql          # Database schema (6 tables)
   rls-policies.sql    # Row-level security policies (anon read + submissions insert)

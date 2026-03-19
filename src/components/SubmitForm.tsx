@@ -1,10 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getBarangays,
   getAidCategories,
   insertSubmission,
+  type SubmissionInsert,
 } from "@/lib/queries";
+import {
+  getCachedOptions,
+  setCachedOptions,
+  addToOutbox,
+  getOutboxEntries,
+  removeFromOutbox,
+} from "@/lib/form-cache";
+import { useOutbox } from "@/lib/outbox-context";
 
 type SubmissionType = "request" | "feedback";
 
@@ -21,11 +30,13 @@ interface AidCategory {
 
 export default function SubmitForm() {
   const { t } = useTranslation();
+  const { refreshCount } = useOutbox();
   const [type, setType] = useState<SubmissionType>("request");
   const [barangays, setBarangays] = useState<Barangay[]>([]);
   const [categories, setCategories] = useState<AidCategory[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [savedOffline, setSavedOffline] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,17 +46,46 @@ export default function SubmitForm() {
   } | null>(null);
 
   useEffect(() => {
-    Promise.all([getBarangays(), getAidCategories()])
-      .then(([b, c]) => {
-        setBarangays(b);
-        setCategories(c);
-      })
-      .catch(() => {
-        setError(t("SubmitForm.loadError"));
-      })
-      .finally(() => {
+    let hadCache = false;
+    let cancelled = false;
+
+    // Step 1: Try loading from IndexedDB cache first
+    Promise.all([
+      getCachedOptions<Barangay>("barangays"),
+      getCachedOptions<AidCategory>("aid_categories"),
+    ]).then(([cachedB, cachedC]) => {
+      if (cancelled) return;
+      if (cachedB?.data.length && cachedC?.data.length) {
+        hadCache = true;
+        setBarangays(cachedB.data);
+        setCategories(cachedC.data);
         setLoading(false);
-      });
+      }
+
+      // Step 2: Fetch fresh data from Supabase in parallel
+      Promise.all([getBarangays(), getAidCategories()])
+        .then(([freshB, freshC]) => {
+          if (cancelled) return;
+          setBarangays(freshB);
+          setCategories(freshC);
+          setLoading(false);
+          // Update cache for next offline visit
+          setCachedOptions("barangays", freshB);
+          setCachedOptions("aid_categories", freshC);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          if (!hadCache) {
+            setError(t("SubmitForm.loadError"));
+            setLoading(false);
+          }
+          // If cache was showing, silently ignore the fetch failure
+        });
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [t]);
 
   const requestLocation = () => {
@@ -61,43 +101,99 @@ export default function SubmitForm() {
     }
   };
 
+  const flushingRef = useRef(false);
+
+  const flushOutbox = useCallback(async () => {
+    if (flushingRef.current) return;
+    flushingRef.current = true;
+    try {
+      const entries = await getOutboxEntries();
+      for (const entry of entries) {
+        try {
+          await insertSubmission(entry.payload);
+          await removeFromOutbox(entry.key);
+        } catch (err: unknown) {
+          // Check for Postgres unique violation (duplicate key = already synced)
+          const isUniqueViolation =
+            err &&
+            typeof err === "object" &&
+            "code" in err &&
+            (err as { code: string }).code === "23505";
+          if (isUniqueViolation) {
+            await removeFromOutbox(entry.key);
+          }
+          // Other errors: leave in outbox for next attempt
+        }
+      }
+      refreshCount();
+    } finally {
+      flushingRef.current = false;
+    }
+  }, [refreshCount]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      flushOutbox();
+    };
+    window.addEventListener("online", handleOnline);
+
+    if (navigator.onLine) {
+      flushOutbox();
+    }
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [flushOutbox]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
     const formData = new FormData(e.currentTarget);
+    const id = crypto.randomUUID();
+
+    const payload: SubmissionInsert = {
+      id,
+      type,
+      contact_name: formData.get("contact_name") as string,
+      contact_phone: (formData.get("contact_phone") as string) || null,
+      barangay_id: formData.get("barangay_id") as string,
+      aid_category_id: formData.get("aid_category_id") as string,
+      notes: (formData.get("notes") as string) || null,
+      quantity_needed:
+        type === "request" && formData.get("quantity_needed")
+          ? Number(formData.get("quantity_needed"))
+          : null,
+      urgency:
+        type === "request"
+          ? (formData.get("urgency") as string) || null
+          : null,
+      rating:
+        type === "feedback" && formData.get("rating")
+          ? Number(formData.get("rating"))
+          : null,
+      issue_type:
+        type === "feedback"
+          ? (formData.get("issue_type") as string) || null
+          : null,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
+    };
 
     try {
-      await insertSubmission({
-        type,
-        contact_name: formData.get("contact_name") as string,
-        contact_phone: (formData.get("contact_phone") as string) || null,
-        barangay_id: formData.get("barangay_id") as string,
-        aid_category_id: formData.get("aid_category_id") as string,
-        notes: (formData.get("notes") as string) || null,
-        quantity_needed:
-          type === "request" && formData.get("quantity_needed")
-            ? Number(formData.get("quantity_needed"))
-            : null,
-        urgency:
-          type === "request"
-            ? (formData.get("urgency") as string) || null
-            : null,
-        rating:
-          type === "feedback" && formData.get("rating")
-            ? Number(formData.get("rating"))
-            : null,
-        issue_type:
-          type === "feedback"
-            ? (formData.get("issue_type") as string) || null
-            : null,
-        lat: coords?.lat ?? null,
-        lng: coords?.lng ?? null,
-      });
+      await insertSubmission(payload);
       setSubmitted(true);
     } catch {
-      setError(t("SubmitForm.errorMessage"));
+      try {
+        await addToOutbox(payload);
+        refreshCount();
+        setSavedOffline(true);
+        setSubmitted(true);
+      } catch {
+        setError(t("SubmitForm.errorMessage"));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -106,15 +202,22 @@ export default function SubmitForm() {
   if (submitted) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-xl font-bold text-success">
-          {t("SubmitForm.successTitle")}
+        <h2
+          className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}
+        >
+          {t(savedOffline ? "SubmitForm.savedTitle" : "SubmitForm.successTitle")}
         </h2>
         <p className="mt-2 text-neutral-400">
-          {t("SubmitForm.successMessage")}
+          {t(
+            savedOffline
+              ? "SubmitForm.savedMessage"
+              : "SubmitForm.successMessage"
+          )}
         </p>
         <button
           onClick={() => {
             setSubmitted(false);
+            setSavedOffline(false);
             setFormKey((k) => k + 1);
             setCoords(null);
           }}

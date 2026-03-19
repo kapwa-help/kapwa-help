@@ -1,5 +1,8 @@
+import { Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
-import DeploymentMap from "@/components/maps/DeploymentMap";
+import MapSkeleton from "@/components/maps/MapSkeleton";
+
+const DeploymentMap = lazy(() => import("@/components/maps/DeploymentMap"));
 
 type DeploymentPoint = {
   lat: number;
@@ -34,7 +37,9 @@ export default function AidDistributionMap({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {deploymentPoints.length > 0 ? (
-          <DeploymentMap points={deploymentPoints} />
+          <Suspense fallback={<MapSkeleton />}>
+            <DeploymentMap points={deploymentPoints} />
+          </Suspense>
         ) : (
           <div className="flex h-[24rem] items-center justify-center rounded-lg bg-base/30">
             <p className="text-sm text-neutral-400/60">
@@ -62,7 +67,8 @@ export default function AidDistributionMap({
                   />
                 </svg>
                 <span className="text-neutral-400">
-                  {t("Dashboard.barangayPrefix")} {brgy.name}, {brgy.municipality}
+                  {t("Dashboard.barangayPrefix")} {brgy.name},{" "}
+                  {brgy.municipality}
                 </span>
               </div>
               <div className="text-right">

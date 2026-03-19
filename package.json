@@ -37,6 +37,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^9",
+    "fake-indexeddb": "^6.2.5",
     "globals": "^17.4.0",
     "google-translate-api-x": "^10.7.2",
     "jsdom": "^28.1.0",
