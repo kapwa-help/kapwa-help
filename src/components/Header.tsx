@@ -62,7 +62,7 @@ export default function Header() {
           >
             {t("Navigation.report")}
             {pendingCount > 0 && (
-              <span className="ml-1.5 rounded-full bg-warning px-1.5 py-0.5 text-xs font-medium text-base">
+              <span className="ml-1.5 rounded-full bg-warning px-1.5 py-0.5 text-xs font-medium text-secondary">
                 {pendingCount}
               </span>
             )}
