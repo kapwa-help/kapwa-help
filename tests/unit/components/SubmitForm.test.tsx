@@ -19,6 +19,13 @@ vi.mock("@/lib/queries", () => ({
 vi.mock("@/lib/form-cache", () => ({
   getCachedOptions: vi.fn(),
   setCachedOptions: vi.fn(),
+  addToOutbox: vi.fn(),
+  getOutboxEntries: vi.fn(),
+  removeFromOutbox: vi.fn(),
+}));
+
+vi.mock("@/lib/outbox-context", () => ({
+  useOutbox: () => ({ pendingCount: 0, refreshCount: vi.fn() }),
 }));
 
 import {
@@ -26,12 +33,22 @@ import {
   getAidCategories,
   insertSubmission,
 } from "@/lib/queries";
-import { getCachedOptions, setCachedOptions } from "@/lib/form-cache";
+import {
+  getCachedOptions,
+  setCachedOptions,
+  addToOutbox,
+  getOutboxEntries,
+  removeFromOutbox,
+} from "@/lib/form-cache";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubGlobal("crypto", { randomUUID: () => "test-uuid-123" });
   vi.mocked(getCachedOptions).mockResolvedValue(null);
   vi.mocked(setCachedOptions).mockResolvedValue(undefined);
+  vi.mocked(addToOutbox).mockResolvedValue(undefined);
+  vi.mocked(getOutboxEntries).mockResolvedValue([]);
+  vi.mocked(removeFromOutbox).mockResolvedValue(undefined);
   vi.mocked(getBarangays).mockResolvedValue([
     { id: "brgy-1", name: "Catbangen", municipality: "San Fernando" },
     { id: "brgy-2", name: "Pagdalagan", municipality: "San Fernando" },
@@ -125,6 +142,7 @@ describe("SubmitForm", () => {
     await waitFor(() => {
       expect(insertSubmission).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: "test-uuid-123",
           type: "request",
           contact_name: "Juan Dela Cruz",
           barangay_id: "brgy-1",
@@ -166,7 +184,7 @@ describe("SubmitForm", () => {
     });
   });
 
-  it("shows error message on submission failure", async () => {
+  it("saves to outbox and shows offline success when submission fails", async () => {
     vi.mocked(insertSubmission).mockRejectedValue(new Error("Network error"));
 
     render(<SubmitForm />);
@@ -191,13 +209,21 @@ describe("SubmitForm", () => {
     fireEvent.click(screen.getByText("SubmitForm.submit"));
 
     await waitFor(() => {
-      expect(screen.getByText("SubmitForm.errorMessage")).toBeInTheDocument();
+      expect(addToOutbox).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "test-uuid-123",
+          type: "request",
+          contact_name: "Juan",
+          barangay_id: "brgy-1",
+          aid_category_id: "cat-1",
+        })
+      );
     });
 
-    // Form should still be visible (not replaced by success)
-    expect(
-      screen.getByPlaceholderText("SubmitForm.contactNamePlaceholder")
-    ).toBeInTheDocument();
+    // Should show offline saved success screen, not error
+    expect(screen.getByText("SubmitForm.savedTitle")).toBeInTheDocument();
+    expect(screen.getByText("SubmitForm.savedMessage")).toBeInTheDocument();
+    expect(screen.getByText("SubmitForm.submitAnother")).toBeInTheDocument();
   });
 
   it("shows error when dropdown data fails to load", async () => {
@@ -246,6 +272,112 @@ describe("SubmitForm", () => {
 
     // No error should be shown
     expect(screen.queryByText("SubmitForm.loadError")).not.toBeInTheDocument();
+  });
+
+  it("calls flushOutbox when online event fires", async () => {
+    const outboxEntries = [
+      {
+        key: 1,
+        payload: {
+          id: "uuid-1",
+          type: "request" as const,
+          contact_name: "Juan",
+          contact_phone: null,
+          barangay_id: "brgy-1",
+          aid_category_id: "cat-1",
+          notes: null,
+          quantity_needed: null,
+          urgency: "high",
+          rating: null,
+          issue_type: null,
+          lat: null,
+          lng: null,
+        },
+      },
+      {
+        key: 2,
+        payload: {
+          id: "uuid-2",
+          type: "feedback" as const,
+          contact_name: "Maria",
+          contact_phone: null,
+          barangay_id: "brgy-2",
+          aid_category_id: "cat-2",
+          notes: null,
+          quantity_needed: null,
+          urgency: null,
+          rating: 5,
+          issue_type: null,
+          lat: null,
+          lng: null,
+        },
+      },
+    ];
+
+    // Return empty initially (mount flush), then return entries for the online event
+    vi.mocked(getOutboxEntries)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(outboxEntries);
+
+    render(<SubmitForm />);
+
+    // Wait for initial mount flush to complete
+    await waitFor(() => {
+      expect(getOutboxEntries).toHaveBeenCalledTimes(1);
+    });
+
+    // Fire the online event
+    fireEvent(window, new Event("online"));
+
+    await waitFor(() => {
+      expect(getOutboxEntries).toHaveBeenCalledTimes(2);
+    });
+
+    await waitFor(() => {
+      expect(insertSubmission).toHaveBeenCalledWith(outboxEntries[0].payload);
+      expect(insertSubmission).toHaveBeenCalledWith(outboxEntries[1].payload);
+      expect(removeFromOutbox).toHaveBeenCalledWith(1);
+      expect(removeFromOutbox).toHaveBeenCalledWith(2);
+    });
+  });
+
+  it("removes outbox entry on unique violation during flush", async () => {
+    const outboxEntries = [
+      {
+        key: 1,
+        payload: {
+          id: "uuid-dup",
+          type: "request" as const,
+          contact_name: "Juan",
+          contact_phone: null,
+          barangay_id: "brgy-1",
+          aid_category_id: "cat-1",
+          notes: null,
+          quantity_needed: null,
+          urgency: null,
+          rating: null,
+          issue_type: null,
+          lat: null,
+          lng: null,
+        },
+      },
+    ];
+
+    vi.mocked(getOutboxEntries).mockResolvedValue(outboxEntries);
+    // Throw a Postgres unique violation error
+    vi.mocked(insertSubmission).mockRejectedValue({ code: "23505" });
+
+    render(<SubmitForm />);
+
+    // flushOutbox is called on mount (navigator.onLine is true in jsdom)
+    await waitFor(() => {
+      expect(insertSubmission).toHaveBeenCalledWith(outboxEntries[0].payload);
+    });
+
+    // Even though insert threw, the entry should be removed (unique violation = already synced)
+    await waitFor(() => {
+      expect(removeFromOutbox).toHaveBeenCalledWith(1);
+    });
   });
 
   it("resets to form view when 'submit another' is clicked", async () => {
