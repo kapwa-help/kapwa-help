@@ -37,12 +37,14 @@ export default function SubmitForm() {
 
   useEffect(() => {
     let hadCache = false;
+    let cancelled = false;
 
     // Step 1: Try loading from IndexedDB cache first
     Promise.all([
       getCachedOptions<Barangay>("barangays"),
       getCachedOptions<AidCategory>("aid_categories"),
     ]).then(([cachedB, cachedC]) => {
+      if (cancelled) return;
       if (cachedB?.data.length && cachedC?.data.length) {
         hadCache = true;
         setBarangays(cachedB.data);
@@ -53,6 +55,7 @@ export default function SubmitForm() {
       // Step 2: Fetch fresh data from Supabase in parallel
       Promise.all([getBarangays(), getAidCategories()])
         .then(([freshB, freshC]) => {
+          if (cancelled) return;
           setBarangays(freshB);
           setCategories(freshC);
           setLoading(false);
@@ -61,6 +64,7 @@ export default function SubmitForm() {
           setCachedOptions("aid_categories", freshC);
         })
         .catch(() => {
+          if (cancelled) return;
           if (!hadCache) {
             setError(t("SubmitForm.loadError"));
             setLoading(false);
@@ -68,6 +72,10 @@ export default function SubmitForm() {
           // If cache was showing, silently ignore the fetch failure
         });
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [t]);
 
   const requestLocation = () => {
