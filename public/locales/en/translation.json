@@ -69,6 +69,10 @@
     "successTitle": "Report Submitted",
     "successMessage": "Thank you. Your report has been received.",
     "submitAnother": "Submit Another Report",
-    "errorMessage": "Could not submit. Check your connection and try again."
+    "errorMessage": "Could not submit. Check your connection and try again.",
+    "loadError": "Could not load form options. Check your connection and try again.",
+    "shareLocation": "Share my location to help prioritize aid",
+    "locationCaptured": "Location captured",
+    "loadingOptions": "Loading…"
   }
 }

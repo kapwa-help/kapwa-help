@@ -71,7 +71,7 @@ CREATE TABLE submissions (
   quantity_needed integer,
   urgency         text CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
   rating          integer CHECK (rating BETWEEN 1 AND 5),
-  issue_type      text CHECK (issue_type IN ('none', 'insufficient', 'damaged', 'wrong_items', 'delayed')),
+  issue_type      text CHECK (issue_type IN ('insufficient', 'damaged', 'wrong_items', 'delayed')),
   lat             decimal(9,6),
   lng             decimal(9,6),
   created_at      timestamptz DEFAULT now()

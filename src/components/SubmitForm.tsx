@@ -26,6 +26,8 @@ export default function SubmitForm() {
   const [categories, setCategories] = useState<AidCategory[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formKey, setFormKey] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{
     lat: number;
@@ -33,13 +35,20 @@ export default function SubmitForm() {
   } | null>(null);
 
   useEffect(() => {
-    Promise.all([getBarangays(), getAidCategories()]).then(([b, c]) => {
-      setBarangays(b);
-      setCategories(c);
-    });
-  }, []);
+    Promise.all([getBarangays(), getAidCategories()])
+      .then(([b, c]) => {
+        setBarangays(b);
+        setCategories(c);
+      })
+      .catch(() => {
+        setError(t("SubmitForm.loadError"));
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [t]);
 
-  useEffect(() => {
+  const requestLocation = () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) =>
@@ -50,7 +59,7 @@ export default function SubmitForm() {
         () => {} // silently ignore denial
       );
     }
-  }, []);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -104,7 +113,11 @@ export default function SubmitForm() {
           {t("SubmitForm.successMessage")}
         </p>
         <button
-          onClick={() => setSubmitted(false)}
+          onClick={() => {
+            setSubmitted(false);
+            setFormKey((k) => k + 1);
+            setCoords(null);
+          }}
           className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary/80"
         >
           {t("SubmitForm.submitAnother")}
@@ -114,7 +127,7 @@ export default function SubmitForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       {/* Type toggle */}
       <div className="flex gap-2">
         <button
@@ -179,9 +192,12 @@ export default function SubmitForm() {
           id="barangay_id"
           name="barangay_id"
           required
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
+          disabled={loading}
+          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
         >
-          <option value="">{t("SubmitForm.barangayPlaceholder")}</option>
+          <option value="">
+            {loading ? t("SubmitForm.loadingOptions") : t("SubmitForm.barangayPlaceholder")}
+          </option>
           {barangays.map((b) => (
             <option key={b.id} value={b.id}>
               {b.name} — {b.municipality}
@@ -199,9 +215,12 @@ export default function SubmitForm() {
           id="aid_category_id"
           name="aid_category_id"
           required
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
+          disabled={loading}
+          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
         >
-          <option value="">{t("SubmitForm.aidCategoryPlaceholder")}</option>
+          <option value="">
+            {loading ? t("SubmitForm.loadingOptions") : t("SubmitForm.aidCategoryPlaceholder")}
+          </option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -294,6 +313,23 @@ export default function SubmitForm() {
           </div>
         </>
       )}
+
+      {/* Location */}
+      <div>
+        {coords ? (
+          <p className="text-sm text-success">
+            {t("SubmitForm.locationCaptured")}
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={requestLocation}
+            className="rounded-lg border border-neutral-400/20 bg-base px-4 py-2.5 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+          >
+            {t("SubmitForm.shareLocation")}
+          </button>
+        )}
+      </div>
 
       {/* Notes */}
       <div>

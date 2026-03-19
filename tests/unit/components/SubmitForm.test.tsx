@@ -192,6 +192,16 @@ describe("SubmitForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows error when dropdown data fails to load", async () => {
+    vi.mocked(getBarangays).mockRejectedValue(new Error("Network error"));
+
+    render(<SubmitForm />);
+
+    await waitFor(() => {
+      expect(screen.getByText("SubmitForm.loadError")).toBeInTheDocument();
+    });
+  });
+
   it("resets to form view when 'submit another' is clicked", async () => {
     render(<SubmitForm />);
 
