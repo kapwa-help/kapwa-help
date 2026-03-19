@@ -36,6 +36,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^9",
+    "fake-indexeddb": "^6.2.5",
     "globals": "^17.4.0",
     "jsdom": "^28.1.0",
     "tailwindcss": "^4",
