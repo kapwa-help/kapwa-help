@@ -102,7 +102,8 @@ The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
 - **Offline indicator**: The hero section shows "Last Updated: [timestamp]" and appends "· Offline" when `navigator.onLine` is false.
 - **Auto-refresh**: When the browser regains connectivity (`online` event), the dashboard automatically re-fetches.
 - **Map tiles** (`vite.config.ts` runtimeCaching): OSM tiles use CacheFirst strategy (cache name: `map-tiles`, max 200 tiles, 30-day expiry). When tiles fail to load, `DeploymentMap` shows a fallback overlay after 3 consecutive `tileerror` events; the overlay clears automatically when tiles load again.
-- **Future**: Per-query caching can be added when additional pages (barangay triage board, forms) need to share cached query results.
+- **Offline submit form** (`src/lib/form-cache.ts` + `src/lib/outbox-context.tsx`): Form dropdown options (barangays, aid categories) are cached in IndexedDB so the submit form works fully offline. Submissions go into an IndexedDB outbox queue with client-generated UUIDs for idempotent sync. A React context (`OutboxProvider`) manages the queue and auto-syncs pending submissions when the browser fires an `online` event.
+- **Future**: Per-query caching can be added when additional pages (barangay triage board) need to share cached query results.
 
 ## What's Built vs Planned
 
@@ -120,10 +121,10 @@ The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
 - Offline dashboard caching (#10) — IndexedDB stale-while-revalidate with auto-refresh
 - Offline map tile caching (#37) — Workbox CacheFirst for OSM tiles with fallback overlay
 - Submit form page (SubmitForm + SubmitPage) with aid request / feedback toggle (#11)
+- Offline submit form (#10) — IndexedDB outbox queue, dropdown caching, auto-sync on reconnect
 - Submissions table with anon INSERT + SELECT RLS policies
 
 **Planned (see GitHub Issues):**
-- Offline form submissions (#10) — IndexedDB write queue + background sync for submit form
 - Barangay triage (#15) — status board reading from submissions table
 - CMS integration (#13) — WordPress content via REST API
 

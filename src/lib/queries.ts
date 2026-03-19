@@ -110,6 +110,7 @@ export async function getDeploymentMapPoints() {
 // --- Submission form queries ---
 
 export interface SubmissionInsert {
+  id?: string; // Client-generated UUID for idempotent sync
   type: "request" | "feedback";
   contact_name: string;
   contact_phone: string | null;

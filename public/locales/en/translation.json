@@ -73,6 +73,8 @@
     "loadError": "Could not load form options. Check your connection and try again.",
     "shareLocation": "Share my location to help prioritize aid",
     "locationCaptured": "Location captured",
-    "loadingOptions": "Loading…"
+    "loadingOptions": "Loading…",
+    "savedTitle": "Report saved!",
+    "savedMessage": "Will send when you're back online."
   }
 }

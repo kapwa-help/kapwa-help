@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Outlet, useParams, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { supportedLocales, type Locale } from "../i18n";
+import { OutboxProvider } from "@/lib/outbox-context";
 
 export function RootLayout() {
   const { locale } = useParams<{ locale: string }>();
@@ -25,5 +26,9 @@ export function RootLayout() {
     return <Navigate to="/en" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <OutboxProvider>
+      <Outlet />
+    </OutboxProvider>
+  );
 }
