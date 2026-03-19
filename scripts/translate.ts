@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import translate from "google-translate-api-x";
@@ -81,22 +81,42 @@ async function main() {
   for (const { gtCode, folder, label } of TARGETS) {
     console.log(`→ Translating to ${label} (${gtCode} → ${folder}/)...`);
 
+    // Load existing translations to preserve human-reviewed work
+    const outPath = resolve(LOCALES_DIR, `${folder}/translation.json`);
+    const existing: TranslationObject = existsSync(outPath)
+      ? JSON.parse(readFileSync(outPath, "utf-8"))
+      : {};
+
     const output: TranslationObject = {};
+    let translated_count = 0;
+    let kept_count = 0;
 
     for (const [namespace, entries] of Object.entries(source)) {
       output[namespace] = {};
 
       for (const [key, value] of Object.entries(entries)) {
+        const existingValue = existing[namespace]?.[key];
+
+        // If the target file already has a value that differs from
+        // the English source, a human or previous run translated it — keep it
+        if (existingValue && existingValue !== value) {
+          output[namespace][key] = existingValue;
+          console.log(`  · ${namespace}.${key} — kept existing`);
+          kept_count++;
+          continue;
+        }
+
         if (isUntranslatable(value)) {
           output[namespace][key] = value;
-          console.log(`  ✓ ${namespace}.${key} — ${value} (skipped)`);
+          console.log(`  - ${namespace}.${key} — ${value} (untranslatable)`);
           continue;
         }
 
         try {
-          const translated = await translateWithPlaceholders(value, gtCode);
-          output[namespace][key] = translated;
-          console.log(`  ✓ ${namespace}.${key} — ${translated}`);
+          const result = await translateWithPlaceholders(value, gtCode);
+          output[namespace][key] = result;
+          console.log(`  ✓ ${namespace}.${key} — ${result}`);
+          translated_count++;
         } catch (err) {
           // On error, keep the English string and warn
           output[namespace][key] = value;
@@ -108,9 +128,8 @@ async function main() {
       }
     }
 
-    const outPath = resolve(LOCALES_DIR, `${folder}/translation.json`);
     writeFileSync(outPath, JSON.stringify(output, null, 2) + "\n", "utf-8");
-    console.log(`\n  → Wrote ${outPath}\n`);
+    console.log(`\n  → Wrote ${outPath} (${translated_count} new, ${kept_count} kept)\n`);
   }
 
   console.log("→ Done.");
