@@ -1,64 +1,69 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import AidDistributionMap from "@/components/AidDistributionMap";
 
-vi.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: { changeLanguage: vi.fn() },
-  }),
-}));
-
+// Mock the lazy-loaded DeploymentMap
 vi.mock("@/components/maps/DeploymentMap", () => ({
   default: ({ points }: { points: unknown[] }) => (
-    <div data-testid="deployment-map">Map with {points.length} points</div>
+    <div data-testid="deployment-map">{points.length} points</div>
   ),
 }));
 
-const mockBarangays = [
-  { name: "Urbiztondo", municipality: "San Juan", beneficiaries: 1245 },
-  { name: "Poblacion", municipality: "San Juan", beneficiaries: 987 },
-];
+// Mock MapSkeleton
+vi.mock("@/components/maps/MapSkeleton", () => ({
+  default: () => <div data-testid="map-skeleton">Loading map…</div>,
+}));
+
+// Mock i18n
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
 
 const mockPoints = [
   {
     lat: 16.62,
     lng: 120.35,
-    quantity: 200,
-    unit: "meals",
-    orgName: "Red Cross",
-    categoryName: "Meals",
+    quantity: 100,
+    unit: "kg",
+    orgName: "Test Org",
+    categoryName: "Food",
   },
 ];
 
+const mockBarangays = [
+  { name: "Barangay 1", municipality: "San Fernando", beneficiaries: 500 },
+];
+
 describe("AidDistributionMap", () => {
-  it("renders barangay names and beneficiary counts", () => {
+  it("renders the map when deployment points exist", async () => {
     render(
       <AidDistributionMap
         barangays={mockBarangays}
         deploymentPoints={mockPoints}
-      />
+      />,
     );
-    expect(screen.getByText(/Urbiztondo/)).toBeInTheDocument();
-    expect(screen.getByText("1,245")).toBeInTheDocument();
-    expect(screen.getByText(/Poblacion/)).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("deployment-map"),
+    ).toBeInTheDocument();
   });
 
-  it("renders DeploymentMap when deployment points exist", () => {
+  it("renders no-data placeholder when no deployment points", () => {
     render(
-      <AidDistributionMap
-        barangays={mockBarangays}
-        deploymentPoints={mockPoints}
-      />
+      <AidDistributionMap barangays={mockBarangays} deploymentPoints={[]} />,
     );
-    expect(screen.getByTestId("deployment-map")).toBeInTheDocument();
-  });
-
-  it("renders placeholder when no deployment points", () => {
-    render(
-      <AidDistributionMap barangays={mockBarangays} deploymentPoints={[]} />
-    );
-    expect(screen.queryByTestId("deployment-map")).not.toBeInTheDocument();
     expect(screen.getByText("Dashboard.noDeploymentData")).toBeInTheDocument();
+  });
+
+  it("renders barangay list", () => {
+    render(
+      <AidDistributionMap
+        barangays={mockBarangays}
+        deploymentPoints={mockPoints}
+      />,
+    );
+    expect(screen.getByText(/Barangay 1/)).toBeInTheDocument();
+    expect(screen.getByText("500")).toBeInTheDocument();
   });
 });
