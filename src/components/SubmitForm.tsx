@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getBarangays,
@@ -101,26 +101,34 @@ export default function SubmitForm() {
     }
   };
 
+  const flushingRef = useRef(false);
+
   const flushOutbox = useCallback(async () => {
-    const entries = await getOutboxEntries();
-    for (const entry of entries) {
-      try {
-        await insertSubmission(entry.payload);
-        await removeFromOutbox(entry.key);
-      } catch (err: unknown) {
-        // Check for Postgres unique violation (duplicate key = already synced)
-        const isUniqueViolation =
-          err &&
-          typeof err === "object" &&
-          "code" in err &&
-          (err as { code: string }).code === "23505";
-        if (isUniqueViolation) {
+    if (flushingRef.current) return;
+    flushingRef.current = true;
+    try {
+      const entries = await getOutboxEntries();
+      for (const entry of entries) {
+        try {
+          await insertSubmission(entry.payload);
           await removeFromOutbox(entry.key);
+        } catch (err: unknown) {
+          // Check for Postgres unique violation (duplicate key = already synced)
+          const isUniqueViolation =
+            err &&
+            typeof err === "object" &&
+            "code" in err &&
+            (err as { code: string }).code === "23505";
+          if (isUniqueViolation) {
+            await removeFromOutbox(entry.key);
+          }
+          // Other errors: leave in outbox for next attempt
         }
-        // Other errors: leave in outbox for next attempt
       }
+      refreshCount();
+    } finally {
+      flushingRef.current = false;
     }
-    refreshCount();
   }, [refreshCount]);
 
   useEffect(() => {
@@ -178,10 +186,14 @@ export default function SubmitForm() {
       await insertSubmission(payload);
       setSubmitted(true);
     } catch {
-      await addToOutbox(payload);
-      refreshCount();
-      setSavedOffline(true);
-      setSubmitted(true);
+      try {
+        await addToOutbox(payload);
+        refreshCount();
+        setSavedOffline(true);
+        setSubmitted(true);
+      } catch {
+        setError(t("SubmitForm.errorMessage"));
+      }
     } finally {
       setSubmitting(false);
     }

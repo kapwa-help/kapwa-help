@@ -83,8 +83,6 @@ export async function addToOutbox(payload: SubmissionInsert): Promise<void> {
     const tx = db.transaction(OUTBOX_STORE, "readwrite");
     const store = tx.objectStore(OUTBOX_STORE);
     store.add({ payload, createdAt: Date.now() } satisfies OutboxEntry);
-  } catch {
-    // Outbox write failure is non-critical — silently ignore
   } finally {
     db?.close();
   }
