@@ -8,7 +8,6 @@ LUaid.org is an open-source Progressive Web App for disaster relief operations i
 
 - **Frontend**: Vite + React SPA with react-router v7, TypeScript (strict mode)
 - **Database**: Supabase (Postgres) — browser-side via anon key (RLS required)
-- **CMS**: WordPress backend at cms.LUaid.org (REST API for content)
 - **Maps**: Leaflet + react-leaflet + OpenStreetMap (interactive deployment map on dashboard)
 - **PWA**: vite-plugin-pwa (Workbox GenerateSW) for offline caching
 - **i18n**: react-i18next with i18next-http-backend (loads from `public/locales/`)
@@ -59,6 +58,7 @@ npm run preview      # Preview production build locally
 npm run lint         # ESLint
 npm test             # Run tests (Vitest, once)
 npm run test:watch   # Run tests (watch mode)
+npm run translate    # Machine-translate new i18n keys to fil/ilo
 npm run verify       # Playwright smoke tests (headless)
 npm run verify:headed # Playwright smoke tests (visible browser)
 ```
@@ -68,9 +68,10 @@ npm run verify:headed # Playwright smoke tests (visible browser)
 ```
 src/
   main.tsx            # App entry point (ReactDOM + RouterProvider)
-  index.css           # Global styles (Tailwind)
+  index.css           # Global styles + Tailwind v4 @theme tokens
   i18n.ts             # i18next config (HTTP backend, language detection)
   router.tsx          # Client-side routes (react-router v7)
+  vite-env.d.ts       # Vite type declarations
   components/
     RootLayout.tsx    # Locale-aware layout (syncs i18n + html lang)
     Header.tsx        # Site header with navigation + language switcher
@@ -80,6 +81,7 @@ src/
     GoodsByCategory.tsx
     AidDistributionMap.tsx
     StatusFooter.tsx
+    SubmitForm.tsx    # Aid request / feedback form component
     dashboard/        # Dashboard-specific components (planned)
     forms/            # Form components (planned)
     maps/             # Map components (DeploymentMap.tsx, MapSkeleton.tsx)
@@ -87,7 +89,7 @@ src/
   pages/
     DashboardPage.tsx # Live dashboard (index route)
     SubmitPage.tsx    # Aid request / feedback form (/:locale/submit)
-  hooks/              # Custom React hooks
+  hooks/              # Custom React hooks (planned)
   lib/
     supabase.ts       # Supabase client (anon key via import.meta.env)
     queries.ts        # Typed query functions for dashboard + submit form
@@ -98,19 +100,24 @@ supabase/
   schema.sql          # Database schema (6 tables)
   rls-policies.sql    # Row-level security policies (anon read + submissions insert)
   seed-kml.ts         # KML parser → Supabase seed script
+  seed-demo.sql       # Demo data for prototype dashboard
+scripts/
+  translate.ts        # Machine-translate i18n keys (google-translate-api-x)
 data/                 # Real relief operation data (KML exports)
 public/
   locales/            # Translation files ({en,fil,ilo}/translation.json)
   icons/              # PWA icons
 index.html            # SPA entry point
 vite.config.ts        # Vite config (React, Tailwind, PWA, tsconfig paths)
+vitest.config.ts      # Vitest test runner config
+eslint.config.mjs     # ESLint v9 config
 tests/
   setup.ts            # Vitest setup
   unit/               # Vitest unit tests
   e2e/
     smoke.spec.ts     # Playwright smoke tests (9 tests)
     screenshots/      # Auto-generated screenshots (gitignored PNGs)
-docs/                 # Architecture, setup guide, plans
+docs/                 # Architecture, setup guide, design system, i18n, plans
 playwright.config.ts  # Playwright config (Chromium only, auto-starts dev server)
 ```
 

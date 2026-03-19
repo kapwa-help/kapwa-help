@@ -56,6 +56,7 @@ Check the [Issues](https://github.com/r0droald/LUaid/issues) tab to find somethi
 | [Architecture](docs/architecture.md) | System design, database schema, query functions, key decisions, what's built vs planned |
 | [Local Setup](docs/setup.md) | Environment setup, seed data, testing, troubleshooting |
 | [Design System](docs/design-system.md) | Color tokens, typography, component patterns |
+| [i18n Guide](docs/i18n.md) | Translation workflow, script usage, adding new languages |
 | [Project History](docs/project-history.md) | Origin story, goals, and project direction |
 
 ## License

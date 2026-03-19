@@ -2,7 +2,7 @@
 
 ## System Overview
 
-LUaid is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the entire app shell for offline use via a Workbox service worker. Content comes from a WordPress CMS. The architecture prioritizes simplicity — client-side fetch, render, cache — with room to grow into forms, real-time updates, and offline sync.
+LUaid is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the entire app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with room to grow into real-time updates and CMS integration.
 
 ```
 ┌─────────────────────┐   client fetch    ┌──────────────┐
@@ -87,7 +87,7 @@ Real deployment data from Typhoon Emong relief operations is stored in `data/Emo
 | PWA | vite-plugin-pwa (Workbox GenerateSW) | Precaches entire shell, navigateFallback to index.html, runtime caching for API |
 | Primary keys | UUIDs | Collision-free IDs for future offline sync from multiple devices |
 | Schema design | Deployment-centric | Real KML data shows every aid delivery is a located event — one core table |
-| Data entry (MVP) | Supabase table editor | No forms to build yet, fastest path to real data |
+| Data entry | Submit form + Supabase table editor | Field-facing submit form (aid requests + feedback) with offline outbox; table editor for admin bulk entry |
 
 ## Internationalization
 
