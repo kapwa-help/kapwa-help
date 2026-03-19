@@ -1,6 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, act } from "@testing-library/react";
 import DeploymentMap from "@/components/maps/DeploymentMap";
+
+let tileLayerEventHandlers: Record<string, (...args: unknown[]) => void> = {};
 
 vi.mock("react-leaflet", () => ({
   MapContainer: ({
@@ -18,7 +20,15 @@ vi.mock("react-leaflet", () => ({
       {children}
     </div>
   ),
-  TileLayer: () => <div data-testid="tile-layer" />,
+  TileLayer: ({
+    eventHandlers,
+  }: {
+    eventHandlers?: Record<string, (...args: unknown[]) => void>;
+    [key: string]: unknown;
+  }) => {
+    tileLayerEventHandlers = eventHandlers ?? {};
+    return <div data-testid="tile-layer" />;
+  },
   Marker: ({
     children,
   }: {
@@ -33,6 +43,12 @@ vi.mock("react-leaflet", () => ({
 vi.mock("leaflet", () => ({
   default: { divIcon: vi.fn(() => ({})) },
   divIcon: vi.fn(() => ({})),
+}));
+
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
 }));
 
 const mockPoints = [
@@ -55,6 +71,10 @@ const mockPoints = [
 ];
 
 describe("DeploymentMap", () => {
+  beforeEach(() => {
+    tileLayerEventHandlers = {};
+  });
+
   it("renders a map container", () => {
     render(<DeploymentMap points={mockPoints} />);
     expect(screen.getByTestId("map-container")).toBeInTheDocument();
@@ -83,5 +103,109 @@ describe("DeploymentMap", () => {
     render(<DeploymentMap points={[]} />);
     expect(screen.getByTestId("map-container")).toBeInTheDocument();
     expect(screen.queryAllByTestId("map-marker")).toHaveLength(0);
+  });
+
+  describe("tile fallback", () => {
+    it("shows fallback after 3 tile errors", () => {
+      render(<DeploymentMap points={mockPoints} />);
+      expect(
+        screen.queryByText("Dashboard.mapTilesUnavailable"),
+      ).not.toBeInTheDocument();
+
+      act(() => {
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+      });
+
+      expect(
+        screen.getByText("Dashboard.mapTilesUnavailable"),
+      ).toBeInTheDocument();
+    });
+
+    it("does not show fallback after fewer than 3 tile errors", () => {
+      render(<DeploymentMap points={mockPoints} />);
+
+      act(() => {
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+      });
+
+      expect(
+        screen.queryByText("Dashboard.mapTilesUnavailable"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("clears fallback when a tile loads successfully", () => {
+      render(<DeploymentMap points={mockPoints} />);
+
+      act(() => {
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+      });
+
+      expect(
+        screen.getByText("Dashboard.mapTilesUnavailable"),
+      ).toBeInTheDocument();
+
+      act(() => {
+        tileLayerEventHandlers.tileload?.();
+      });
+
+      expect(
+        screen.queryByText("Dashboard.mapTilesUnavailable"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("still renders markers when fallback is visible", () => {
+      render(<DeploymentMap points={mockPoints} />);
+
+      act(() => {
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+      });
+
+      expect(
+        screen.getByText("Dashboard.mapTilesUnavailable"),
+      ).toBeInTheDocument();
+      expect(screen.getAllByTestId("map-marker")).toHaveLength(2);
+    });
+
+    it("requires 3 new errors after recovery to show fallback again", () => {
+      render(<DeploymentMap points={mockPoints} />);
+
+      act(() => {
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+      });
+      expect(
+        screen.getByText("Dashboard.mapTilesUnavailable"),
+      ).toBeInTheDocument();
+
+      act(() => {
+        tileLayerEventHandlers.tileload?.();
+      });
+      expect(
+        screen.queryByText("Dashboard.mapTilesUnavailable"),
+      ).not.toBeInTheDocument();
+
+      act(() => {
+        tileLayerEventHandlers.tileerror?.();
+        tileLayerEventHandlers.tileerror?.();
+      });
+      expect(
+        screen.queryByText("Dashboard.mapTilesUnavailable"),
+      ).not.toBeInTheDocument();
+
+      act(() => {
+        tileLayerEventHandlers.tileerror?.();
+      });
+      expect(
+        screen.getByText("Dashboard.mapTilesUnavailable"),
+      ).toBeInTheDocument();
+    });
   });
 });

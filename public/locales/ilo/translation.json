@@ -32,6 +32,7 @@
     "retry": "Retry",
     "organizationCount": "{{count}} nga organisasion",
     "locationsServed": "{{count}} a lugar a naabot",
-    "acrossDeployments": "iti {{count}} a deployment"
+    "acrossDeployments": "iti {{count}} a deployment",
+    "mapTilesUnavailable": "Saan a magun-od dagiti map tiles no offline"
   }
 }
