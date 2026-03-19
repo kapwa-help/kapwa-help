@@ -11,6 +11,11 @@
 # testing
 /coverage
 
+# playwright
+/tests/e2e/screenshots/*.png
+/tests/e2e/test-results/
+/playwright-report/
+
 # production
 /dist/
 /dev-dist/

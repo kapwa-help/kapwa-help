@@ -12,7 +12,7 @@ LUaid.org is an open-source Progressive Web App for disaster relief operations i
 - **Maps**: Leaflet + react-leaflet + OpenStreetMap (interactive deployment map on dashboard)
 - **PWA**: vite-plugin-pwa (Workbox GenerateSW) for offline caching
 - **i18n**: react-i18next with i18next-http-backend (loads from `public/locales/`)
-- **Testing**: Vitest + React Testing Library
+- **Testing**: Vitest + React Testing Library (unit), Playwright (UI verification)
 
 See `docs/architecture.md` for system design details and schema overview.
 
@@ -59,6 +59,8 @@ npm run preview      # Preview production build locally
 npm run lint         # ESLint
 npm test             # Run tests (Vitest, once)
 npm run test:watch   # Run tests (watch mode)
+npm run verify       # Playwright smoke tests (headless)
+npm run verify:headed # Playwright smoke tests (visible browser)
 ```
 
 ## Project Structure
@@ -102,10 +104,18 @@ public/
   icons/              # PWA icons
 index.html            # SPA entry point
 vite.config.ts        # Vite config (React, Tailwind, PWA, tsconfig paths)
+tests/
+  setup.ts            # Vitest setup
+  unit/               # Vitest unit tests
+  e2e/
+    smoke.spec.ts     # Playwright smoke tests (9 tests)
+    screenshots/      # Auto-generated screenshots (gitignored PNGs)
 docs/                 # Architecture, setup guide, plans
+playwright.config.ts  # Playwright config (Chromium only, auto-starts dev server)
 ```
 
 ## Lessons Learned
 
 - `Problem:` Supabase JS client returns nested relations as `unknown` types → `Rule:` Cast join results explicitly (e.g., `row.organizations as unknown as { name: string }`) in query functions
 - `Problem:` PWA service worker only generated on production build → `Rule:` Use `npm run build && npm run preview` to test offline behavior
+- `Problem:` UI changes can break silently across locales and routes → `Rule:` Run `npm run verify` after component, page, route, or i18n changes
