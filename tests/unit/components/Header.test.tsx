@@ -11,6 +11,15 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
 
+const mockUseOutbox = vi.fn().mockReturnValue({
+  pendingCount: 0,
+  refreshCount: vi.fn(),
+});
+
+vi.mock("@/lib/outbox-context", () => ({
+  useOutbox: () => mockUseOutbox(),
+}));
+
 function renderHeader(locale = "en") {
   return render(
     <MemoryRouter initialEntries={[`/${locale}`]}>
@@ -43,5 +52,24 @@ describe("Header", () => {
   it("selects the current locale", () => {
     renderHeader("fil");
     expect(screen.getByRole("combobox")).toHaveValue("fil");
+  });
+
+  it("shows pending count badge when outbox has items", () => {
+    mockUseOutbox.mockReturnValue({
+      pendingCount: 3,
+      refreshCount: vi.fn(),
+    });
+    renderHeader();
+    expect(screen.getByText("3")).toBeInTheDocument();
+  });
+
+  it("hides badge when outbox count is zero", () => {
+    mockUseOutbox.mockReturnValue({
+      pendingCount: 0,
+      refreshCount: vi.fn(),
+    });
+    renderHeader();
+    const reportLink = screen.getByRole("link", { name: "Navigation.report" });
+    expect(reportLink.querySelector("span")).toBeNull();
   });
 });

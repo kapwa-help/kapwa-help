@@ -33,6 +33,11 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
 
+// Mock outbox-context (Header uses useOutbox)
+vi.mock("@/lib/outbox-context", () => ({
+  useOutbox: () => ({ pendingCount: 0, refreshCount: vi.fn() }),
+}));
+
 // Mock react-router (Header uses useParams/useNavigate/Link)
 vi.mock("react-router", () => ({
   useParams: () => ({ locale: "en" }),
