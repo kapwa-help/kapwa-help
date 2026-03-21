@@ -1,80 +1,60 @@
+# Project Scope: KapwaRelief (Citizen-Led Response)
 
 ## 1. Project Objectives
-The mission of KapwaRelief / KapwaHelp is to bridge the "Information Gap" between official government reports and the actual, granular needs of isolated communities.
+The mission of **KapwaRelief** is to bridge the "Information Gap" between official government reports and the actual, granular needs of isolated communities through a lightweight, high-speed interface.
 
-* **Real-Time Coordination (The Map):** Provide a lightweight, mobile-first visualization of urgent, verified needs to prevent aid duplication.
-* **Radical Transparency (The Archive):** Maintain a public ledger of every peso or relief pack tracked from donor to recipient to build long-term trust.
-* **Standardized Data (The Protocol):** Create a uniform "Needs Assessment" format that can be easily shared with other NGOs or local government units (LGUs).
-* **Institutional Memory:** Preserve data from past disasters to identify recurring "dead zones" or highly resilient areas for future disaster preparedness.
+* **Real-Time Coordination:** Provide a mobile-first visualization of urgent, verified needs to prevent aid duplication.
+* **Radical Transparency:** Maintain a public ledger of every relief pack tracked from donor to recipient to build long-term trust.
+* **Standardized Data:** Use a uniform "Needs Assessment" format compatible with local NGOs and LGUs.
+* **Institutional Memory:** Archive data from past disasters to identify recurring "dead zones" and improve future preparedness.
 
 ---
 
 ## 2. Detailed Project Scope
 
 ### A. Main Audience (Transparency & Accountability)
-Who is the data *for*?
-* **The Donor Community:** Individual "Kapwa" donors and CSR (Corporate Social Responsibility) departments requiring "Proof of Impact" (photos, GPS-tagged distributions, and receipts).
-* **The Beneficiaries:** Local community leaders (Barangay/Sitio) who need to see if help is on the way to manage expectations and order.
-* **Audit Bodies:** Independent observers or partner NGOs who need to verify that KapwaRelief is not overlapping with DSWD or Red Cross efforts.
+* **The Donor Community:** Individual donors and CSR departments requiring "Proof of Impact" (GPS-tagged distributions and receipts).
+* **The Beneficiaries:** Community leaders (Barangay/Sitio) checking if help is en route to manage local expectations.
+* **Audit Bodies:** Independent observers verifying that efforts do not overlap redundantly with DSWD or Red Cross.
 
 ### B. Main Users (Data Management)
-Who *interacts* with the system?
-* **Field Responders (Submitters):** Pre-vetted volunteers on the ground using a "Low-Bandwidth" mobile form to submit assessments.
-* **Validation Team (Reviewers):** A remote "War Room" of volunteers who cross-reference field submissions with social media, news, and official NDRRMC reports before clicking "Publish to Live Map."
-* **System Admins (Curators):** Manage the "Event IDs," archive old data to the sub-domain, and ensure the database remains optimized for speed.
+* **Field Responders (Submitters):** Pre-vetted volunteers on the ground using a low-bandwidth mobile form.
+* **Validation Team (Reviewers):** Remote volunteers who cross-reference field submissions with trusted news and community reports before publishing.
+* **System Admins (Curators):** Manage "Event IDs" and handle the migration of data to the archive subdomain.
 
-### C. Data Points & Sourcing (The "What" and "Where")
-To keep the dashboard light, we categorize data into **Dynamic (Live)** and **Static (Archive)**.
+### C. The "Lean" Data Model
+To ensure maximum loading speed in low-connectivity zones, external weather/hazard APIs are excluded. Only human-verified data is tracked.
 
-#### 1. Damage & Situational Assessments
-* **What:** Road passability (4x4 only, boat only, impassable), power/comms status, and structural damage (partially vs. totally destroyed houses).
-* **Where:** Sourced via **Tier 2 Field Leads** using GPS-tagged photos and **DPWH/PAGASA** API feeds.
+#### 1. The "Needs" Data (Sourced from Field Leads)
+* **Location:** GPS Coordinates + Baranggay/Sitio name.
+* **The "Gap":** Categorized by:
+    * *Lunas (Medical):* Kits, hygiene, clean water.
+    * *Sustenance (Food):* Ready-to-eat meals, infant formula, rice.
+    * *Shelter/Protection:* Tents, solar lamps, blankets.
+* **Access Status:** Simple toggle (Truck / 4x4 / Boat / Foot Only).
 
-#### 2. Humanitarian Needs (The "Gap" Analysis)
-* **What:** Quantified needs categorized by:
-    * *Lunas:* Medical kits, hygiene, clean water.
-    * *Sustenance:* Ready-to-eat meals, infant formula, rice.
-    * *Protection:* Tents, solar lamps, blankets.
-* **Where:** Sourced from **Direct Community Requests** verified by KapwaRelief field leads.
-
-#### 3. Relief Progress (The "Transparency" Report)
-* **What:** "In-Transit" vs. "Distributed" status, number of families served, and timestamped "Proof of Turn-over."
-* **Where:** Sourced from **Logistics Volunteers** and distribution logs.
-
-A. The "Needs" Data (Sourced from Field Leads)
-Location: GPS Coordinates + Baranggay/Sitio name.
-
-The "Gap": Category (Lunas/Medical, Sustenance, or Shelter) + Quantity needed.
-
-Access Status: Simple toggle (Passable by: Truck / 4x4 / Boat / Foot Only).
-
-B. The "Action" Data (Sourced from Relief Ops)
-Status: Unverified → Verified → Ongoing → Completed.
-
-Proof of Relief: A single low-res photo upload and a timestamp of distribution.
-
-Donor ID: A reference code linking the aid to a specific fundraising drive or donor.
+#### 2. The "Action" Data (Sourced from Relief Ops)
+* **Live Status:** `Unverified` → `Verified` → `Ongoing` → `Completed`.
+* **Proof of Relief:** Single low-res photo upload + timestamp.
+* **Donor ID:** Reference code linking aid to specific fundraising drives.
 
 ---
 
 ## 3. Boundaries & Constraints (The "Guardrails")
-Functional Boundary:** KapwaRelief is nota Search and Rescue (SAR) dispatch. We refer life-and-death rescue requests to the proper authorities (911/PCG) and focus purely on Relief & Recovery.
-Geographic Boundary:** Limited to specific "Active Operations Zones" defined at the start of each disaster event to prevent the map from becoming unreadable.
-Data Retention Boundary:** Data is "Live" for 21 days post-disaster. On day 22, it is moved to `reports.KapwaRelief.ph` and stripped of high-res images on the main server to keep the site fast.
-Privacy Boundary:** While data is transparent, we adhere to the **Data Privacy Act (DPA)**. Recipient names are anonymized in public reports (e.g., "Family A.R. – Brgy. 1") but kept in the secure back-end for auditing.
-Boundary & Method (The "Verified" Workflow)
-How we ensure the data is accurate without using heavy official sensors:
 
-Boundary: The dashboard only displays pins within a defined operational radius (e.g., "Typhoon Pepito Response - Bicol Region").
+* **Functional Boundary:** **KapwaRelief is NOT a Search and Rescue (SAR) dispatch.** Life-and-death requests are referred to 911/PCG; the platform focuses purely on Relief & Recovery.
+* **Geographic Boundary:** Limited to specific "Active Operations Zones" per event to keep the map uncluttered.
+* **Data Retention Boundary:** Data remains "Live" for **21 days**. On day 22, entries are moved to `reports.KapwaRelief.ph` and stripped from the live map database.
+* **Privacy Boundary:** Adherence to the **Data Privacy Act (DPA)**. Recipient names are anonymized in public views (e.g., "Family A.R. – Brgy. 1").
 
-Verification Method:
-
-Submission: Field Lead submits a report via a lightweight text-based form.
-
-Assessment: Admin checks the report (usually via a quick Viber/Telegram call to the Lead).
-
-Activation: Once "Verified," the pin appears on KapwaRelief.ph.
-
-Archiving: Once "Completed," the data is moved to reports.KapwaRelief.ph and deleted from the live map database.
 ---
 
+## 4. Verification & Archive Method
+
+
+
+### The Verified Workflow:
+1.  **Submission:** Field Lead submits a report via a text-heavy, low-data form.
+2.  **Assessment:** Admins verify the report via direct comms (Viber/Telegram) with the Lead.
+3.  **Activation:** Once verified, the pin appears on the live map (`KapwaRelief.ph`).
+4.  **Archiving:** Upon completion, data moves to the archive subdomain (`reports.KapwaRelief.ph`) for long-term public access.
