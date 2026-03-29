@@ -81,18 +81,20 @@ src/
     GoodsByCategory.tsx
     AidDistributionMap.tsx
     StatusFooter.tsx
-    SubmitForm.tsx    # Aid request / feedback form component
+    NeedsSummaryCards.tsx  # Needs summary cards (active/transit/fulfilled/critical)
+    NeedsCoordinationMap.tsx # Needs map wrapper with access filter + legend
+    SubmitForm.tsx    # Need / aid request / feedback form component
     dashboard/        # Dashboard-specific components (planned)
     forms/            # Form components (planned)
-    maps/             # Map components (DeploymentMap.tsx, MapSkeleton.tsx)
+    maps/             # Map components (DeploymentMap.tsx, NeedsMap.tsx, MapSkeleton.tsx)
     shared/           # Shared UI components (planned)
   pages/
-    DashboardPage.tsx # Live dashboard (index route)
-    SubmitPage.tsx    # Aid request / feedback form (/:locale/submit)
+    DashboardPage.tsx # Live dashboard — needs-first layout (index route)
+    SubmitPage.tsx    # Need / aid request / feedback form (/:locale/submit)
   hooks/              # Custom React hooks (planned)
   lib/
     supabase.ts       # Supabase client (anon key via import.meta.env)
-    queries.ts        # Typed query functions for dashboard + submit form
+    queries.ts        # Typed query functions for dashboard, needs coordination + submit form
     cache.ts          # IndexedDB cache for offline dashboard data
     form-cache.ts     # IndexedDB cache for form dropdown options (offline submit)
     outbox-context.tsx # React context + provider for offline submission queue
