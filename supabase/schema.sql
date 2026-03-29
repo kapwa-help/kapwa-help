@@ -1,6 +1,19 @@
 -- LUaid.org — Supabase Schema
 -- Run this in the Supabase SQL Editor to create all tables.
 
+-- Events: disaster operations that scope all data
+CREATE TABLE events (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        text NOT NULL,
+  slug        text NOT NULL UNIQUE,
+  description text,
+  region      text NOT NULL,
+  started_at  date NOT NULL,
+  ended_at    date,
+  is_active   boolean NOT NULL DEFAULT true,
+  created_at  timestamptz DEFAULT now()
+);
+
 -- Organizations: donors, deployment hubs, or both
 CREATE TABLE organizations (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
