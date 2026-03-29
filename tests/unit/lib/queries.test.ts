@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 import { supabase } from "@/lib/supabase";
-import { getBarangays, getAidCategories, insertSubmission } from "@/lib/queries";
+import { getBarangays, getAidCategories, insertSubmission, getNeedsMapPoints } from "@/lib/queries";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -107,5 +107,46 @@ describe("insertSubmission", () => {
     };
 
     await expect(insertSubmission(payload)).rejects.toEqual(error);
+  });
+});
+
+describe("getNeedsMapPoints", () => {
+  it("returns formatted need points from Supabase", async () => {
+    const mockData = [
+      {
+        id: "abc",
+        lat: 16.67,
+        lng: 120.32,
+        status: "verified",
+        gap_category: "sustenance",
+        access_status: "truck",
+        urgency: "high",
+        quantity_needed: 80,
+        notes: "Food needed",
+        contact_name: "Test",
+        barangays: { name: "Urbiztondo", municipality: "San Juan" },
+        aid_categories: { name: "Sustenance" },
+      },
+    ];
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        in: vi.fn().mockReturnValue({
+          not: vi.fn().mockReturnValue({
+            not: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+          }),
+        }),
+      }),
+    } as never);
+
+    const result = await getNeedsMapPoints();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: "abc",
+      lat: 16.67,
+      lng: 120.32,
+      status: "verified",
+      gapCategory: "sustenance",
+      accessStatus: "truck",
+    });
   });
 });
