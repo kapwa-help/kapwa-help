@@ -53,24 +53,6 @@ CREATE TABLE donations (
   created_at      timestamptz DEFAULT now()
 );
 
--- Deployments: every aid delivery event (core table)
-CREATE TABLE deployments (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  organization_id uuid NOT NULL REFERENCES organizations(id),
-  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
-  barangay_id     uuid REFERENCES barangays(id),
-  quantity        integer,
-  unit            text,
-  recipient       text,
-  lat             decimal(9,6),
-  lng             decimal(9,6),
-  date            date,
-  volunteer_count integer,
-  hours           decimal(5,1),
-  notes           text,
-  created_at      timestamptz DEFAULT now()
-);
-
 -- Submissions: aid needs and feedback from the field
 -- "Needs" follow the KapwaRelief pin lifecycle (docs/scope §5.B)
 CREATE TABLE submissions (
@@ -101,6 +83,27 @@ CREATE TABLE submissions (
   -- Timestamps
   verified_at     timestamptz,
   completed_at    timestamptz,
+  created_at      timestamptz DEFAULT now()
+);
+
+-- Deployments (Relief Actions): every aid delivery event
+-- Can optionally fulfill a specific need (submission_id)
+CREATE TABLE deployments (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id        uuid REFERENCES events(id),
+  organization_id uuid NOT NULL REFERENCES organizations(id),
+  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
+  barangay_id     uuid REFERENCES barangays(id),
+  submission_id   uuid REFERENCES submissions(id),
+  quantity        integer,
+  unit            text,
+  recipient       text,
+  lat             decimal(9,6),
+  lng             decimal(9,6),
+  date            date,
+  volunteer_count integer,
+  hours           decimal(5,1),
+  notes           text,
   created_at      timestamptz DEFAULT now()
 );
 
