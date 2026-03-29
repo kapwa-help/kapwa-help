@@ -26,6 +26,9 @@ vi.mock("@/lib/queries", () => ({
 vi.mock("@/components/maps/DeploymentMap", () => ({
   default: () => <div data-testid="deployment-map" />,
 }));
+vi.mock("@/components/maps/NeedsMap", () => ({
+  default: () => <div data-testid="needs-map" />,
+}));
 
 // Mock react-i18next
 vi.mock("react-i18next", () => ({
