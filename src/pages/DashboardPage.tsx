@@ -21,6 +21,9 @@ import {
   getGoodsByCategory,
   getBeneficiariesByBarangay,
   getDeploymentMapPoints,
+  getNeedsMapPoints,
+  getNeedsSummary,
+  getActiveEvent,
 } from "@/lib/queries";
 
 export function DashboardPage() {
@@ -43,6 +46,9 @@ export function DashboardPage() {
         goodsByCategory,
         barangays,
         deploymentPoints,
+        needsPoints,
+        needsSummary,
+        activeEvent,
       ] = await Promise.all([
         getTotalDonations(),
         getTotalBeneficiaries(),
@@ -52,6 +58,9 @@ export function DashboardPage() {
         getGoodsByCategory(),
         getBeneficiariesByBarangay(),
         getDeploymentMapPoints(),
+        getNeedsMapPoints(),
+        getNeedsSummary(),
+        getActiveEvent(),
       ]);
 
       const freshData: DashboardData = {
@@ -63,6 +72,9 @@ export function DashboardPage() {
         goodsByCategory,
         barangays,
         deploymentPoints,
+        needsPoints,
+        needsSummary,
+        activeEvent,
       };
 
       setData(freshData);

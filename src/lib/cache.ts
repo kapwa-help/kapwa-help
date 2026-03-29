@@ -4,6 +4,7 @@ const STORE_NAME = "dashboard";
 const CACHE_KEY = "latest";
 
 export type DashboardData = {
+  // Existing fields
   totalDonations: number;
   totalBeneficiaries: number;
   volunteerCount: number;
@@ -19,6 +20,30 @@ export type DashboardData = {
     orgName: string;
     categoryName: string;
   }[];
+  // New: needs coordination
+  activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
+  needsPoints: {
+    id: string;
+    lat: number;
+    lng: number;
+    status: string;
+    gapCategory: string | null;
+    accessStatus: string | null;
+    urgency: string | null;
+    quantityNeeded: number | null;
+    notes: string | null;
+    contactName: string;
+    barangayName: string;
+    municipality: string;
+    categoryName: string;
+  }[];
+  needsSummary: {
+    total: number;
+    byStatus: { pending: number; verified: number; in_transit: number; completed: number };
+    byGap: { lunas: number; sustenance: number; shelter: number };
+    byAccess: { truck: number; "4x4": number; boat: number; foot_only: number; cut_off: number };
+    critical: number;
+  };
 };
 
 type CachedDashboard = {
