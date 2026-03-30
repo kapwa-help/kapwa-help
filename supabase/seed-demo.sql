@@ -31,11 +31,6 @@ DECLARE
   -- Event ID
   v_event          uuid;
 
-  -- Gap category IDs
-  v_lunas          uuid;
-  v_sustenance     uuid;
-  v_shelter        uuid;
-
   -- Aid category IDs
   v_meals            uuid;
   v_relief           uuid;
@@ -82,11 +77,6 @@ BEGIN
     )
     ON CONFLICT (slug) DO NOTHING;
   SELECT id INTO v_event FROM events WHERE slug = 'typhoon-emong-2024';
-
-  -- Look up scope gap categories
-  SELECT id INTO v_lunas      FROM aid_categories WHERE name = 'Lunas';
-  SELECT id INTO v_sustenance FROM aid_categories WHERE name = 'Sustenance';
-  SELECT id INTO v_shelter    FROM aid_categories WHERE name = 'Shelter';
 
   -- ============================================================
   -- 2. Look up existing aid categories
@@ -324,21 +314,21 @@ BEGIN
   -- 9. Insert demo needs (guarded — skip if already seeded)
   -- ============================================================
   IF NOT EXISTS (SELECT 1 FROM submissions WHERE type = 'need' LIMIT 1) THEN
-    INSERT INTO submissions (event_id, type, status, contact_name, barangay_id, aid_category_id, gap_category, lat, lng, access_status, quantity_needed, urgency, notes, created_at) VALUES
+    INSERT INTO submissions (event_id, type, status, contact_name, barangay_id, gap_category, lat, lng, access_status, quantity_needed, urgency, notes, created_at) VALUES
       -- Verified needs (live on map)
-      (v_event, 'need', 'verified',   'Kap. Maria Santos',    v_brgy_urbiztondo,   v_lunas,      'lunas',      16.6690, 120.3230, 'truck',     50, 'critical', 'Medical supplies for 50 families — multiple injuries from debris', '2024-11-11 08:00:00+08'),
-      (v_event, 'need', 'verified',   'Kap. Jose Reyes',      v_brgy_bacnotan,     v_sustenance, 'sustenance', 16.7345, 120.3475, '4x4',       80, 'high',     'Food and water for 80 families — supplies running low',             '2024-11-11 09:30:00+08'),
-      (v_event, 'need', 'verified',   'Ldr. Ana Cruz',        v_brgy_nalvo,        v_shelter,    'shelter',    16.8090, 120.3690, 'foot_only', 30, 'critical', '30 homes destroyed — need tarps and building materials',            '2024-11-11 10:00:00+08'),
-      (v_event, 'need', 'verified',   'Ldr. Pedro Gomez',     v_brgy_paringao,     v_sustenance, 'sustenance', 16.5150, 120.3290, 'boat',      60, 'high',     'Flooding cut road access — boat needed for food delivery',          '2024-11-12 07:00:00+08'),
-      (v_event, 'need', 'verified',   'Vol. Rica Tan',        v_brgy_guerrero,     v_lunas,      'lunas',      16.7260, 120.3550, 'truck',     25, 'medium',   'First aid kits needed for minor injuries',                          '2024-11-12 11:00:00+08'),
+      (v_event, 'need', 'verified',   'Kap. Maria Santos',    v_brgy_urbiztondo,   'lunas',      16.6690, 120.3230, 'truck',     50, 'critical', 'Medical supplies for 50 families — multiple injuries from debris', '2024-11-11 08:00:00+08'),
+      (v_event, 'need', 'verified',   'Kap. Jose Reyes',      v_brgy_bacnotan,     'sustenance', 16.7345, 120.3475, '4x4',       80, 'high',     'Food and water for 80 families — supplies running low',             '2024-11-11 09:30:00+08'),
+      (v_event, 'need', 'verified',   'Ldr. Ana Cruz',        v_brgy_nalvo,        'shelter',    16.8090, 120.3690, 'foot_only', 30, 'critical', '30 homes destroyed — need tarps and building materials',            '2024-11-11 10:00:00+08'),
+      (v_event, 'need', 'verified',   'Ldr. Pedro Gomez',     v_brgy_paringao,     'sustenance', 16.5150, 120.3290, 'boat',      60, 'high',     'Flooding cut road access — boat needed for food delivery',          '2024-11-12 07:00:00+08'),
+      (v_event, 'need', 'verified',   'Vol. Rica Tan',        v_brgy_guerrero,     'lunas',      16.7260, 120.3550, 'truck',     25, 'medium',   'First aid kits needed for minor injuries',                          '2024-11-12 11:00:00+08'),
       -- In-transit (donor committed)
-      (v_event, 'need', 'in_transit', 'Kap. Luis Aquino',     v_brgy_central_east, v_sustenance, 'sustenance', 16.5380, 120.3400, 'truck',     100, 'high',    'EcoNest committed 420 relief packs — en route',                    '2024-11-11 14:00:00+08'),
-      (v_event, 'need', 'in_transit', 'Ldr. Rosa Bautista',   v_brgy_dili,         v_shelter,    'shelter',    16.7420, 120.3510, '4x4',       40, 'high',     'Art Relief deploying construction materials',                       '2024-11-12 08:00:00+08'),
+      (v_event, 'need', 'in_transit', 'Kap. Luis Aquino',     v_brgy_central_east, 'sustenance', 16.5380, 120.3400, 'truck',     100, 'high',    'EcoNest committed 420 relief packs — en route',                    '2024-11-11 14:00:00+08'),
+      (v_event, 'need', 'in_transit', 'Ldr. Rosa Bautista',   v_brgy_dili,         'shelter',    16.7420, 120.3510, '4x4',       40, 'high',     'Art Relief deploying construction materials',                       '2024-11-12 08:00:00+08'),
       -- Completed (fulfilled)
-      (v_event, 'need', 'completed',  'Kap. Elena Ramos',     v_brgy_poblacion_sj, v_sustenance, 'sustenance', 16.6640, 120.3290, 'truck',     70, 'high',     'LU Citizen Volunteers delivered 480 meals',                        '2024-11-11 06:00:00+08'),
-      (v_event, 'need', 'completed',  'Vol. Marco Diaz',      v_brgy_baccuit,      v_lunas,      'lunas',      16.5462, 120.3312, 'truck',     35, 'medium',   'La Union Surf Club delivered 120 medical kits',                    '2024-11-12 09:00:00+08'),
+      (v_event, 'need', 'completed',  'Kap. Elena Ramos',     v_brgy_poblacion_sj, 'sustenance', 16.6640, 120.3290, 'truck',     70, 'high',     'LU Citizen Volunteers delivered 480 meals',                        '2024-11-11 06:00:00+08'),
+      (v_event, 'need', 'completed',  'Vol. Marco Diaz',      v_brgy_baccuit,      'lunas',      16.5462, 120.3312, 'truck',     35, 'medium',   'La Union Surf Club delivered 120 medical kits',                    '2024-11-12 09:00:00+08'),
       -- Pending (unverified, not yet visible on map)
-      (v_event, 'need', 'pending',    'Caller: unknown',      v_brgy_poblacion_lu, v_sustenance, 'sustenance', 16.8015, 120.3735, 'cut_off',   45, 'critical', 'Unverified report of cut-off community needing food — checking',   '2024-11-13 06:00:00+08');
+      (v_event, 'need', 'pending',    'Caller: unknown',      v_brgy_poblacion_lu, 'sustenance', 16.8015, 120.3735, 'cut_off',   45, 'critical', 'Unverified report of cut-off community needing food — checking',   '2024-11-13 06:00:00+08');
   END IF;
 
   -- Link existing deployments to the event
