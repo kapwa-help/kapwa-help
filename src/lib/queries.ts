@@ -161,7 +161,7 @@ export async function getNeedsSummary() {
   const { data, error } = await supabase
     .from("submissions")
     .select("status, gap_category, access_status, urgency")
-    .in("type", ["need", "request"]);
+    .eq("type", "need");
 
   if (error) throw error;
 
