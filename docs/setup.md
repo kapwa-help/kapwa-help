@@ -48,7 +48,7 @@ The KML seeder script (`supabase/seed-kml.ts`) parses this file and inserts it i
 
 ### Demo data — prototype seed
 
-The file `supabase/seed-demo.sql` adds mock data to fill out the dashboard prototype: additional organizations, donations (totaling ~₱2.8M), barangay records, volunteer counts, and deployments spread across Bacnotan, Bauang, and Luna. All demo records are tagged with `notes = 'demo-seed'` for easy identification and cleanup.
+The file `supabase/seed-demo.sql` adds mock data to fill out the dashboard prototype: a demo event ("Typhoon Emong Relief"), organizations, donations, barangay records, volunteer deployments, and 10 needs across all lifecycle statuses (pending→verified→in_transit→completed→resolved) with varying gap categories and access types. All demo records are tagged with `notes = 'demo-seed'` for easy identification and cleanup.
 
 **You don't need to run this either** — it's already seeded in the shared database.
 
@@ -57,12 +57,13 @@ The file `supabase/seed-demo.sql` adds mock data to fill out the dashboard proto
 If you want a private database instance instead of using the shared one:
 
 1. Create a project at [supabase.com/dashboard](https://supabase.com/dashboard)
-2. Run `supabase/schema.sql` in the **SQL Editor** (creates tables + aid categories)
+2. Run `supabase/schema.sql` in the **SQL Editor** (creates 7 tables + aid categories)
 3. Run `supabase/rls-policies.sql` in the **SQL Editor** (enables public read access)
 4. Update `.env.local` with your project's URL and anon key (from **Settings → API**)
 5. Optionally seed data:
    - **Real data:** Add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`, then run `npx tsx supabase/seed-kml.ts data/Emong_relief_operations.kml`
-   - **Demo data:** Run `supabase/seed-demo.sql` in the SQL Editor
+   - **Demo data:** Run `supabase/seed-demo.sql` in the SQL Editor (includes a demo event, needs, and deployments)
+   - **Cleanup:** If you accidentally double-seed, run `supabase/dedup-seed.sql` to remove duplicates
 
 ## 5. Testing and Linting
 

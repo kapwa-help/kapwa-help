@@ -1,6 +1,6 @@
 # UI Verification Protocol
 
-Agent-facing playbook for verifying UI changes with Playwright.
+How to verify UI changes with Playwright.
 
 ## Quick Verification
 
