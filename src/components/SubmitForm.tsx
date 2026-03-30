@@ -40,6 +40,10 @@ export default function SubmitForm() {
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [coords, setCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
     let hadCache = false;
@@ -83,6 +87,19 @@ export default function SubmitForm() {
       cancelled = true;
     };
   }, [t]);
+
+  const requestLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) =>
+          setCoords({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          }),
+        () => {} // silently ignore denial
+      );
+    }
+  };
 
   const flushingRef = useRef(false);
 
@@ -169,6 +186,8 @@ export default function SubmitForm() {
         type === "feedback"
           ? (formData.get("issue_type") as string) || null
           : null,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
     };
 
     try {
@@ -208,6 +227,7 @@ export default function SubmitForm() {
             setSubmitted(false);
             setSavedOffline(false);
             setFormKey((k) => k + 1);
+            setCoords(null);
           }}
           className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
@@ -497,6 +517,23 @@ export default function SubmitForm() {
           </div>
         </>
       )}
+
+      {/* Location */}
+      <div>
+        {coords ? (
+          <p className="text-sm text-success">
+            {t("SubmitForm.locationCaptured")}
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={requestLocation}
+            className="rounded-lg border border-neutral-400/20 bg-base px-4 py-2.5 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+          >
+            {t("SubmitForm.shareLocation")}
+          </button>
+        )}
+      </div>
 
       {/* Notes */}
       <div>
