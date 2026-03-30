@@ -206,18 +206,15 @@ export async function getActiveEvent() {
 export interface SubmissionInsert {
   id?: string; // Client-generated UUID for idempotent sync
   event_id?: string | null;
-  type: "need" | "request" | "feedback";
+  type: "need";
   contact_name: string;
   contact_phone: string | null;
   barangay_id: string;
-  aid_category_id: string;
-  gap_category?: string | null;
-  access_status?: string | null;
+  gap_category: string;
+  access_status: string;
   notes: string | null;
   quantity_needed: number | null;
-  urgency: string | null;
-  rating: number | null;
-  issue_type: string | null;
+  urgency: string;
   lat: number | null;
   lng: number | null;
   photo_url?: string | null;
