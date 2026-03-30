@@ -57,7 +57,9 @@
     "access4x4": "4x4 nga",
     "accessBoat": "Bangka Laeng",
     "accessFootOnly": "Saka Laeng",
-    "accessCutOff": "Putden ti Off"
+    "accessCutOff": "Putden ti Off",
+    "accessLabel": "Pannakaserrek",
+    "familyCount": "{{count}} pamilya"
   },
   "SubmitForm": {
     "title": "Mangipatulod iti Report",
@@ -101,7 +103,7 @@
     "savedMessage": "Ipatulodna inton agsublika nga online.",
     "typeNeed": "Kasapulan ti Report",
     "gapCategory": "Kita ti Kasapulan",
-    "gap_lunas": "Medikal (Lunas) .",
+    "gap_lunas": "Medikal (Lunas)",
     "gap_sustenance": "Taraon & Danum",
     "gap_shelter": "Linong",
     "accessStatus": "Pannakastrek iti Kalsada",

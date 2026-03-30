@@ -7,7 +7,7 @@ vi.mock("react-i18next", () => ({
 
 const mockSummary = {
   total: 10,
-  byStatus: { pending: 2, verified: 4, in_transit: 2, completed: 2 },
+  byStatus: { pending: 2, verified: 4, in_transit: 2, completed: 2, resolved: 0 },
   byGap: { lunas: 3, sustenance: 5, shelter: 2 },
   byAccess: { truck: 4, "4x4": 2, boat: 2, foot_only: 1, cut_off: 1 },
   critical: 3,

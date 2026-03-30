@@ -209,7 +209,7 @@ export default function SubmitForm() {
             setSavedOffline(false);
             setFormKey((k) => k + 1);
           }}
-          className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary/80"
+          className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
           {t("SubmitForm.submitAnother")}
         </button>
@@ -226,7 +226,7 @@ export default function SubmitForm() {
           onClick={() => setType("need")}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
             type === "need"
-              ? "bg-primary text-white"
+              ? "bg-primary text-neutral-50"
               : "bg-base text-neutral-400"
           }`}
         >
@@ -237,7 +237,7 @@ export default function SubmitForm() {
           onClick={() => setType("request")}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
             type === "request"
-              ? "bg-primary text-white"
+              ? "bg-primary text-neutral-50"
               : "bg-base text-neutral-400"
           }`}
         >
@@ -248,7 +248,7 @@ export default function SubmitForm() {
           onClick={() => setType("feedback")}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
             type === "feedback"
-              ? "bg-primary text-white"
+              ? "bg-primary text-neutral-50"
               : "bg-base text-neutral-400"
           }`}
         >
@@ -519,7 +519,7 @@ export default function SubmitForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
+        className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80 disabled:opacity-50"
       >
         {submitting ? t("SubmitForm.submitting") : t("SubmitForm.submit")}
       </button>

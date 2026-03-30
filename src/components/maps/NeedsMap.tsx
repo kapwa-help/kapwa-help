@@ -22,12 +22,12 @@ function makeIcon(status: string) {
   });
 }
 
-const ACCESS_LABELS: Record<string, string> = {
-  truck: "Truck",
-  "4x4": "4x4 Vehicle",
-  boat: "Boat Only",
-  foot_only: "Foot Only",
-  cut_off: "Cut Off",
+const ACCESS_KEYS: Record<string, string> = {
+  truck: "Dashboard.accessTruck",
+  "4x4": "Dashboard.access4x4",
+  boat: "Dashboard.accessBoat",
+  foot_only: "Dashboard.accessFootOnly",
+  cut_off: "Dashboard.accessCutOff",
 };
 
 const DEFAULT_CENTER: [number, number] = [16.62, 120.35];
@@ -80,14 +80,14 @@ export default function NeedsMap({ points }: Props) {
             <Popup>
               <div className="text-sm space-y-1">
                 <p className="font-semibold">{point.barangayName}, {point.municipality}</p>
-                <p>{point.categoryName} — {point.urgency ?? "unset"} urgency</p>
+                <p>{point.categoryName} — {t(`Dashboard.urgency_${point.urgency ?? "unset"}`, point.urgency ?? t("Dashboard.unset"))}</p>
                 {point.accessStatus && (
                   <p className="text-xs">
-                    Access: <strong>{ACCESS_LABELS[point.accessStatus] ?? point.accessStatus}</strong>
+                    {t("Dashboard.accessLabel")}: <strong>{ACCESS_KEYS[point.accessStatus] ? t(ACCESS_KEYS[point.accessStatus]) : point.accessStatus}</strong>
                   </p>
                 )}
                 {point.quantityNeeded && (
-                  <p className="text-xs">{point.quantityNeeded} families</p>
+                  <p className="text-xs">{t("Dashboard.familyCount", { count: point.quantityNeeded })}</p>
                 )}
                 {point.notes && <p className="text-xs italic">{point.notes}</p>}
               </div>

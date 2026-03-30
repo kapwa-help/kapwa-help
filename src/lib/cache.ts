@@ -1,5 +1,5 @@
 const DB_NAME = "luaid";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "dashboard";
 const CACHE_KEY = "latest";
 
@@ -39,7 +39,7 @@ export type DashboardData = {
   }[];
   needsSummary: {
     total: number;
-    byStatus: { pending: number; verified: number; in_transit: number; completed: number };
+    byStatus: { pending: number; verified: number; in_transit: number; completed: number; resolved: number };
     byGap: { lunas: number; sustenance: number; shelter: number };
     byAccess: { truck: number; "4x4": number; boat: number; foot_only: number; cut_off: number };
     critical: number;

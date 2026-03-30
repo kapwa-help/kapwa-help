@@ -9,6 +9,14 @@ type Props = {
   needsPoints: NeedPoint[];
 };
 
+const ACCESS_KEYS: Record<string, string> = {
+  truck: "Dashboard.accessTruck",
+  "4x4": "Dashboard.access4x4",
+  boat: "Dashboard.accessBoat",
+  foot_only: "Dashboard.accessFootOnly",
+  cut_off: "Dashboard.accessCutOff",
+};
+
 const ACCESS_FILTERS = [
   { value: "all", label: "Dashboard.allAccess" },
   { value: "truck", label: "Dashboard.accessTruck" },
@@ -46,7 +54,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
             onClick={() => setAccessFilter(f.value)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               accessFilter === f.value
-                ? "bg-primary text-white"
+                ? "bg-primary text-neutral-50"
                 : "bg-base text-neutral-400 hover:text-neutral-50"
             }`}
           >
@@ -117,7 +125,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                     </p>
                     <p className="text-xs text-neutral-400">
                       {need.categoryName}
-                      {need.accessStatus && ` · ${need.accessStatus.replace("_", " ")}`}
+                      {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
                     </p>
                   </div>
                 </div>

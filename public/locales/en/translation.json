@@ -57,7 +57,9 @@
     "access4x4": "4x4",
     "accessBoat": "Boat Only",
     "accessFootOnly": "Foot Only",
-    "accessCutOff": "Cut Off"
+    "accessCutOff": "Cut Off",
+    "accessLabel": "Access",
+    "familyCount": "{{count}} families"
   },
   "SubmitForm": {
     "title": "Submit a Report",

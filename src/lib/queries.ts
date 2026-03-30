@@ -167,7 +167,7 @@ export async function getNeedsSummary() {
 
   const summary = {
     total: data.length,
-    byStatus: { pending: 0, verified: 0, in_transit: 0, completed: 0 },
+    byStatus: { pending: 0, verified: 0, in_transit: 0, completed: 0, resolved: 0 },
     byGap: { lunas: 0, sustenance: 0, shelter: 0 },
     byAccess: { truck: 0, "4x4": 0, boat: 0, foot_only: 0, cut_off: 0 },
     critical: 0,

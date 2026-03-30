@@ -57,7 +57,9 @@
     "access4x4": "4x4",
     "accessBoat": "Bangka Lamang",
     "accessFootOnly": "Paa Lamang",
-    "accessCutOff": "Putulin"
+    "accessCutOff": "Putulin",
+    "accessLabel": "Access",
+    "familyCount": "{{count}} pamilya"
   },
   "SubmitForm": {
     "title": "Magsumite ng Ulat",
