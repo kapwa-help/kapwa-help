@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 import { supabase } from "@/lib/supabase";
-import { getBarangays, getAidCategories, insertSubmission, getNeedsMapPoints } from "@/lib/queries";
+import { getBarangays, insertSubmission, getNeedsMapPoints } from "@/lib/queries";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -42,24 +42,6 @@ describe("getBarangays", () => {
   });
 });
 
-describe("getAidCategories", () => {
-  it("returns categories ordered by name", async () => {
-    const mockData = [
-      { id: "c1", name: "Drinking Water" },
-      { id: "c2", name: "Meals" },
-    ];
-    vi.mocked(supabase.from).mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-      }),
-    } as never);
-
-    const result = await getAidCategories();
-    expect(supabase.from).toHaveBeenCalledWith("aid_categories");
-    expect(result).toEqual(mockData);
-  });
-});
-
 describe("insertSubmission", () => {
   it("inserts a submission and returns void", async () => {
     vi.mocked(supabase.from).mockReturnValue({
@@ -67,16 +49,15 @@ describe("insertSubmission", () => {
     } as never);
 
     const payload = {
-      type: "request" as const,
+      type: "need" as const,
       contact_name: "Juan Dela Cruz",
       contact_phone: null,
       barangay_id: "b1",
-      aid_category_id: "c1",
+      gap_category: "sustenance",
+      access_status: "truck",
       notes: null,
       quantity_needed: 50,
       urgency: "high",
-      rating: null,
-      issue_type: null,
       lat: null,
       lng: null,
     };
@@ -92,16 +73,15 @@ describe("insertSubmission", () => {
     } as never);
 
     const payload = {
-      type: "request" as const,
+      type: "need" as const,
       contact_name: "Juan",
       contact_phone: null,
       barangay_id: "b1",
-      aid_category_id: "c1",
+      gap_category: "sustenance",
+      access_status: "truck",
       notes: null,
       quantity_needed: null,
       urgency: "low",
-      rating: null,
-      issue_type: null,
       lat: null,
       lng: null,
     };
