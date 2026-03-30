@@ -183,10 +183,10 @@ export function DashboardPage() {
         </div>
 
         {/* Primary: Needs summary */}
-        <NeedsSummaryCards summary={data.needsSummary} />
+        {data.needsSummary && <NeedsSummaryCards summary={data.needsSummary} />}
 
         {/* Primary: Needs coordination map */}
-        <NeedsCoordinationMap needsPoints={data.needsPoints} />
+        {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}
 
         {/* Secondary: Relief operations context */}
         <div className="border-t border-neutral-400/10 pt-6">

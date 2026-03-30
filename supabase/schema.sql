@@ -1,8 +1,9 @@
 -- LUaid.org — Supabase Schema
 -- Run this in the Supabase SQL Editor to create all tables.
+-- Safe to run multiple times: uses IF NOT EXISTS throughout.
 
 -- Events: disaster operations that scope all data
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text NOT NULL,
   slug        text NOT NULL UNIQUE,
@@ -15,7 +16,7 @@ CREATE TABLE events (
 );
 
 -- Organizations: donors, deployment hubs, or both
-CREATE TABLE organizations (
+CREATE TABLE IF NOT EXISTS organizations (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name         text NOT NULL,
   type         text NOT NULL CHECK (type IN ('donor', 'hub', 'both')),
@@ -26,14 +27,14 @@ CREATE TABLE organizations (
 );
 
 -- Aid categories: broad groupings for dashboard rollups
-CREATE TABLE aid_categories (
+CREATE TABLE IF NOT EXISTS aid_categories (
   id   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   icon text
 );
 
 -- Barangays: geographic aggregation layer
-CREATE TABLE barangays (
+CREATE TABLE IF NOT EXISTS barangays (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name         text NOT NULL,
   municipality text NOT NULL,
@@ -44,7 +45,7 @@ CREATE TABLE barangays (
 );
 
 -- Donations: monetary contributions
-CREATE TABLE donations (
+CREATE TABLE IF NOT EXISTS donations (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL REFERENCES organizations(id),
   amount          decimal(12,2) NOT NULL,
@@ -55,7 +56,7 @@ CREATE TABLE donations (
 
 -- Submissions: aid needs and feedback from the field
 -- "Needs" follow the KapwaRelief pin lifecycle (docs/scope §5.B)
-CREATE TABLE submissions (
+CREATE TABLE IF NOT EXISTS submissions (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id        uuid REFERENCES events(id),
   type            text NOT NULL CHECK (type IN ('need', 'request', 'feedback')),
@@ -88,7 +89,7 @@ CREATE TABLE submissions (
 
 -- Deployments (Relief Actions): every aid delivery event
 -- Can optionally fulfill a specific need (submission_id)
-CREATE TABLE deployments (
+CREATE TABLE IF NOT EXISTS deployments (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id        uuid REFERENCES events(id),
   organization_id uuid NOT NULL REFERENCES organizations(id),
@@ -116,10 +117,12 @@ INSERT INTO aid_categories (name, icon) VALUES
   ('Construction Materials', 'hammer'),
   ('Cleaning Supplies', 'sparkles'),
   ('Drinking Water', 'glass-water'),
-  ('Kiddie Packs', 'baby');
+  ('Kiddie Packs', 'baby')
+ON CONFLICT (name) DO NOTHING;
 
 -- Scope-aligned gap categories (KapwaRelief "The Gap" taxonomy)
 INSERT INTO aid_categories (name, icon) VALUES
   ('Lunas', 'heart-pulse'),
   ('Sustenance', 'utensils'),
-  ('Shelter', 'house');
+  ('Shelter', 'house')
+ON CONFLICT (name) DO NOTHING;
