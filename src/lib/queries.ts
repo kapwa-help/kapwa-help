@@ -107,20 +107,120 @@ export async function getDeploymentMapPoints() {
   }));
 }
 
+// --- Needs coordination queries ---
+
+export type NeedPoint = {
+  id: string;
+  lat: number;
+  lng: number;
+  status: string;
+  gapCategory: string | null;
+  accessStatus: string | null;
+  urgency: string | null;
+  quantityNeeded: number | null;
+  notes: string | null;
+  contactName: string;
+  barangayName: string;
+  municipality: string;
+  categoryName: string;
+};
+
+export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(
+      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, barangays(name, municipality), aid_categories(name)"
+    )
+    .in("status", ["verified", "in_transit", "completed"])
+    .not("lat", "is", null)
+    .not("lng", "is", null);
+
+  if (error) throw error;
+  return data.map((row) => {
+    const brgy = row.barangays as unknown as { name: string; municipality: string };
+    const cat = row.aid_categories as unknown as { name: string };
+    return {
+      id: row.id,
+      lat: Number(row.lat),
+      lng: Number(row.lng),
+      status: row.status,
+      gapCategory: row.gap_category,
+      accessStatus: row.access_status,
+      urgency: row.urgency,
+      quantityNeeded: row.quantity_needed,
+      notes: row.notes,
+      contactName: row.contact_name,
+      barangayName: brgy?.name ?? "Unknown",
+      municipality: brgy?.municipality ?? "",
+      categoryName: cat?.name ?? "Unknown",
+    };
+  });
+}
+
+export async function getNeedsSummary() {
+  const { data, error } = await supabase
+    .from("submissions")
+    .select("status, gap_category, access_status, urgency")
+    .in("type", ["need", "request"]);
+
+  if (error) throw error;
+
+  const summary = {
+    total: data.length,
+    byStatus: { pending: 0, verified: 0, in_transit: 0, completed: 0, resolved: 0 },
+    byGap: { lunas: 0, sustenance: 0, shelter: 0 },
+    byAccess: { truck: 0, "4x4": 0, boat: 0, foot_only: 0, cut_off: 0 },
+    critical: 0,
+  };
+
+  for (const row of data) {
+    const s = row.status as keyof typeof summary.byStatus;
+    if (s in summary.byStatus) summary.byStatus[s]++;
+
+    const g = row.gap_category as keyof typeof summary.byGap | null;
+    if (g && g in summary.byGap) summary.byGap[g]++;
+
+    const a = row.access_status as keyof typeof summary.byAccess | null;
+    if (a && a in summary.byAccess) summary.byAccess[a]++;
+
+    if (row.urgency === "critical") summary.critical++;
+  }
+
+  return summary;
+}
+
+export async function getActiveEvent() {
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, name, slug, description, region, started_at")
+    .eq("is_active", true)
+    .limit(1)
+    .single();
+
+  if (error && error.code !== "PGRST116") throw error;
+  return data;
+}
+
 // --- Submission form queries ---
 
 export interface SubmissionInsert {
   id?: string; // Client-generated UUID for idempotent sync
-  type: "request" | "feedback";
+  event_id?: string | null;
+  type: "need" | "request" | "feedback";
   contact_name: string;
   contact_phone: string | null;
   barangay_id: string;
   aid_category_id: string;
+  gap_category?: string | null;
+  access_status?: string | null;
   notes: string | null;
   quantity_needed: number | null;
   urgency: string | null;
   rating: number | null;
   issue_type: string | null;
+  lat: number | null;
+  lng: number | null;
+  photo_url?: string | null;
 }
 
 export async function getBarangays() {

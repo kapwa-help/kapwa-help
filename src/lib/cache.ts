@@ -1,9 +1,10 @@
 const DB_NAME = "luaid";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "dashboard";
 const CACHE_KEY = "latest";
 
 export type DashboardData = {
+  // Existing fields
   totalDonations: number;
   totalBeneficiaries: number;
   volunteerCount: number;
@@ -19,6 +20,30 @@ export type DashboardData = {
     orgName: string;
     categoryName: string;
   }[];
+  // New: needs coordination
+  activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
+  needsPoints: {
+    id: string;
+    lat: number;
+    lng: number;
+    status: string;
+    gapCategory: string | null;
+    accessStatus: string | null;
+    urgency: string | null;
+    quantityNeeded: number | null;
+    notes: string | null;
+    contactName: string;
+    barangayName: string;
+    municipality: string;
+    categoryName: string;
+  }[];
+  needsSummary: {
+    total: number;
+    byStatus: { pending: number; verified: number; in_transit: number; completed: number; resolved: number };
+    byGap: { lunas: number; sustenance: number; shelter: number };
+    byAccess: { truck: number; "4x4": number; boat: number; foot_only: number; cut_off: number };
+    critical: number;
+  };
 };
 
 type CachedDashboard = {
@@ -30,7 +55,12 @@ function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
-      request.result.createObjectStore(STORE_NAME);
+      const db = request.result;
+      // Drop and recreate on version bump to clear stale data shape
+      if (db.objectStoreNames.contains(STORE_NAME)) {
+        db.deleteObjectStore(STORE_NAME);
+      }
+      db.createObjectStore(STORE_NAME);
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);

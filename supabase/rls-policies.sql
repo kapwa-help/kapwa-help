@@ -2,6 +2,11 @@
 -- LUaid serves open relief data — all dashboard tables are publicly readable.
 -- Write policies will be added when authenticated forms are implemented.
 
+-- Events
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "anon_read_events" ON events
+  FOR SELECT USING (true);
+
 -- Organizations
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "anon_read_organizations" ON organizations

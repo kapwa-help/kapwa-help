@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
+import NeedsSummaryCards from "@/components/NeedsSummaryCards";
+import NeedsCoordinationMap from "@/components/NeedsCoordinationMap";
 import SummaryCards from "@/components/SummaryCards";
 import DonationsByOrg from "@/components/DonationsByOrg";
 import DeploymentHubs from "@/components/DeploymentHubs";
@@ -21,6 +23,9 @@ import {
   getGoodsByCategory,
   getBeneficiariesByBarangay,
   getDeploymentMapPoints,
+  getNeedsMapPoints,
+  getNeedsSummary,
+  getActiveEvent,
 } from "@/lib/queries";
 
 export function DashboardPage() {
@@ -43,6 +48,9 @@ export function DashboardPage() {
         goodsByCategory,
         barangays,
         deploymentPoints,
+        needsPoints,
+        needsSummary,
+        activeEvent,
       ] = await Promise.all([
         getTotalDonations(),
         getTotalBeneficiaries(),
@@ -52,6 +60,9 @@ export function DashboardPage() {
         getGoodsByCategory(),
         getBeneficiariesByBarangay(),
         getDeploymentMapPoints(),
+        getNeedsMapPoints(),
+        getNeedsSummary(),
+        getActiveEvent(),
       ]);
 
       const freshData: DashboardData = {
@@ -63,6 +74,9 @@ export function DashboardPage() {
         goodsByCategory,
         barangays,
         deploymentPoints,
+        needsPoints,
+        needsSummary,
+        activeEvent,
       };
 
       setData(freshData);
@@ -142,12 +156,13 @@ export function DashboardPage() {
     <div className="min-h-screen bg-base">
       <Header />
       <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+        {/* Event header */}
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-50">
-            {t("Dashboard.hero")}
+            {data.activeEvent?.name ?? t("Dashboard.hero")}
           </h1>
           <p className="mt-1 text-sm text-neutral-400">
-            {t("Dashboard.subtitle")}
+            {data.activeEvent?.description ?? t("Dashboard.subtitle")}
           </p>
           <p className="mt-2 text-sm text-neutral-400">
             {updatedAt
@@ -166,14 +181,27 @@ export function DashboardPage() {
             )}
           </p>
         </div>
-        <SummaryCards
-          totalDonations={data.totalDonations}
-          totalBeneficiaries={data.totalBeneficiaries}
-          volunteerCount={data.volunteerCount}
-          orgCount={data.donationsByOrg.length}
-          locationCount={data.barangays.length}
-          deploymentCount={totalDeployments}
-        />
+
+        {/* Primary: Needs summary */}
+        {data.needsSummary && <NeedsSummaryCards summary={data.needsSummary} />}
+
+        {/* Primary: Needs coordination map */}
+        {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}
+
+        {/* Secondary: Relief operations context */}
+        <div className="border-t border-neutral-400/10 pt-6">
+          <h2 className="mb-4 text-lg font-semibold text-neutral-400">
+            {t("Dashboard.reliefOperations")}
+          </h2>
+          <SummaryCards
+            totalDonations={data.totalDonations}
+            totalBeneficiaries={data.totalBeneficiaries}
+            volunteerCount={data.volunteerCount}
+            orgCount={data.donationsByOrg.length}
+            locationCount={data.barangays.length}
+            deploymentCount={totalDeployments}
+          />
+        </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <DonationsByOrg donations={data.donationsByOrg} />
           <DeploymentHubs hubs={data.deploymentHubs} />

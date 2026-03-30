@@ -18,10 +18,16 @@ vi.mock("@/lib/queries", () => ({
   getGoodsByCategory: vi.fn(),
   getBeneficiariesByBarangay: vi.fn(),
   getDeploymentMapPoints: vi.fn(),
+  getNeedsMapPoints: vi.fn(),
+  getNeedsSummary: vi.fn(),
+  getActiveEvent: vi.fn(),
 }));
 
 vi.mock("@/components/maps/DeploymentMap", () => ({
   default: () => <div data-testid="deployment-map" />,
+}));
+vi.mock("@/components/maps/NeedsMap", () => ({
+  default: () => <div data-testid="needs-map" />,
 }));
 
 // Mock react-i18next
@@ -38,10 +44,11 @@ vi.mock("@/lib/outbox-context", () => ({
   useOutbox: () => ({ pendingCount: 0, refreshCount: vi.fn() }),
 }));
 
-// Mock react-router (Header uses useParams/useNavigate/Link)
+// Mock react-router (Header uses useParams/useNavigate/useLocation/Link)
 vi.mock("react-router", () => ({
   useParams: () => ({ locale: "en" }),
   useNavigate: () => vi.fn(),
+  useLocation: () => ({ pathname: "/en", search: "", hash: "", state: null, key: "default" }),
   Link: ({ children, ...props }: { children: React.ReactNode; to: string; className?: string }) => (
     <a href={props.to} className={props.className}>{children}</a>
   ),
@@ -56,8 +63,19 @@ import {
   getGoodsByCategory,
   getBeneficiariesByBarangay,
   getDeploymentMapPoints,
+  getNeedsMapPoints,
+  getNeedsSummary,
+  getActiveEvent,
 } from "@/lib/queries";
 import { getCachedDashboard, setCachedDashboard } from "@/lib/cache";
+
+const emptyNeedsSummary = {
+  total: 0,
+  byStatus: { pending: 0, verified: 0, in_transit: 0, completed: 0, resolved: 0 },
+  byGap: { lunas: 0, sustenance: 0, shelter: 0 },
+  byAccess: { truck: 0, "4x4": 0, boat: 0, foot_only: 0, cut_off: 0 },
+  critical: 0,
+};
 
 const mockQueries = () => {
   vi.mocked(getTotalDonations).mockResolvedValue(500000);
@@ -79,6 +97,9 @@ const mockQueries = () => {
   vi.mocked(getDeploymentMapPoints).mockResolvedValue([
     { lat: 16.62, lng: 120.35, quantity: 200, unit: "meals", orgName: "Red Cross", categoryName: "Meals" },
   ]);
+  vi.mocked(getNeedsMapPoints).mockResolvedValue([]);
+  vi.mocked(getNeedsSummary).mockResolvedValue(emptyNeedsSummary);
+  vi.mocked(getActiveEvent).mockResolvedValue(null);
 };
 
 describe("DashboardPage", () => {
@@ -154,6 +175,9 @@ describe("DashboardPage", () => {
         deploymentPoints: [
           { lat: 16.62, lng: 120.35, quantity: 200, unit: "meals", orgName: "Red Cross", categoryName: "Meals" },
         ],
+        activeEvent: null,
+        needsPoints: [],
+        needsSummary: emptyNeedsSummary,
       },
       updatedAt: Date.now(),
     });
@@ -182,6 +206,9 @@ describe("DashboardPage", () => {
           { name: "Catbangen", municipality: "San Fernando", beneficiaries: 400 },
         ],
         deploymentPoints: [],
+        activeEvent: null,
+        needsPoints: [],
+        needsSummary: emptyNeedsSummary,
       },
       updatedAt: Date.now(),
     });
