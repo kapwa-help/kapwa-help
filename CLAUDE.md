@@ -50,3 +50,4 @@ Main repo: `r0droald/LUaid`. Feature branches (`feat/<name>`, `fix/<name>`) -> P
 - `Problem:` Supabase JS client returns nested relations as `unknown` -> `Rule:` Cast join results explicitly in query functions
 - `Problem:` PWA service worker only generated on production build -> `Rule:` Use `npm run build && npm run preview` to test offline behavior
 - `Problem:` UI changes can break silently across locales and routes -> `Rule:` Run `npm run verify` after component, page, route, or i18n changes
+- `Problem:` Untracked files (plans, docs) written before creating a worktree don't appear in the worktree -> `Rule:` Commit any files the worktree session will need *before* creating the worktree
