@@ -23,7 +23,7 @@ export default function GoodsByCategory({ categories }: Props) {
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-xl border border-neutral-400/20 bg-secondary p-6">
+    <div className="rounded-2xl border-l-[3px] border-accent bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
       <h3 className="mb-4 text-lg font-semibold text-neutral-50">
         {t("Dashboard.goodsPurchased")}
       </h3>
@@ -37,7 +37,7 @@ export default function GoodsByCategory({ categories }: Props) {
               {CATEGORY_ICONS[cat.name] || "📋"}
             </p>
             <p className="mt-1 text-sm text-neutral-400">{cat.name}</p>
-            <p className="mt-1 text-lg font-bold text-primary">
+            <p className="mt-1 text-lg font-extrabold text-primary">
               {cat.total.toLocaleString()}
             </p>
           </div>
