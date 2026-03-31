@@ -35,7 +35,6 @@ export type DashboardData = {
     contactName: string;
     barangayName: string;
     municipality: string;
-    categoryName: string;
   }[];
   needsSummary: {
     total: number;

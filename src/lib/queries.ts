@@ -122,14 +122,13 @@ export type NeedPoint = {
   contactName: string;
   barangayName: string;
   municipality: string;
-  categoryName: string;
 };
 
 export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
   const { data, error } = await supabase
     .from("submissions")
     .select(
-      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, barangays(name, municipality), aid_categories(name)"
+      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, barangays(name, municipality)"
     )
     .in("status", ["verified", "in_transit", "completed"])
     .not("lat", "is", null)
@@ -138,7 +137,6 @@ export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
   if (error) throw error;
   return data.map((row) => {
     const brgy = row.barangays as unknown as { name: string; municipality: string };
-    const cat = row.aid_categories as unknown as { name: string };
     return {
       id: row.id,
       lat: Number(row.lat),
@@ -152,7 +150,6 @@ export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
       contactName: row.contact_name,
       barangayName: brgy?.name ?? "Unknown",
       municipality: brgy?.municipality ?? "",
-      categoryName: cat?.name ?? "Unknown",
     };
   });
 }

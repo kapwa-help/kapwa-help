@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS donations (
 CREATE TABLE IF NOT EXISTS submissions (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id        uuid REFERENCES events(id),
-  type            text NOT NULL CHECK (type IN ('need', 'feedback')),
+  type            text NOT NULL CHECK (type IN ('need')),
   status          text NOT NULL DEFAULT 'pending'
                     CHECK (status IN ('pending', 'verified', 'in_transit', 'completed', 'resolved')),
   -- Contact
