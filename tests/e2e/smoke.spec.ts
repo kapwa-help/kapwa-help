@@ -120,3 +120,30 @@ test("nav links navigate between pages", async ({ page }) => {
   await expect(page).toHaveURL(/\/en\/relief$/);
   await expect(page.locator("h1")).toBeVisible();
 });
+
+test("mobile hamburger menu navigates between pages", async ({ page }) => {
+  // Set mobile viewport
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/en");
+
+  // Desktop nav should be hidden
+  await expect(page.locator("nav")).toBeHidden();
+
+  // Hamburger button should be visible
+  const menuButton = page.getByRole("button", { name: /menu/i });
+  await expect(menuButton).toBeVisible();
+
+  // Open menu and click Relief
+  await menuButton.click();
+  await page.getByTestId("mobile-nav").getByText(/relief/i).click();
+  await expect(page).toHaveURL(/\/en\/relief$/);
+
+  // Menu should close after navigation
+  await expect(page.getByTestId("mobile-nav")).toBeHidden();
+
+  // Screenshot
+  await page.screenshot({
+    path: "tests/e2e/screenshots/mobile-nav.png",
+    fullPage: true,
+  });
+});

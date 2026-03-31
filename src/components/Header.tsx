@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useLocation, Link, NavLink } from "react-router";
 import { supportedLocales, type Locale } from "../i18n";
@@ -27,60 +28,48 @@ function GlobeIcon() {
   );
 }
 
+function navLinkClass(isActive: boolean, mobile = false) {
+  return `rounded-lg px-3 ${mobile ? "py-2" : "py-1.5"} text-sm transition-colors ${
+    isActive
+      ? "bg-neutral-400/10 text-neutral-50"
+      : "text-neutral-400 hover:text-neutral-100"
+  }`;
+}
+
 export default function Header() {
   const { t } = useTranslation();
   const { locale } = useParams<{ locale: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { pendingCount } = useOutbox();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const subPath = locale ? location.pathname.replace(`/${locale}`, "") : "";
     navigate(`/${e.target.value}${subPath}`);
   };
 
+  const navItems = [
+    { to: `/${locale}`, label: t("Navigation.needs"), end: true },
+    { to: `/${locale}/relief`, label: t("Navigation.relief") },
+    { to: `/${locale}/stories`, label: t("Navigation.stories") },
+  ];
+
   return (
     <header className="bg-secondary shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link to={`/${locale}`} className="text-xl font-bold text-white hover:text-neutral-100">Kapwa Help</Link>
         <nav className="hidden items-center gap-1 sm:flex">
-          <NavLink
-            to={`/${locale}`}
-            end
-            className={({ isActive }) =>
-              `rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                isActive
-                  ? "bg-neutral-400/10 text-neutral-50"
-                  : "text-neutral-400 hover:text-neutral-100"
-              }`
-            }
-          >
-            {t("Navigation.needs")}
-          </NavLink>
-          <NavLink
-            to={`/${locale}/relief`}
-            className={({ isActive }) =>
-              `rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                isActive
-                  ? "bg-neutral-400/10 text-neutral-50"
-                  : "text-neutral-400 hover:text-neutral-100"
-              }`
-            }
-          >
-            {t("Navigation.relief")}
-          </NavLink>
-          <NavLink
-            to={`/${locale}/stories`}
-            className={({ isActive }) =>
-              `rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                isActive
-                  ? "bg-neutral-400/10 text-neutral-50"
-                  : "text-neutral-400 hover:text-neutral-100"
-              }`
-            }
-          >
-            {t("Navigation.stories")}
-          </NavLink>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => navLinkClass(isActive)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -88,6 +77,7 @@ export default function Header() {
             <select
               value={locale}
               onChange={handleLocaleChange}
+              aria-label="Language"
               className="rounded-lg border border-neutral-400/20 bg-secondary px-3 py-1.5 text-sm text-neutral-400"
             >
               {supportedLocales.map((loc) => (
@@ -108,7 +98,37 @@ export default function Header() {
               </span>
             )}
           </Link>
+          <button
+            className="text-neutral-400 hover:text-neutral-100 sm:hidden"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {menuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
+      </div>
+      <div
+        data-testid="mobile-nav"
+        className={`${menuOpen ? "flex" : "hidden"} flex-col gap-1 border-t border-neutral-400/20 px-6 py-3 sm:hidden`}
+      >
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) => navLinkClass(isActive, true)}
+          >
+            {item.label}
+          </NavLink>
+        ))}
       </div>
     </header>
   );
