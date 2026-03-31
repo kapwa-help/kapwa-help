@@ -1,13 +1,16 @@
 {
   "App": {
-    "title": "Kapwa Help",
+    "title": "Kapwa Tulong",
     "description": "Kinalawag ti Panangsaranay iti Kalamidad"
   },
   "Navigation": {
     "home": "Balay",
     "dashboard": "Dashboard ti Dashboard",
     "volunteer": "Situtulnog",
-    "report": "Ipadamag"
+    "report": "Ipadamag",
+    "needs": "Kasapulan",
+    "relief": "Operasion ti Relief",
+    "stories": "Dagiti Estoria"
   },
   "Dashboard": {
     "hero": "Koordinasion ti Tulong iti Komunidad",
@@ -61,6 +64,10 @@
     "accessCutOff": "Putden ti Off",
     "accessLabel": "Pannakaserrek",
     "familyCount": "{{count}} pamilya"
+  },
+  "Stories": {
+    "title": "Dagiti Estoria",
+    "comingSoon": "Coming soon — estoria ti komunidad, nasursuro, ken journal."
   },
   "SubmitForm": {
     "title": "Ireport ti Kasapulan",

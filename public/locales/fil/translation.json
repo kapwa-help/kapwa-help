@@ -1,13 +1,16 @@
 {
   "App": {
-    "title": "Kapwa Help",
+    "title": "Kapwa Tulong",
     "description": "Transparency sa Pagtulong sa Sakuna"
   },
   "Navigation": {
     "home": "Bahay",
     "dashboard": "Dashboard",
     "volunteer": "Magboluntaryo",
-    "report": "Ulat"
+    "report": "Ulat",
+    "needs": "Pangangailangan",
+    "relief": "Mga Relief Operations",
+    "stories": "Mga kwento"
   },
   "Dashboard": {
     "hero": "Koordinasyon ng Tulong sa Komunidad",
@@ -61,6 +64,10 @@
     "accessCutOff": "Putulin",
     "accessLabel": "Access",
     "familyCount": "{{count}} pamilya"
+  },
+  "Stories": {
+    "title": "Mga kwento",
+    "comingSoon": "Paparating na — mga kuwento ng komunidad, mga natutunan, at mga journal."
   },
   "SubmitForm": {
     "title": "Mag-ulat ng Pangangailangan",

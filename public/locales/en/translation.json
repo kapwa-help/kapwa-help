@@ -7,7 +7,10 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "volunteer": "Volunteer",
-    "report": "Report"
+    "report": "Report",
+    "needs": "Needs",
+    "relief": "Relief Operations",
+    "stories": "Stories"
   },
   "Dashboard": {
     "hero": "Community Relief Coordination",
@@ -61,6 +64,10 @@
     "accessCutOff": "Cut Off",
     "accessLabel": "Access",
     "familyCount": "{{count}} families"
+  },
+  "Stories": {
+    "title": "Stories",
+    "comingSoon": "Coming soon — community stories, learnings, and journals."
   },
   "SubmitForm": {
     "title": "Report a Need",
