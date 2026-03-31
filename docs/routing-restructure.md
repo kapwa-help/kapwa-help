@@ -1,6 +1,6 @@
 # Routing Restructure Plan
 
-**Status:** Not started — plan before implementing
+**Status:** Implemented — see docs/plans/2026-03-30-routing-restructure.md
 
 ## Decision
 
