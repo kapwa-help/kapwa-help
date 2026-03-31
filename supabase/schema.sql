@@ -54,12 +54,12 @@ CREATE TABLE IF NOT EXISTS donations (
   created_at      timestamptz DEFAULT now()
 );
 
--- Submissions: aid needs and feedback from the field
+-- Submissions: needs from the field
 -- "Needs" follow the KapwaRelief pin lifecycle (docs/scope §5.B)
 CREATE TABLE IF NOT EXISTS submissions (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id        uuid REFERENCES events(id),
-  type            text NOT NULL CHECK (type IN ('need', 'request', 'feedback')),
+  type            text NOT NULL CHECK (type IN ('need')),
   status          text NOT NULL DEFAULT 'pending'
                     CHECK (status IN ('pending', 'verified', 'in_transit', 'completed', 'resolved')),
   -- Contact
@@ -67,20 +67,16 @@ CREATE TABLE IF NOT EXISTS submissions (
   contact_phone   text,
   -- Location
   barangay_id     uuid NOT NULL REFERENCES barangays(id),
-  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
-  gap_category    text CHECK (gap_category IN ('lunas', 'sustenance', 'shelter')),
+  gap_category    text NOT NULL CHECK (gap_category IN ('lunas', 'sustenance', 'shelter')),
   lat             decimal(9,6),
   lng             decimal(9,6),
   -- Access / passability (scope §5.A)
-  access_status   text CHECK (access_status IN ('truck', '4x4', 'boat', 'foot_only', 'cut_off')),
+  access_status   text NOT NULL CHECK (access_status IN ('truck', '4x4', 'boat', 'foot_only', 'cut_off')),
   -- Need details
   quantity_needed integer,
-  urgency         text CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
+  urgency         text NOT NULL CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
   notes           text,
   photo_url       text,
-  -- Feedback fields (type='feedback' only)
-  rating          integer CHECK (rating BETWEEN 1 AND 5),
-  issue_type      text CHECK (issue_type IN ('insufficient', 'damaged', 'wrong_items', 'delayed')),
   -- Timestamps
   verified_at     timestamptz,
   completed_at    timestamptz,

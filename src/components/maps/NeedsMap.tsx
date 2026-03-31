@@ -80,7 +80,7 @@ export default function NeedsMap({ points }: Props) {
             <Popup>
               <div className="text-sm space-y-1">
                 <p className="font-semibold">{point.barangayName}, {point.municipality}</p>
-                <p>{point.categoryName} — {t(`Dashboard.urgency_${point.urgency ?? "unset"}`, point.urgency ?? t("Dashboard.unset"))}</p>
+                <p>{point.gapCategory ?? t("Dashboard.unset")} — {t(`Dashboard.urgency_${point.urgency ?? "unset"}`, point.urgency ?? t("Dashboard.unset"))}</p>
                 {point.accessStatus && (
                   <p className="text-xs">
                     {t("Dashboard.accessLabel")}: <strong>{ACCESS_KEYS[point.accessStatus] ? t(ACCESS_KEYS[point.accessStatus]) : point.accessStatus}</strong>

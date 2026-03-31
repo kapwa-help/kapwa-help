@@ -124,7 +124,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                       {need.barangayName}
                     </p>
                     <p className="text-xs text-neutral-400">
-                      {need.categoryName}
+                      {need.gapCategory ?? t("Dashboard.unset")}
                       {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
                     </p>
                   </div>

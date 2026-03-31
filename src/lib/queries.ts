@@ -122,14 +122,13 @@ export type NeedPoint = {
   contactName: string;
   barangayName: string;
   municipality: string;
-  categoryName: string;
 };
 
 export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
   const { data, error } = await supabase
     .from("submissions")
     .select(
-      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, barangays(name, municipality), aid_categories(name)"
+      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, barangays(name, municipality)"
     )
     .in("status", ["verified", "in_transit", "completed"])
     .not("lat", "is", null)
@@ -138,7 +137,6 @@ export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
   if (error) throw error;
   return data.map((row) => {
     const brgy = row.barangays as unknown as { name: string; municipality: string };
-    const cat = row.aid_categories as unknown as { name: string };
     return {
       id: row.id,
       lat: Number(row.lat),
@@ -152,7 +150,6 @@ export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
       contactName: row.contact_name,
       barangayName: brgy?.name ?? "Unknown",
       municipality: brgy?.municipality ?? "",
-      categoryName: cat?.name ?? "Unknown",
     };
   });
 }
@@ -161,7 +158,7 @@ export async function getNeedsSummary() {
   const { data, error } = await supabase
     .from("submissions")
     .select("status, gap_category, access_status, urgency")
-    .in("type", ["need", "request"]);
+    .eq("type", "need");
 
   if (error) throw error;
 
@@ -206,18 +203,15 @@ export async function getActiveEvent() {
 export interface SubmissionInsert {
   id?: string; // Client-generated UUID for idempotent sync
   event_id?: string | null;
-  type: "need" | "request" | "feedback";
+  type: "need";
   contact_name: string;
   contact_phone: string | null;
   barangay_id: string;
-  aid_category_id: string;
-  gap_category?: string | null;
-  access_status?: string | null;
+  gap_category: string;
+  access_status: string;
   notes: string | null;
   quantity_needed: number | null;
-  urgency: string | null;
-  rating: number | null;
-  issue_type: string | null;
+  urgency: string;
   lat: number | null;
   lng: number | null;
   photo_url?: string | null;

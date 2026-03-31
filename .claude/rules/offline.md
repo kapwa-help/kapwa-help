@@ -27,6 +27,6 @@ OSM tiles use Workbox CacheFirst strategy (cache name: `map-tiles`, max 200 tile
 
 ## Offline Submit Form (`src/lib/form-cache.ts` + `src/lib/outbox-context.tsx`)
 
-- Form dropdown options (barangays, aid categories) cached in IndexedDB
+- Form dropdown options (barangays) cached in IndexedDB
 - Submissions go into IndexedDB outbox queue with client-generated UUIDs (idempotent sync)
 - `OutboxProvider` context manages queue and auto-syncs on `online` event

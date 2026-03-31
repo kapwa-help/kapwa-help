@@ -42,14 +42,14 @@ for (const locale of LOCALES) {
     // Form exists
     await expect(page.locator("form")).toBeVisible();
 
-    // Type toggle buttons (request / feedback) + share location button
+    // Share location button
     const formButtons = page.locator("form button[type='button']");
     await expect(formButtons.first()).toBeVisible();
 
     // Required fields exist
     await expect(page.locator("#contact_name")).toBeVisible();
     await expect(page.locator("#barangay_id")).toBeVisible();
-    await expect(page.locator("#aid_category_id")).toBeVisible();
+    await expect(page.locator("#access_status")).toBeVisible();
 
     // Submit button
     await expect(page.locator("form button[type='submit']")).toBeVisible();
