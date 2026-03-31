@@ -38,7 +38,7 @@ Supported locales: `en`, `fil`, `ilo`
 ## Screenshots
 
 Smoke tests save full-page screenshots to `tests/e2e/screenshots/`:
-`needs-{en,fil,ilo}.png`, `relief-{en,fil,ilo}.png`, `stories-{en,fil,ilo}.png`, `submit-{en,fil,ilo}.png`
+`needs-{en,fil,ilo}.png`, `relief-{en,fil,ilo}.png`, `stories-{en,fil,ilo}.png`, `submit-{en,fil,ilo}.png`, `mobile-nav.png`
 
 ## Filtering Tests
 
@@ -49,6 +49,7 @@ npx playwright test --grep "stories"
 npx playwright test --grep "submit"
 npx playwright test --grep "locale switcher"
 npx playwright test --grep "nav links"
+npx playwright test --grep "mobile hamburger"
 ```
 
 ## Troubleshooting
