@@ -3,34 +3,21 @@ import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import NeedsSummaryCards from "@/components/NeedsSummaryCards";
 import NeedsCoordinationMap from "@/components/NeedsCoordinationMap";
-import SummaryCards from "@/components/SummaryCards";
-import DonationsByOrg from "@/components/DonationsByOrg";
-import DeploymentHubs from "@/components/DeploymentHubs";
-import GoodsByCategory from "@/components/GoodsByCategory";
-import AidDistributionMap from "@/components/AidDistributionMap";
 import StatusFooter from "@/components/StatusFooter";
 import {
-  getCachedDashboard,
-  setCachedDashboard,
-  type DashboardData,
+  getCachedNeeds,
+  setCachedNeeds,
+  type NeedsData,
 } from "@/lib/cache";
 import {
-  getTotalDonations,
-  getTotalBeneficiaries,
-  getVolunteerCount,
-  getDonationsByOrganization,
-  getDeploymentHubs,
-  getGoodsByCategory,
-  getBeneficiariesByBarangay,
-  getDeploymentMapPoints,
   getNeedsMapPoints,
   getNeedsSummary,
   getActiveEvent,
 } from "@/lib/queries";
 
-export function DashboardPage() {
+export function NeedsPage() {
   const { t } = useTranslation();
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<NeedsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
@@ -40,40 +27,16 @@ export function DashboardPage() {
   const fetchData = useCallback(async () => {
     try {
       const [
-        totalDonations,
-        totalBeneficiaries,
-        volunteerCount,
-        donationsByOrg,
-        deploymentHubs,
-        goodsByCategory,
-        barangays,
-        deploymentPoints,
         needsPoints,
         needsSummary,
         activeEvent,
       ] = await Promise.all([
-        getTotalDonations(),
-        getTotalBeneficiaries(),
-        getVolunteerCount(),
-        getDonationsByOrganization(),
-        getDeploymentHubs(),
-        getGoodsByCategory(),
-        getBeneficiariesByBarangay(),
-        getDeploymentMapPoints(),
         getNeedsMapPoints(),
         getNeedsSummary(),
         getActiveEvent(),
       ]);
 
-      const freshData: DashboardData = {
-        totalDonations,
-        totalBeneficiaries,
-        volunteerCount,
-        donationsByOrg,
-        deploymentHubs,
-        goodsByCategory,
-        barangays,
-        deploymentPoints,
+      const freshData: NeedsData = {
         needsPoints,
         needsSummary,
         activeEvent,
@@ -83,10 +46,10 @@ export function DashboardPage() {
       setUpdatedAt(new Date());
       setError(null);
       hasDataRef.current = true;
-      setCachedDashboard(freshData);
+      setCachedNeeds(freshData);
     } catch (e) {
       if (!hasDataRef.current) {
-        setError(e instanceof Error ? e.message : "Failed to load dashboard data");
+        setError(e instanceof Error ? e.message : "Failed to load needs data");
       }
       if (!navigator.onLine) {
         setIsOffline(true);
@@ -98,7 +61,7 @@ export function DashboardPage() {
 
   useEffect(() => {
     async function init() {
-      const cached = await getCachedDashboard();
+      const cached = await getCachedNeeds();
       if (cached) {
         setData(cached.data);
         setUpdatedAt(new Date(cached.updatedAt));
@@ -128,7 +91,7 @@ export function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-neutral-400">{t("Dashboard.loading")}</p>
+        <p className="text-neutral-400">{t("App.loading")}</p>
       </div>
     );
   }
@@ -136,21 +99,16 @@ export function DashboardPage() {
   if (error || !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <p className="text-error">{t("Dashboard.loadError")}</p>
+        <p className="text-error">{t("App.loadError")}</p>
         <button
           onClick={fetchData}
-          className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/80"
+          className="rounded-lg bg-primary px-4 py-2 text-sm text-neutral-50 hover:bg-primary/80"
         >
-          {t("Dashboard.retry")}
+          {t("App.retry")}
         </button>
       </div>
     );
   }
-
-  const totalDeployments = data.deploymentHubs.reduce(
-    (sum, h) => sum + h.count,
-    0
-  );
 
   return (
     <div className="min-h-screen bg-base">
@@ -196,30 +154,6 @@ export function DashboardPage() {
 
         {/* Primary: Needs coordination map */}
         {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}
-
-        {/* Secondary: Relief operations context */}
-        <div className="border-t border-neutral-400/10 pt-6">
-          <h2 className="mb-4 text-lg font-semibold text-neutral-400">
-            {t("Dashboard.reliefOperations")}
-          </h2>
-          <SummaryCards
-            totalDonations={data.totalDonations}
-            totalBeneficiaries={data.totalBeneficiaries}
-            volunteerCount={data.volunteerCount}
-            orgCount={data.donationsByOrg.length}
-            locationCount={data.barangays.length}
-            deploymentCount={totalDeployments}
-          />
-        </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <DonationsByOrg donations={data.donationsByOrg} />
-          <DeploymentHubs hubs={data.deploymentHubs} />
-          <GoodsByCategory categories={data.goodsByCategory} />
-        </div>
-        <AidDistributionMap
-          barangays={data.barangays}
-          deploymentPoints={data.deploymentPoints}
-        />
       </main>
       <StatusFooter />
     </div>

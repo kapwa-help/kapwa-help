@@ -1,13 +1,19 @@
 {
   "App": {
     "title": "Kapwa Help",
-    "description": "Disaster Relief Transparency"
+    "description": "Disaster Relief Transparency",
+    "loading": "Loading\u2026",
+    "loadError": "Failed to load data",
+    "retry": "Retry"
   },
   "Navigation": {
     "home": "Home",
     "dashboard": "Dashboard",
     "volunteer": "Volunteer",
-    "report": "Report"
+    "report": "Report",
+    "needs": "Needs",
+    "relief": "Relief Operations",
+    "stories": "Stories"
   },
   "Dashboard": {
     "hero": "Community Relief Coordination",
@@ -28,8 +34,8 @@
     "beneficiaries": "beneficiaries",
     "online": "Online",
     "lastUpdated": "Last Updated",
-    "loading": "Loading dashboard\u2026",
-    "loadError": "Failed to load dashboard data",
+    "loading": "Loading\u2026",
+    "loadError": "Failed to load data",
     "offline": "Offline",
     "retry": "Retry",
     "organizationCount": "{{count}} organizations",
@@ -61,6 +67,9 @@
     "accessCutOff": "Cut Off",
     "accessLabel": "Access",
     "familyCount": "{{count}} families"
+  },
+  "Stories": {
+    "comingSoon": "Coming soon — community stories, learnings, and journals."
   },
   "SubmitForm": {
     "title": "Report a Need",
