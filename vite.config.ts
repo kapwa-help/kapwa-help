@@ -15,10 +15,10 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "LUaid.org - Humanitarian Dashboard",
-        short_name: "LUaid",
+        name: "Kapwa Help - Disaster Relief Coordination",
+        short_name: "Kapwa Help",
         description:
-          "Disaster relief transparency and coordination for La Union, Philippines",
+          "Citizen-led disaster relief coordination for La Union, Philippines",
         start_url: "/",
         display: "standalone",
         orientation: "portrait",
