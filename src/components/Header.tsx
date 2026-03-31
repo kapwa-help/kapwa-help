@@ -59,20 +59,6 @@ export default function Header() {
     <header className="border-b border-neutral-400/20 bg-secondary">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link to={`/${locale}`} className="text-xl font-bold text-white hover:text-neutral-100">Kapwa Help</Link>
-        <button
-          className="text-neutral-400 hover:text-neutral-100 sm:hidden"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Menu"
-          aria-expanded={menuOpen}
-        >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            {menuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
         <nav className="hidden items-center gap-1 sm:flex">
           {navItems.map((item) => (
             <NavLink
@@ -112,6 +98,20 @@ export default function Header() {
               </span>
             )}
           </Link>
+          <button
+            className="text-neutral-400 hover:text-neutral-100 sm:hidden"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {menuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
       <div
