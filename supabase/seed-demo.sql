@@ -1,6 +1,6 @@
 -- seed-demo.sql — Demo data for LUaid dashboard prototype
 -- Populates donations, volunteer counts, geographic diversity, and barangays.
--- Run in the Supabase SQL Editor AFTER running migrate-to-needs.sql.
+-- Run in the Supabase SQL Editor AFTER running schema.sql.
 --
 -- Safe to run multiple times: uses WHERE NOT EXISTS guards and ON CONFLICT.
 -- To undo: DELETE FROM deployments WHERE notes = 'demo-seed';
@@ -56,11 +56,28 @@ DECLARE
 
 BEGIN
   -- ============================================================
-  -- 1. Look up existing organizations
+  -- 1. Ensure base organizations exist (idempotent via WHERE NOT EXISTS)
+  --    These were originally created by seed-kml.ts; creating them here
+  --    makes seed-demo.sql self-contained.
   -- ============================================================
-  SELECT id INTO v_citizens   FROM organizations WHERE name = 'Citizens for LU';
-  SELECT id INTO v_emerging   FROM organizations WHERE name = 'Emerging Islands';
-  SELECT id INTO v_curma      FROM organizations WHERE name = 'CURMA';
+  INSERT INTO organizations (name, type, municipality)
+    SELECT 'Citizens for LU', 'both', 'San Juan'
+    WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Citizens for LU');
+  SELECT id INTO v_citizens FROM organizations WHERE name = 'Citizens for LU';
+
+  INSERT INTO organizations (name, type, municipality)
+    SELECT 'Emerging Islands', 'hub', 'San Juan'
+    WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Emerging Islands');
+  SELECT id INTO v_emerging FROM organizations WHERE name = 'Emerging Islands';
+
+  INSERT INTO organizations (name, type, municipality)
+    SELECT 'CURMA', 'hub', 'San Juan'
+    WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'CURMA');
+  SELECT id INTO v_curma FROM organizations WHERE name = 'CURMA';
+
+  INSERT INTO organizations (name, type, municipality)
+    SELECT 'Waves4Water', 'hub', 'San Juan'
+    WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Waves4Water');
   SELECT id INTO v_waves4water FROM organizations WHERE name = 'Waves4Water';
 
   -- ============================================================

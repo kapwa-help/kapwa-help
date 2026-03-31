@@ -44,4 +44,5 @@ Key relationships: `deployments` and `submissions` both reference `events` for d
 ## Seed Data
 
 Real Typhoon Emong data in `data/` (KML exports). Seed script: `supabase/seed-kml.ts`.
-Demo data: `supabase/seed-demo.sql`. Migration script: `supabase/migrate-to-needs.sql`.
+Demo data: `supabase/seed-demo.sql` (self-contained — no dependency on seed-kml.ts).
+Deploy path: drop all tables, run `schema.sql`, then `seed-demo.sql`.
