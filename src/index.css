@@ -1,24 +1,54 @@
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/nunito";
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
 @theme inline {
-  --color-primary: #1976D2;
-  --color-secondary: #263238;
-  --color-accent: #FFC107;
+  --color-primary: #0E9AA7;
+  --color-secondary: #24282e;
+  --color-accent: #F0C456;
   --color-success: #388E3C;
   --color-warning: #FFA000;
   --color-error: #D32F2F;
   --color-neutral-50: #FFFFFF;
-  --color-neutral-100: #F5F5F5;
-  --color-neutral-400: #B0BEC5;
-  --color-base: #1a252b;
+  --color-neutral-100: #F3F0ED;
+  --color-neutral-400: #9CA3AF;
+  --color-base: #1a1d21;
 }
 
 body {
   background: var(--color-base);
   color: var(--color-neutral-50);
-  font-family: "Inter Variable", Inter, Arial, sans-serif;
+  font-family: "Nunito Variable", Nunito, Arial, sans-serif;
+}
+
+/* Faint grain texture — registers as "surface" vs "void" */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Staggered card entrance animation */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fadeSlideUp 400ms ease-out both;
+  animation-delay: var(--delay, 0ms);
 }
 
 .leaflet-popup-content-wrapper {
