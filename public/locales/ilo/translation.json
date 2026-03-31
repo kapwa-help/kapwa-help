@@ -1,7 +1,10 @@
 {
   "App": {
-    "title": "Kapwa Tulong",
-    "description": "Kinalawag ti Panangsaranay iti Kalamidad"
+    "title": "Kapwa Help",
+    "description": "Kinalawag ti Panangsaranay iti Kalamidad",
+    "loading": "Agkarkarga\u2026",
+    "loadError": "Napaay a mangikarga ti datos",
+    "retry": "Padasem manen"
   },
   "Navigation": {
     "home": "Balay",
@@ -66,7 +69,6 @@
     "familyCount": "{{count}} pamilya"
   },
   "Stories": {
-    "title": "Dagiti Estoria",
     "comingSoon": "Coming soon — estoria ti komunidad, nasursuro, ken journal."
   },
   "SubmitForm": {

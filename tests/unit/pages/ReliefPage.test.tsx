@@ -85,7 +85,7 @@ describe("ReliefPage", () => {
 
   it("shows loading state initially", () => {
     render(<ReliefPage />);
-    expect(screen.getByText("Dashboard.loading")).toBeInTheDocument();
+    expect(screen.getByText("App.loading")).toBeInTheDocument();
   });
 
   it("renders relief components after data loads", async () => {
@@ -162,10 +162,10 @@ describe("ReliefPage", () => {
     render(<ReliefPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Dashboard.loadError")).toBeInTheDocument();
+      expect(screen.getByText("App.loadError")).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("button", { name: "Dashboard.retry" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "App.retry" })).toBeInTheDocument();
   });
 
   it("shows cached data when cache exists", async () => {

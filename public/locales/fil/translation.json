@@ -1,7 +1,10 @@
 {
   "App": {
-    "title": "Kapwa Tulong",
-    "description": "Transparency sa Pagtulong sa Sakuna"
+    "title": "Kapwa Help",
+    "description": "Transparency sa Pagtulong sa Sakuna",
+    "loading": "Naglo-load\u2026",
+    "loadError": "Nabigong i-load ang data",
+    "retry": "Subukan muli"
   },
   "Navigation": {
     "home": "Bahay",
@@ -66,7 +69,6 @@
     "familyCount": "{{count}} pamilya"
   },
   "Stories": {
-    "title": "Mga kwento",
     "comingSoon": "Paparating na — mga kuwento ng komunidad, mga natutunan, at mga journal."
   },
   "SubmitForm": {

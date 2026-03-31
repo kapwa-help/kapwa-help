@@ -25,7 +25,7 @@ vi.mock("react-router", () => ({
 describe("StoriesPage", () => {
   it("renders heading and coming soon message", () => {
     render(<StoriesPage />);
-    expect(screen.getByText("Stories.title")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Navigation.stories" })).toBeInTheDocument();
     expect(screen.getByText("Stories.comingSoon")).toBeInTheDocument();
   });
 });

@@ -91,7 +91,7 @@ export function NeedsPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-neutral-400">{t("Dashboard.loading")}</p>
+        <p className="text-neutral-400">{t("App.loading")}</p>
       </div>
     );
   }
@@ -99,12 +99,12 @@ export function NeedsPage() {
   if (error || !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <p className="text-error">{t("Dashboard.loadError")}</p>
+        <p className="text-error">{t("App.loadError")}</p>
         <button
           onClick={fetchData}
-          className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/80"
+          className="rounded-lg bg-primary px-4 py-2 text-sm text-neutral-50 hover:bg-primary/80"
         >
-          {t("Dashboard.retry")}
+          {t("App.retry")}
         </button>
       </div>
     );

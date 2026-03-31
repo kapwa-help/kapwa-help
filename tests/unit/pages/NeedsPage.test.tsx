@@ -77,7 +77,7 @@ describe("NeedsPage", () => {
 
   it("shows loading state initially", () => {
     render(<NeedsPage />);
-    expect(screen.getByText("Dashboard.loading")).toBeInTheDocument();
+    expect(screen.getByText("App.loading")).toBeInTheDocument();
   });
 
   it("renders hero and needs components after data loads", async () => {
@@ -132,10 +132,10 @@ describe("NeedsPage", () => {
     render(<NeedsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Dashboard.loadError")).toBeInTheDocument();
+      expect(screen.getByText("App.loadError")).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("button", { name: "Dashboard.retry" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "App.retry" })).toBeInTheDocument();
   });
 
   it("shows cached data when cache exists", async () => {
@@ -197,6 +197,6 @@ describe("NeedsPage", () => {
       expect(screen.getByText("5")).toBeInTheDocument();
     });
 
-    expect(screen.queryByText("Dashboard.loadError")).not.toBeInTheDocument();
+    expect(screen.queryByText("App.loadError")).not.toBeInTheDocument();
   });
 });
