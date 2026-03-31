@@ -2,9 +2,6 @@ const DB_NAME = "luaid";
 const DB_VERSION = 3;
 const STORE_NAME = "dashboard";
 
-// Legacy key (kept until Task 7 removes DashboardPage)
-const CACHE_KEY = "latest";
-// New split keys
 const NEEDS_KEY = "needs";
 const RELIEF_KEY = "relief";
 
@@ -51,15 +48,10 @@ export type ReliefData = {
   }[];
 };
 
-// Kept until Task 7 removes DashboardPage
-export type DashboardData = NeedsData & ReliefData;
-
 type CachedEntry<T> = {
   data: T;
   updatedAt: number;
 };
-
-type CachedDashboard = CachedEntry<DashboardData>;
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -129,16 +121,4 @@ export function getCachedRelief(): Promise<CachedEntry<ReliefData> | null> {
 
 export function setCachedRelief(data: ReliefData): Promise<void> {
   return setCached(RELIEF_KEY, data);
-}
-
-// --- Legacy (kept until Task 7 removes DashboardPage) ---
-
-export async function getCachedDashboard(): Promise<CachedDashboard | null> {
-  return getCached<DashboardData>(CACHE_KEY);
-}
-
-export async function setCachedDashboard(
-  data: CachedDashboard["data"]
-): Promise<void> {
-  return setCached(CACHE_KEY, data);
 }
