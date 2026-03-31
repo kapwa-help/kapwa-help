@@ -1,26 +1,14 @@
 const DB_NAME = "luaid";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_NAME = "dashboard";
-const CACHE_KEY = "latest";
 
-export type DashboardData = {
-  // Existing fields
-  totalDonations: number;
-  totalBeneficiaries: number;
-  volunteerCount: number;
-  donationsByOrg: { name: string; amount: number }[];
-  deploymentHubs: { name: string; municipality: string; count: number }[];
-  goodsByCategory: { name: string; icon: string | null; total: number }[];
-  barangays: { name: string; municipality: string; beneficiaries: number }[];
-  deploymentPoints: {
-    lat: number;
-    lng: number;
-    quantity: number | null;
-    unit: string | null;
-    orgName: string;
-    categoryName: string;
-  }[];
-  // New: needs coordination
+// Legacy key (kept until Task 7 removes DashboardPage)
+const CACHE_KEY = "latest";
+// New split keys
+const NEEDS_KEY = "needs";
+const RELIEF_KEY = "relief";
+
+export type NeedsData = {
   activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
   needsPoints: {
     id: string;
@@ -45,10 +33,33 @@ export type DashboardData = {
   };
 };
 
-type CachedDashboard = {
-  data: DashboardData;
+export type ReliefData = {
+  totalDonations: number;
+  totalBeneficiaries: number;
+  volunteerCount: number;
+  donationsByOrg: { name: string; amount: number }[];
+  deploymentHubs: { name: string; municipality: string; count: number }[];
+  goodsByCategory: { name: string; icon: string | null; total: number }[];
+  barangays: { name: string; municipality: string; beneficiaries: number }[];
+  deploymentPoints: {
+    lat: number;
+    lng: number;
+    quantity: number | null;
+    unit: string | null;
+    orgName: string;
+    categoryName: string;
+  }[];
+};
+
+// Kept until Task 7 removes DashboardPage
+export type DashboardData = NeedsData & ReliefData;
+
+type CachedEntry<T> = {
+  data: T;
   updatedAt: number;
 };
+
+type CachedDashboard = CachedEntry<DashboardData>;
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -66,14 +77,16 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function getCachedDashboard(): Promise<CachedDashboard | null> {
+// --- Generic helpers ---
+
+async function getCached<T>(key: string): Promise<CachedEntry<T> | null> {
   let db: IDBDatabase | null = null;
   try {
     db = await openDB();
-    return await new Promise<CachedDashboard | null>((resolve) => {
+    return await new Promise<CachedEntry<T> | null>((resolve) => {
       const tx = db!.transaction(STORE_NAME, "readonly");
       const store = tx.objectStore(STORE_NAME);
-      const request = store.get(CACHE_KEY);
+      const request = store.get(key);
       request.onsuccess = () => resolve(request.result ?? null);
       request.onerror = () => resolve(null);
     });
@@ -84,18 +97,48 @@ export async function getCachedDashboard(): Promise<CachedDashboard | null> {
   }
 }
 
-export async function setCachedDashboard(
-  data: CachedDashboard["data"]
-): Promise<void> {
+async function setCached<T>(key: string, data: T): Promise<void> {
   let db: IDBDatabase | null = null;
   try {
     db = await openDB();
     const tx = db.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
-    store.put({ data, updatedAt: Date.now() } satisfies CachedDashboard, CACHE_KEY);
+    store.put({ data, updatedAt: Date.now() } satisfies CachedEntry<T>, key);
   } catch {
     // Cache write failure is non-critical — silently ignore
   } finally {
     db?.close();
   }
+}
+
+// --- Needs cache ---
+
+export function getCachedNeeds(): Promise<CachedEntry<NeedsData> | null> {
+  return getCached<NeedsData>(NEEDS_KEY);
+}
+
+export function setCachedNeeds(data: NeedsData): Promise<void> {
+  return setCached(NEEDS_KEY, data);
+}
+
+// --- Relief cache ---
+
+export function getCachedRelief(): Promise<CachedEntry<ReliefData> | null> {
+  return getCached<ReliefData>(RELIEF_KEY);
+}
+
+export function setCachedRelief(data: ReliefData): Promise<void> {
+  return setCached(RELIEF_KEY, data);
+}
+
+// --- Legacy (kept until Task 7 removes DashboardPage) ---
+
+export async function getCachedDashboard(): Promise<CachedDashboard | null> {
+  return getCached<DashboardData>(CACHE_KEY);
+}
+
+export async function setCachedDashboard(
+  data: CachedDashboard["data"]
+): Promise<void> {
+  return setCached(CACHE_KEY, data);
 }
