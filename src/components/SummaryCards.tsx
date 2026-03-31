@@ -35,14 +35,14 @@ export default function SummaryCards({
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <div className="animate-fade-slide-up rounded-2xl border-l-[3px] border-success bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_2px_6px_rgba(0,0,0,0.4),0_8px_20px_rgba(0,0,0,0.2)]" style={{ "--delay": "0ms" } as React.CSSProperties}>
+      <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
             {t("Dashboard.totalDonations")}
           </p>
           <TrendIcon />
         </div>
-        <p className="mt-2 text-3xl font-extrabold text-success">
+        <p className="mt-2 text-3xl font-bold text-success">
           ₱{totalDonations.toLocaleString()}
         </p>
         <p className="mt-1 text-xs text-neutral-400">
@@ -50,14 +50,14 @@ export default function SummaryCards({
         </p>
       </div>
 
-      <div className="animate-fade-slide-up rounded-2xl border-l-[3px] border-primary bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_2px_6px_rgba(0,0,0,0.4),0_8px_20px_rgba(0,0,0,0.2)]" style={{ "--delay": "60ms" } as React.CSSProperties}>
+      <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
             {t("Dashboard.totalBeneficiaries")}
           </p>
           <TrendIcon />
         </div>
-        <p className="mt-2 text-3xl font-extrabold text-neutral-50">
+        <p className="mt-2 text-3xl font-bold text-neutral-50">
           {totalBeneficiaries.toLocaleString()}
         </p>
         <p className="mt-1 text-xs text-neutral-400">
@@ -65,11 +65,11 @@ export default function SummaryCards({
         </p>
       </div>
 
-      <div className="animate-fade-slide-up rounded-2xl border-l-[3px] border-primary bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_2px_6px_rgba(0,0,0,0.4),0_8px_20px_rgba(0,0,0,0.2)]" style={{ "--delay": "120ms" } as React.CSSProperties}>
+      <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
         <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
           {t("Dashboard.volunteerCount")}
         </p>
-        <p className="mt-2 text-3xl font-extrabold text-neutral-50">
+        <p className="mt-2 text-3xl font-bold text-neutral-50">
           {volunteerCount.toLocaleString()}
         </p>
         <p className="mt-1 text-xs text-neutral-400">

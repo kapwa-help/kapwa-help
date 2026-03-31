@@ -25,7 +25,7 @@ export default function AidDistributionMap({
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-2xl border-l-[3px] border-success bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+    <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-neutral-50">
           {t("Dashboard.aidDistributionMap")}

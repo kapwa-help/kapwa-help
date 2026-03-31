@@ -34,13 +34,14 @@ Single dark theme. Dark `bg-base` background with `bg-secondary` card surfaces.
 
 ## Common Patterns
 
-- **Cards:** `rounded-2xl bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]` with colored `border-l-[3px]` accent bars and `.animate-fade-slide-up` entrance animation
+- **Cards (default):** `rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]`
+- **Cards (status-coded, Needs page only):** `rounded-2xl border-l-2 border-{status} bg-secondary p-5 shadow-[...]` — use colored left accent only when the color encodes a meaningful status (e.g., error=active, warning=transit, success=fulfilled)
 - **Buttons:** `bg-primary hover:bg-primary/80 text-neutral-50 rounded-lg px-4 py-2`
 - **Opacity variants:** Use `/` syntax — `text-neutral-400/60`, `border-neutral-400/20`, `bg-error/20`
 
 ## Font
 
-Nunito Variable loaded locally via `@fontsource-variable/nunito` (no CDN — offline-first). Rounded terminals give approachable personality. Weight 800 for metric/KPI numbers (signature element).
+Nunito Variable loaded locally via `@fontsource-variable/nunito` (no CDN — offline-first). Rounded terminals give approachable personality. Weight 700 (bold) for metric/KPI numbers.
 
 ## Leaflet Override
 
