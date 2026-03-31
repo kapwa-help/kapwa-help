@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import Header from "@/components/Header";
 
@@ -75,15 +75,50 @@ describe("Header", () => {
 
   it("renders navigation links for needs, relief, and stories", () => {
     renderHeader();
-    expect(screen.getByRole("link", { name: "Navigation.needs" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Navigation.relief" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Navigation.stories" })).toBeInTheDocument();
+    // Each link appears twice (desktop nav + mobile nav)
+    expect(screen.getAllByRole("link", { name: "Navigation.needs" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Navigation.relief" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Navigation.stories" })).toHaveLength(2);
   });
 
   it("navigation links point to locale-prefixed routes", () => {
     renderHeader();
-    expect(screen.getByRole("link", { name: "Navigation.needs" })).toHaveAttribute("href", "/en");
-    expect(screen.getByRole("link", { name: "Navigation.relief" })).toHaveAttribute("href", "/en/relief");
-    expect(screen.getByRole("link", { name: "Navigation.stories" })).toHaveAttribute("href", "/en/stories");
+    // Check the desktop nav links (first of each pair)
+    expect(screen.getAllByRole("link", { name: "Navigation.needs" })[0]).toHaveAttribute("href", "/en");
+    expect(screen.getAllByRole("link", { name: "Navigation.relief" })[0]).toHaveAttribute("href", "/en/relief");
+    expect(screen.getAllByRole("link", { name: "Navigation.stories" })[0]).toHaveAttribute("href", "/en/stories");
+  });
+
+  it("renders a hamburger menu button on mobile", () => {
+    renderHeader();
+    const menuButton = screen.getByRole("button", { name: /menu/i });
+    expect(menuButton).toBeInTheDocument();
+  });
+
+  it("toggles mobile nav when hamburger is clicked", () => {
+    renderHeader();
+    const menuButton = screen.getByRole("button", { name: /menu/i });
+
+    // Mobile nav should be hidden initially
+    const mobileNav = screen.getByTestId("mobile-nav");
+    expect(mobileNav).toHaveClass("hidden");
+
+    // Click to open
+    fireEvent.click(menuButton);
+    expect(mobileNav).not.toHaveClass("hidden");
+
+    // Click to close
+    fireEvent.click(menuButton);
+    expect(mobileNav).toHaveClass("hidden");
+  });
+
+  it("mobile nav contains all navigation links", () => {
+    renderHeader();
+    const menuButton = screen.getByRole("button", { name: /menu/i });
+    fireEvent.click(menuButton);
+
+    const mobileNav = screen.getByTestId("mobile-nav");
+    const links = mobileNav.querySelectorAll("a");
+    expect(links).toHaveLength(3);
   });
 });
