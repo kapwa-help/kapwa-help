@@ -28,8 +28,8 @@ npm run verify:headed   # Headed — watch in browser
 
 | Route | Page | Key Elements |
 |-------|------|-------------|
-| `/:locale` | Dashboard | Header, `<h1>`, locale `<select>`, summary cards |
-| `/:locale/submit` | Submit Form | Header, `<h1>`, `<form>`, type toggle, required fields |
+| `/:locale` | Dashboard | Header (`Kapwa Help`), `<h1>`, locale `<select>`, summary cards |
+| `/:locale/submit` | Submit Form | Header, `<h1>`, `<form>`, required fields (contact, barangay, gap category, access, urgency) |
 
 Supported locales: `en`, `fil`, `ilo`
 

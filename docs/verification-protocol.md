@@ -15,8 +15,8 @@ All 9 smoke tests should pass. Any failure means a UI regression.
 
 | Route | Page | Key Elements |
 |-------|------|-------------|
-| `/:locale` | Dashboard | Header (`LUaid.org`), `<h1>`, locale `<select>`, summary cards |
-| `/:locale/submit` | Submit Form | Header, `<h1>`, `<form>`, type toggle buttons, required fields (`#contact_name`, `#barangay_id`, `#aid_category_id`), submit button |
+| `/:locale` | Dashboard | Header (`Kapwa Help`), `<h1>`, locale `<select>`, summary cards |
+| `/:locale/submit` | Submit Form | Header, `<h1>`, `<form>`, required fields (`#contact_name`, `#barangay_id`, `gap_category` radios, `access_status` dropdown, `urgency`), submit button |
 
 Supported locales: `en`, `fil`, `ilo`
 

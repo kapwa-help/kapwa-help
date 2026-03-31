@@ -33,7 +33,7 @@ function renderHeader(locale = "en") {
 describe("Header", () => {
   it("renders logo, language switcher, and volunteer button", () => {
     renderHeader();
-    expect(screen.getByText("LUaid")).toBeInTheDocument();
+    expect(screen.getByText("Kapwa Help")).toBeInTheDocument();
     const reportLink = screen.getByRole("link", { name: "Navigation.report" });
     expect(reportLink).toBeInTheDocument();
     expect(reportLink).toHaveAttribute("href", "/en/submit");

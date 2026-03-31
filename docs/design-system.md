@@ -1,6 +1,6 @@
 # Design System
 
-Production reference for LUaid's implemented design tokens and styling patterns. Source of truth is `src/index.css`.
+Production reference for Kapwa Help's implemented design tokens and styling patterns. Source of truth is `src/index.css`.
 
 ## Typography
 

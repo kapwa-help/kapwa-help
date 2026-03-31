@@ -36,7 +36,7 @@ All primary keys are UUIDs — designed for future offline sync with collision-f
 - `aid_categories` — 7 pre-seeded aid types
 - `barangays` — geographic aggregation
 - `donations` — monetary contributions
-- `submissions` — needs and feedback from the field. Needs follow pin lifecycle: `pending→verified→in_transit→completed→resolved`. Required fields: `gap_category` NOT NULL (lunas/sustenance/shelter), `access_status` NOT NULL (truck/4x4/boat/foot_only/cut_off), `urgency` NOT NULL (low/medium/high/critical)
+- `submissions` — needs from the field. Follow pin lifecycle: `pending→verified→in_transit→completed→resolved`. Required fields: `gap_category` NOT NULL (lunas/sustenance/shelter), `access_status` NOT NULL (truck/4x4/boat/foot_only/cut_off), `urgency` NOT NULL (low/medium/high/critical)
 - `deployments` — aid delivery events, optionally linked to a specific need via `submission_id`
 
 Key relationships: `deployments` and `submissions` both reference `events` for disaster scoping. `deployments.submission_id` links a relief action to the specific need it fulfills.

@@ -2,7 +2,7 @@
 
 ## System Overview
 
-LUaid is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the entire app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with room to grow into real-time updates and CMS integration.
+Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the entire app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with room to grow into real-time updates and CMS integration.
 
 ```
 ┌─────────────────────┐   client fetch    ┌──────────────┐
@@ -51,7 +51,7 @@ organizations ──→ donations
 | `aid_categories` | Lookup table for aid types | name, icon (7 dashboard + 3 gap categories) |
 | `barangays` | Geographic aggregation | name, municipality, lat/lng, population |
 | `donations` | Monetary contributions | organization_id, amount, date |
-| `submissions` | Needs, aid requests, and field feedback | event_id, type (need/request/feedback), status (pending→verified→in_transit→completed→resolved), gap_category (lunas/sustenance/shelter), access_status, contact info |
+| `submissions` | Needs from the field | event_id, type (need), status (pending→verified→in_transit→completed→resolved), gap_category (lunas/sustenance/shelter), access_status, urgency, contact info |
 | `deployments` | Relief actions (aid delivery events) | event_id, organization_id, submission_id (optional), aid_category_id, quantity, lat/lng, date |
 
 All primary keys are UUIDs — designed for future offline sync where multiple devices need collision-free IDs.
@@ -76,8 +76,8 @@ Full SQL schema: `supabase/schema.sql`
 | `getNeedsSummary()` | Aggregated counts by status, gap category, access, and critical urgency |
 | `getActiveEvent()` | Current active disaster event (single) |
 | `getBarangays()` | All barangays ordered by name (for form dropdowns) |
-| `getAidCategories()` | All aid categories ordered by name (for form dropdowns) |
-| `insertSubmission(data)` | Inserts a need, aid request, or feedback submission |
+| `getAidCategories()` | All aid categories ordered by name (used by deployment queries, not the submit form) |
+| `insertSubmission(data)` | Inserts a need submission |
 
 ## Seed Data
 
@@ -94,7 +94,7 @@ Real deployment data from Typhoon Emong relief operations is stored in `data/Emo
 | PWA | vite-plugin-pwa (Workbox GenerateSW) | Precaches entire shell, navigateFallback to index.html, runtime caching for API |
 | Primary keys | UUIDs | Collision-free IDs for future offline sync from multiple devices |
 | Schema design | Needs-first, event-scoped | Events scope all data to a disaster. Submissions (needs) are the primary entity with pin lifecycle. Deployments are relief actions that fulfill needs |
-| Data entry | Submit form + Supabase table editor | Field-facing submit form (needs + aid requests + feedback) with offline outbox; table editor for admin bulk entry |
+| Data entry | Submit form + Supabase table editor | Field-facing needs submission form with offline outbox; table editor for admin bulk entry |
 
 ## Internationalization
 
@@ -109,7 +109,7 @@ The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
 - **Offline indicator**: The hero section shows "Last Updated: [timestamp]" and appends "· Offline" when `navigator.onLine` is false.
 - **Auto-refresh**: When the browser regains connectivity (`online` event), the dashboard automatically re-fetches.
 - **Map tiles** (`vite.config.ts` runtimeCaching): OSM tiles use CacheFirst strategy (cache name: `map-tiles`, max 200 tiles, 30-day expiry). When tiles fail to load, `DeploymentMap` shows a fallback overlay after 3 consecutive `tileerror` events; the overlay clears automatically when tiles load again.
-- **Offline submit form** (`src/lib/form-cache.ts` + `src/lib/outbox-context.tsx`): Form dropdown options (barangays, aid categories) are cached in IndexedDB so the submit form works fully offline. Submissions go into an IndexedDB outbox queue with client-generated UUIDs for idempotent sync. A React context (`OutboxProvider`) manages the queue and auto-syncs pending submissions when the browser fires an `online` event.
+- **Offline submit form** (`src/lib/form-cache.ts` + `src/lib/outbox-context.tsx`): Form dropdown options (barangays) are cached in IndexedDB so the submit form works fully offline. Submissions go into an IndexedDB outbox queue with client-generated UUIDs for idempotent sync. A React context (`OutboxProvider`) manages the queue and auto-syncs pending submissions when the browser fires an `online` event.
 - **Future**: Per-query caching can be added when additional pages (barangay triage board) need to share cached query results.
 
 ## What's Built vs Planned
@@ -128,10 +128,10 @@ The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
 - Interactive Leaflet maps (NeedsMap for needs pins, DeploymentMap for deployment markers)
 - Offline dashboard caching (#10) — IndexedDB stale-while-revalidate with auto-refresh
 - Offline map tile caching (#37) — Workbox CacheFirst for OSM tiles with fallback overlay
-- Submit form page with need / aid request / feedback toggle, gap category, and access status
+- Submit form page — single-purpose "Report a Need" with gap category, access status, and urgency
 - Offline submit form (#10) — IndexedDB outbox queue, dropdown caching, auto-sync on reconnect
 - Events table for disaster operation scoping
-- Submissions table with needs lifecycle (pending→verified→in_transit→completed→resolved) and anon INSERT + SELECT RLS policies
+- Submissions table (needs-only) with lifecycle (pending→verified→in_transit→completed→resolved) and anon INSERT + SELECT RLS policies
 
 **Planned (see GitHub Issues):**
 - Barangay triage (#15) — status board reading from submissions table

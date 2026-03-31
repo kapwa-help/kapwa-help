@@ -1,8 +1,8 @@
-# CLAUDE.md — LUaid.org
+# CLAUDE.md — Kapwa Help
 
 ## Overview
 
-Open-source PWA for disaster relief coordination in La Union, Philippines. Needs-first: field reporters submit needs (with gap category, access status, urgency), coordinators triage via map pins with lifecycle tracking (pending→verified→in_transit→completed→resolved). Also tracks donations, volunteer deployments, and aid distribution. Offline-first for low-connectivity disaster zones.
+Open-source PWA for disaster relief coordination in La Union, Philippines. Needs-first: field reporters submit needs (with gap category, access status, urgency), coordinators triage via map pins with lifecycle tracking (pending→verified→in_transit→completed→resolved). Dashboard also shows donations, volunteer deployments, and aid distribution. Offline-first for low-connectivity disaster zones.
 
 ## Architecture
 

@@ -9,7 +9,7 @@ for (const locale of LOCALES) {
     await page.goto(`/${locale}`);
 
     // Header brand
-    await expect(page.locator("text=LUaid.org")).toBeVisible();
+    await expect(page.locator("text=Kapwa Help")).toBeVisible();
 
     // Locale switcher shows correct value
     const select = page.locator("header select");
@@ -34,7 +34,7 @@ for (const locale of LOCALES) {
     await page.goto(`/${locale}/submit`);
 
     // Header brand
-    await expect(page.locator("text=LUaid.org")).toBeVisible();
+    await expect(page.locator("text=Kapwa Help")).toBeVisible();
 
     // Page heading
     await expect(page.locator("h1")).toBeVisible();
