@@ -72,4 +72,18 @@ describe("Header", () => {
     const reportLink = screen.getByRole("link", { name: "Navigation.report" });
     expect(reportLink.querySelector("span")).toBeNull();
   });
+
+  it("renders navigation links for needs, relief, and stories", () => {
+    renderHeader();
+    expect(screen.getByRole("link", { name: "Navigation.needs" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Navigation.relief" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Navigation.stories" })).toBeInTheDocument();
+  });
+
+  it("navigation links point to locale-prefixed routes", () => {
+    renderHeader();
+    expect(screen.getByRole("link", { name: "Navigation.needs" })).toHaveAttribute("href", "/en");
+    expect(screen.getByRole("link", { name: "Navigation.relief" })).toHaveAttribute("href", "/en/relief");
+    expect(screen.getByRole("link", { name: "Navigation.stories" })).toHaveAttribute("href", "/en/stories");
+  });
 });

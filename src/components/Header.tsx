@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams, useLocation, Link } from "react-router";
+import { useNavigate, useParams, useLocation, Link, NavLink } from "react-router";
 import { supportedLocales, type Locale } from "../i18n";
 import { useOutbox } from "@/lib/outbox-context";
 
@@ -43,6 +43,45 @@ export default function Header() {
     <header className="border-b border-neutral-400/20 bg-secondary">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link to={`/${locale}`} className="text-xl font-bold text-white hover:text-neutral-100">Kapwa Help</Link>
+        <nav className="hidden items-center gap-1 sm:flex">
+          <NavLink
+            to={`/${locale}`}
+            end
+            className={({ isActive }) =>
+              `rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                isActive
+                  ? "bg-neutral-400/10 text-neutral-50"
+                  : "text-neutral-400 hover:text-neutral-100"
+              }`
+            }
+          >
+            {t("Navigation.needs")}
+          </NavLink>
+          <NavLink
+            to={`/${locale}/relief`}
+            className={({ isActive }) =>
+              `rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                isActive
+                  ? "bg-neutral-400/10 text-neutral-50"
+                  : "text-neutral-400 hover:text-neutral-100"
+              }`
+            }
+          >
+            {t("Navigation.relief")}
+          </NavLink>
+          <NavLink
+            to={`/${locale}/stories`}
+            className={({ isActive }) =>
+              `rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                isActive
+                  ? "bg-neutral-400/10 text-neutral-50"
+                  : "text-neutral-400 hover:text-neutral-100"
+              }`
+            }
+          >
+            {t("Navigation.stories")}
+          </NavLink>
+        </nav>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <GlobeIcon />

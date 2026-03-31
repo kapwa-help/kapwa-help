@@ -47,6 +47,9 @@ vi.mock("react-router", () => ({
   Link: ({ children, ...props }: { children: React.ReactNode; to: string; className?: string }) => (
     <a href={props.to} className={props.className}>{children}</a>
   ),
+  NavLink: ({ children, ...props }: { children: React.ReactNode; to: string; className?: string | Function }) => (
+    <a href={props.to} className={typeof props.className === "function" ? "" : props.className}>{children}</a>
+  ),
 }));
 
 import {
