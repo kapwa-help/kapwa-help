@@ -85,15 +85,15 @@ BEGIN
   -- ============================================================
   INSERT INTO events (name, slug, description, region, started_at, is_active)
     VALUES (
-      'Typhoon Emong Relief',
-      'typhoon-emong-2024',
-      'Category 4 typhoon making landfall in La Union, November 2024',
+      'La Union Relief Operations',
+      'la-union-relief',
+      'Citizen-led disaster coordination for La Union, Philippines',
       'La Union',
       '2024-11-10',
       true
     )
     ON CONFLICT (slug) DO NOTHING;
-  SELECT id INTO v_event FROM events WHERE slug = 'typhoon-emong-2024';
+  SELECT id INTO v_event FROM events WHERE slug = 'la-union-relief';
 
   -- ============================================================
   -- 2. Look up existing aid categories

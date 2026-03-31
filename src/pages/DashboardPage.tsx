@@ -156,14 +156,23 @@ export function DashboardPage() {
     <div className="min-h-screen bg-base">
       <Header />
       <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
-        {/* Event header */}
+        {/* Site identity */}
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-50">
-            {data.activeEvent?.name ?? t("Dashboard.hero")}
+            {t("Dashboard.hero")}
           </h1>
           <p className="mt-1 text-sm text-neutral-400">
-            {data.activeEvent?.description ?? t("Dashboard.subtitle")}
+            {t("Dashboard.subtitle")}
           </p>
+
+          {/* Active event banner */}
+          {data.activeEvent && (
+            <p className="mt-3 text-sm text-neutral-400">
+              <span>{t("Dashboard.activeEvent")}</span>{" "}
+              <span className="font-medium text-accent">{data.activeEvent.name}</span>
+            </p>
+          )}
+
           <p className="mt-2 text-sm text-neutral-400">
             {updatedAt
               ? `${t("Dashboard.lastUpdated")}: ${updatedAt.toLocaleString("en-PH", {

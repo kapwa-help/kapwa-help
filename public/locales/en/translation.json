@@ -10,8 +10,9 @@
     "report": "Report"
   },
   "Dashboard": {
-    "hero": "Disaster Relief Transparency",
-    "subtitle": "Real-time tracking of humanitarian aid distribution",
+    "hero": "Community Relief Coordination",
+    "subtitle": "Citizen-led disaster response for La Union, Philippines",
+    "activeEvent": "Currently responding to:",
     "totalDonations": "Total Donations",
     "totalBeneficiaries": "Total Beneficiaries",
     "volunteerCount": "Volunteer Count",

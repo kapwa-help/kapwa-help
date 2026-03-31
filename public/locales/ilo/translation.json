@@ -10,8 +10,9 @@
     "report": "Ipadamag"
   },
   "Dashboard": {
-    "hero": "Kinalawag ti Panangsaranay iti Kalamidad",
-    "subtitle": "Real-time a panangsurot iti pannakaiwaras ti natauan a tulong",
+    "hero": "Koordinasion ti Tulong iti Komunidad",
+    "subtitle": "Sungbat dagiti umili iti kalamidad para iti La Union, Pilipinas",
+    "activeEvent": "Agdama a tumutulnog iti:",
     "totalDonations": "Dagup a Donasion",
     "totalBeneficiaries": "Dagup dagiti Benepisiario",
     "volunteerCount": "Bilang ti Boluntario",

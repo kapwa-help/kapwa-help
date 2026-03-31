@@ -10,8 +10,9 @@
     "report": "Ulat"
   },
   "Dashboard": {
-    "hero": "Transparency sa Pagtulong sa Sakuna",
-    "subtitle": "Real-time na pagsubaybay sa pamamahagi ng humanitarian aid",
+    "hero": "Koordinasyon ng Tulong sa Komunidad",
+    "subtitle": "Citizen-led na pagtugon sa sakuna para sa La Union, Pilipinas",
+    "activeEvent": "Kasalukuyang tumutugon sa:",
     "totalDonations": "Kabuuang mga Donasyon",
     "totalBeneficiaries": "Kabuuang Mga Benepisyaryo",
     "volunteerCount": "Bilang ng boluntaryo",
