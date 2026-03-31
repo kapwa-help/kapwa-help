@@ -20,7 +20,7 @@ Run `npm run verify` after changing:
 ## Commands
 
 ```bash
-npm run verify          # Headless — all 9 smoke tests
+npm run verify          # Headless — all smoke tests
 npm run verify:headed   # Headed — watch in browser
 ```
 
@@ -28,22 +28,27 @@ npm run verify:headed   # Headed — watch in browser
 
 | Route | Page | Key Elements |
 |-------|------|-------------|
-| `/:locale` | Dashboard | Header (`Kapwa Help`), `<h1>`, locale `<select>`, summary cards |
-| `/:locale/submit` | Submit Form | Header, `<h1>`, `<form>`, required fields (contact, barangay, gap category, access, urgency) |
+| `/:locale` | Needs | Header (`Kapwa Help`), `<h1>`, locale `<select>`, `<nav>` |
+| `/:locale/relief` | Relief | Header, `<h1>` |
+| `/:locale/stories` | Stories | Header, `<h1>` |
+| `/:locale/submit` | Submit Form | Header, `<h1>`, `<form>`, required fields (contact, barangay, access) |
 
 Supported locales: `en`, `fil`, `ilo`
 
 ## Screenshots
 
 Smoke tests save full-page screenshots to `tests/e2e/screenshots/`:
-`dashboard-{en,fil,ilo}.png`, `submit-{en,fil,ilo}.png`
+`needs-{en,fil,ilo}.png`, `relief-{en,fil,ilo}.png`, `stories-{en,fil,ilo}.png`, `submit-{en,fil,ilo}.png`
 
 ## Filtering Tests
 
 ```bash
-npx playwright test --grep "dashboard"
+npx playwright test --grep "needs"
+npx playwright test --grep "relief"
+npx playwright test --grep "stories"
 npx playwright test --grep "submit"
 npx playwright test --grep "locale switcher"
+npx playwright test --grep "nav links"
 ```
 
 ## Troubleshooting
