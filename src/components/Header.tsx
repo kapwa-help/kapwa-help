@@ -40,7 +40,7 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-neutral-400/20 bg-secondary">
+    <header className="bg-secondary shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link to={`/${locale}`} className="text-xl font-bold text-white hover:text-neutral-100">Kapwa Help</Link>
         <nav className="hidden items-center gap-1 sm:flex">
@@ -99,7 +99,7 @@ export default function Header() {
           </div>
           <Link
             to={`/${locale}/submit`}
-            className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary/80"
+            className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200"
           >
             {t("Navigation.report")}
             {pendingCount > 0 && (

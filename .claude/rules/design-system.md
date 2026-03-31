@@ -17,16 +17,16 @@ Source of truth: `src/index.css` via Tailwind v4 `@theme inline`.
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `primary` | `#1976D2` | Buttons, links, navigation highlights |
-| `secondary` | `#263238` | Card backgrounds |
-| `accent` | `#FFC107` | Highlights, status indicators |
+| `primary` | `#0E9AA7` | Buttons, links, navigation highlights (warm teal) |
+| `secondary` | `#24282e` | Card backgrounds (warm slate) |
+| `accent` | `#F0C456` | Highlights, status indicators (soft gold) |
 | `success` | `#388E3C` | Positive values, online status, monetary amounts |
 | `warning` | `#FFA000` | Caution states |
 | `error` | `#D32F2F` | Errors, map markers |
 | `neutral-50` | `#FFFFFF` | Primary text (headings, values) |
-| `neutral-100` | `#F5F5F5` | Secondary text |
-| `neutral-400` | `#B0BEC5` | Muted text, borders, labels |
-| `base` | `#1a252b` | Page background |
+| `neutral-100` | `#F3F0ED` | Secondary text (warm off-white) |
+| `neutral-400` | `#9CA3AF` | Muted text, borders, labels (true gray) |
+| `base` | `#1a1d21` | Page background (warm ink) |
 
 ## Theme
 
@@ -34,13 +34,13 @@ Single dark theme. Dark `bg-base` background with `bg-secondary` card surfaces.
 
 ## Common Patterns
 
-- **Cards:** `rounded-xl border border-neutral-400/20 bg-secondary p-6`
+- **Cards:** `rounded-2xl bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]` with colored `border-l-[3px]` accent bars and `.animate-fade-slide-up` entrance animation
 - **Buttons:** `bg-primary hover:bg-primary/80 text-neutral-50 rounded-lg px-4 py-2`
 - **Opacity variants:** Use `/` syntax — `text-neutral-400/60`, `border-neutral-400/20`, `bg-error/20`
 
 ## Font
 
-Inter Variable loaded locally via `@fontsource-variable/inter` (no CDN — offline-first).
+Nunito Variable loaded locally via `@fontsource-variable/nunito` (no CDN — offline-first). Rounded terminals give approachable personality. Weight 800 for metric/KPI numbers (signature element).
 
 ## Leaflet Override
 

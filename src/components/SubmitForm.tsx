@@ -210,7 +210,7 @@ export default function SubmitForm() {
           name="contact_name"
           type="text"
           required
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.contactNamePlaceholder")}
         />
       </div>
@@ -224,7 +224,7 @@ export default function SubmitForm() {
           id="contact_phone"
           name="contact_phone"
           type="tel"
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.contactPhonePlaceholder")}
         />
       </div>
@@ -239,7 +239,7 @@ export default function SubmitForm() {
           name="barangay_id"
           required
           disabled={loading}
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
         >
           <option value="">
             {loading ? t("SubmitForm.loadingOptions") : t("SubmitForm.barangayPlaceholder")}
@@ -267,7 +267,7 @@ export default function SubmitForm() {
                 required
                 className="peer sr-only"
               />
-              <span className="block rounded-lg border border-neutral-400/20 bg-base px-2 py-2 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
+              <span className="block rounded-xl border border-neutral-400/20 bg-base px-2 py-3 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
                 {t(`SubmitForm.gap_${gap}`)}
               </span>
             </label>
@@ -284,7 +284,7 @@ export default function SubmitForm() {
           id="access_status"
           name="access_status"
           required
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <option value="">{t("SubmitForm.accessPlaceholder")}</option>
           <option value="truck">{t("SubmitForm.accessTruck")}</option>
@@ -310,7 +310,7 @@ export default function SubmitForm() {
                 required
                 className="peer sr-only"
               />
-              <span className="block rounded-lg border border-neutral-400/20 bg-base px-2 py-2 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
+              <span className="block rounded-xl border border-neutral-400/20 bg-base px-2 py-3 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
                 {t(`SubmitForm.urgency${level.charAt(0).toUpperCase() + level.slice(1)}`)}
               </span>
             </label>
@@ -328,7 +328,7 @@ export default function SubmitForm() {
           name="quantity_needed"
           type="number"
           min="1"
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.quantityPlaceholder")}
         />
       </div>
@@ -343,7 +343,7 @@ export default function SubmitForm() {
           <button
             type="button"
             onClick={requestLocation}
-            className="rounded-lg border border-neutral-400/20 bg-base px-4 py-2.5 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+            className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
           >
             {t("SubmitForm.shareLocation")}
           </button>
@@ -359,7 +359,7 @@ export default function SubmitForm() {
           id="notes"
           name="notes"
           rows={3}
-          className="mt-1 w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.notesPlaceholder")}
         />
       </div>
@@ -371,7 +371,7 @@ export default function SubmitForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80 disabled:opacity-50"
+        className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-neutral-50 shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200 disabled:opacity-50"
       >
         {submitting ? t("SubmitForm.submitting") : t("SubmitForm.submit")}
       </button>
