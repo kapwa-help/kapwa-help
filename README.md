@@ -1,10 +1,10 @@
-# LUaid.org
+# kapwahelp.org
 
 **Open-source disaster relief operations for La Union, Philippines.**
 
-When Typhoon Emong hit La Union in 2025, volunteers self-organized across municipalities to distribute meals, relief goods, drinking water, and medical supplies. Coordination happened over group chats. Tracking happened in spreadsheets — when it happened at all. LUaid was born out of that experience: a transparency and coordination tool built by the people who were on the ground, designed so the next disaster response starts where this one left off.
+When Typhoon Emong hit La Union in 2025, volunteers self-organized across municipalities to distribute meals, relief goods, drinking water, and medical supplies. Coordination happened over group chats. Tracking happened in spreadsheets — when it happened at all. Kapwa Help was born out of that experience: a transparency and coordination tool built by the people who were on the ground, designed so the next disaster response starts where this one left off.
 
-LUaid is a Progressive Web App that tracks donations, volunteer deployments, and aid distribution in real time. It's built for offline-first use in low-connectivity disaster zones, runs entirely on free-tier services, and supports English, Filipino, and Ilocano.
+Kapwa Help is a Progressive Web App that tracks donations, volunteer deployments, and aid distribution in real time. It's built for offline-first use in low-connectivity disaster zones, runs entirely on free-tier services, and supports English, Filipino, and Ilocano.
 
 We publish this software openly in the hope that it's useful for disaster relief operations in your community too.
 
