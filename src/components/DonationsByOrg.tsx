@@ -20,7 +20,7 @@ export default function DonationsByOrg({ donations }: Props) {
   const total = donations.reduce((sum, d) => sum + d.amount, 0);
 
   return (
-    <div className="rounded-2xl border-l-[3px] border-primary bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+    <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
       <h3 className="mb-4 text-lg font-semibold text-neutral-50">
         {t("Dashboard.donationsByOrg")}
       </h3>
