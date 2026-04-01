@@ -1,9 +1,10 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import MapSkeleton from "@/components/maps/MapSkeleton";
+import { lazyWithReload } from "@/lib/lazy-reload";
 import type { NeedPoint } from "@/lib/queries";
 
-const NeedsMap = lazy(() => import("@/components/maps/NeedsMap"));
+const NeedsMap = lazyWithReload(() => import("@/components/maps/NeedsMap"));
 
 type Props = {
   needsPoints: NeedPoint[];

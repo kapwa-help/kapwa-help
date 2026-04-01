@@ -1,8 +1,9 @@
-import { Suspense, lazy } from "react";
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import MapSkeleton from "@/components/maps/MapSkeleton";
+import { lazyWithReload } from "@/lib/lazy-reload";
 
-const DeploymentMap = lazy(() => import("@/components/maps/DeploymentMap"));
+const DeploymentMap = lazyWithReload(() => import("@/components/maps/DeploymentMap"));
 
 type DeploymentPoint = {
   lat: number;
