@@ -13,6 +13,7 @@ vi.mock("react-i18next", () => ({
 
 vi.mock("@/lib/queries", () => ({
   getBarangays: vi.fn(),
+  getAidCategories: vi.fn(),
   insertSubmission: vi.fn(),
 }));
 
@@ -30,6 +31,7 @@ vi.mock("@/lib/outbox-context", () => ({
 
 import {
   getBarangays,
+  getAidCategories,
   insertSubmission,
 } from "@/lib/queries";
 import {
@@ -61,6 +63,12 @@ beforeEach(() => {
   vi.mocked(getBarangays).mockResolvedValue([
     { id: "brgy-1", name: "Catbangen", municipality: "San Fernando" },
     { id: "brgy-2", name: "Pagdalagan", municipality: "San Fernando" },
+  ]);
+  vi.mocked(getAidCategories).mockResolvedValue([
+    { id: "cat-1", name: "Lunas" },
+    { id: "cat-2", name: "Sustenance" },
+    { id: "cat-3", name: "Shelter" },
+    { id: "cat-4", name: "Meals" },
   ]);
   vi.mocked(insertSubmission).mockResolvedValue(undefined);
 });
@@ -110,7 +118,10 @@ describe("SubmitForm", () => {
       screen.getByRole("combobox", { name: "SubmitForm.barangay" }),
       { target: { value: "brgy-1" } }
     );
-    fireEvent.click(screen.getByText("SubmitForm.gap_sustenance"));
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
+      { target: { value: "Sustenance" } }
+    );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
       { target: { value: "truck" } }
@@ -127,7 +138,7 @@ describe("SubmitForm", () => {
           type: "need",
           contact_name: "Juan Dela Cruz",
           barangay_id: "brgy-1",
-          gap_category: "sustenance",
+          gap_category: "Sustenance",
           access_status: "truck",
           urgency: "high",
         })
@@ -150,7 +161,10 @@ describe("SubmitForm", () => {
       screen.getByRole("combobox", { name: "SubmitForm.barangay" }),
       { target: { value: "brgy-1" } }
     );
-    fireEvent.click(screen.getByText("SubmitForm.gap_lunas"));
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
+      { target: { value: "Lunas" } }
+    );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
       { target: { value: "truck" } }
@@ -182,7 +196,10 @@ describe("SubmitForm", () => {
       screen.getByRole("combobox", { name: "SubmitForm.barangay" }),
       { target: { value: "brgy-1" } }
     );
-    fireEvent.click(screen.getByText("SubmitForm.gap_sustenance"));
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
+      { target: { value: "Sustenance" } }
+    );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
       { target: { value: "truck" } }
@@ -197,7 +214,7 @@ describe("SubmitForm", () => {
           type: "need",
           contact_name: "Juan",
           barangay_id: "brgy-1",
-          gap_category: "sustenance",
+          gap_category: "Sustenance",
           access_status: "truck",
         })
       );
@@ -255,7 +272,7 @@ describe("SubmitForm", () => {
           contact_name: "Juan",
           contact_phone: null,
           barangay_id: "brgy-1",
-          gap_category: "sustenance",
+          gap_category: "Sustenance",
           access_status: "truck",
           notes: null,
           quantity_needed: null,
@@ -316,7 +333,7 @@ describe("SubmitForm", () => {
           contact_name: "Juan",
           contact_phone: null,
           barangay_id: "brgy-1",
-          gap_category: "sustenance",
+          gap_category: "Sustenance",
           access_status: "truck",
           notes: null,
           quantity_needed: null,
@@ -359,7 +376,10 @@ describe("SubmitForm", () => {
       screen.getByRole("combobox", { name: "SubmitForm.barangay" }),
       { target: { value: "brgy-1" } }
     );
-    fireEvent.click(screen.getByText("SubmitForm.gap_shelter"));
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
+      { target: { value: "Shelter" } }
+    );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
       { target: { value: "truck" } }
@@ -469,7 +489,10 @@ describe("SubmitForm", () => {
       screen.getByRole("combobox", { name: "SubmitForm.barangay" }),
       { target: { value: "brgy-1" } }
     );
-    fireEvent.click(screen.getByText("SubmitForm.gap_sustenance"));
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
+      { target: { value: "Sustenance" } }
+    );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
       { target: { value: "truck" } }

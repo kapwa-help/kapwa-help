@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getBarangays,
+  getAidCategories,
   insertSubmission,
   type SubmissionInsert,
 } from "@/lib/queries";
@@ -20,10 +21,16 @@ interface Barangay {
   municipality: string;
 }
 
+interface AidCategory {
+  id: string;
+  name: string;
+}
+
 export default function SubmitForm() {
   const { t } = useTranslation();
   const { refreshCount } = useOutbox();
   const [barangays, setBarangays] = useState<Barangay[]>([]);
+  const [categories, setCategories] = useState<AidCategory[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [savedOffline, setSavedOffline] = useState(false);
@@ -60,6 +67,24 @@ export default function SubmitForm() {
             setError(t("SubmitForm.loadError"));
             setLoading(false);
           }
+        });
+    });
+
+    // Load aid categories (same cache-first pattern)
+    getCachedOptions<AidCategory>("aidCategories").then((cachedC) => {
+      if (cancelled) return;
+      if (cachedC?.data.length) {
+        setCategories(cachedC.data);
+      }
+
+      getAidCategories()
+        .then((freshC) => {
+          if (cancelled) return;
+          setCategories(freshC);
+          setCachedOptions("aidCategories", freshC);
+        })
+        .catch(() => {
+          // Non-critical — cached or empty list is acceptable
         });
     });
 
@@ -257,27 +282,29 @@ export default function SubmitForm() {
       </div>
 
       {/* Gap category */}
-      <fieldset>
-        <legend className="text-sm text-neutral-400">
+      <div>
+        <label htmlFor="gap_category" className="block text-sm text-neutral-400">
           {t("SubmitForm.gapCategory")}
-        </legend>
-        <div className="mt-2 flex gap-2">
-          {(["lunas", "sustenance", "shelter"] as const).map((gap) => (
-            <label key={gap} className="flex-1 cursor-pointer">
-              <input
-                type="radio"
-                name="gap_category"
-                value={gap}
-                required
-                className="peer sr-only"
-              />
-              <span className="block rounded-xl border border-neutral-400/20 bg-base px-2 py-3 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
-                {t(`SubmitForm.gap_${gap}`)}
-              </span>
-            </label>
+        </label>
+        <select
+          id="gap_category"
+          name="gap_category"
+          required
+          disabled={!categories.length}
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+        >
+          <option value="">
+            {categories.length
+              ? t("SubmitForm.gapPlaceholder")
+              : t("SubmitForm.loadingOptions")}
+          </option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.name}>
+              {c.name}
+            </option>
           ))}
-        </div>
-      </fieldset>
+        </select>
+      </div>
 
       {/* Access status */}
       <div>
