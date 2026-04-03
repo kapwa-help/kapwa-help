@@ -39,13 +39,6 @@ const sampleNeeds: NeedsData = {
       createdAt: "2026-04-01T10:00:00Z",
     },
   ],
-  needsSummary: {
-    total: 1,
-    byStatus: { pending: 1, verified: 0, in_transit: 0, completed: 0, resolved: 0 },
-    byGap: { lunas: 0, sustenance: 1, shelter: 0 },
-    byAccess: { truck: 1, "4x4": 0, boat: 0, foot_only: 0, cut_off: 0 },
-    critical: 0,
-  },
 };
 
 const sampleRelief: ReliefData = {
