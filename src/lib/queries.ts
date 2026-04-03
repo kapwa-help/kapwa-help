@@ -156,6 +156,15 @@ export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
   });
 }
 
+export async function updateSubmissionStatus(id: string, status: string) {
+  const { error } = await supabase
+    .from("submissions")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) throw error;
+}
+
 export async function getNeedsSummary() {
   const { data, error } = await supabase
     .from("submissions")
