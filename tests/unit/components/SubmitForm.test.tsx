@@ -4,7 +4,8 @@ import SubmitForm from "@/components/SubmitForm";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts ? `${key}|${Object.values(opts).join(",")}` : key,
     i18n: { changeLanguage: vi.fn() },
   }),
   initReactI18next: { type: "3rdParty", init: () => {} },
@@ -39,9 +40,19 @@ import {
   removeFromOutbox,
 } from "@/lib/form-cache";
 
+let mockGetCurrentPosition: ReturnType<typeof vi.fn>;
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubGlobal("crypto", { randomUUID: () => "test-uuid-123" });
+  mockGetCurrentPosition = vi.fn();
+  vi.stubGlobal("navigator", {
+    ...navigator,
+    geolocation: {
+      getCurrentPosition: mockGetCurrentPosition,
+    },
+    onLine: true,
+  });
   vi.mocked(getCachedOptions).mockResolvedValue(null);
   vi.mocked(setCachedOptions).mockResolvedValue(undefined);
   vi.mocked(addToOutbox).mockResolvedValue(undefined);
@@ -367,5 +378,112 @@ describe("SubmitForm", () => {
       screen.getByPlaceholderText("SubmitForm.contactNamePlaceholder")
     ).toBeInTheDocument();
     expect(screen.getByText("SubmitForm.gapCategory")).toBeInTheDocument();
+  });
+
+  it("auto-requests geolocation on mount", async () => {
+    mockGetCurrentPosition.mockImplementation((success) => {
+      success({
+        coords: { latitude: 16.6159, longitude: 120.3209 },
+      });
+    });
+
+    render(<SubmitForm />);
+
+    await waitFor(() => {
+      expect(mockGetCurrentPosition).toHaveBeenCalledOnce();
+    });
+  });
+
+  it("displays formatted coordinates when location is captured", async () => {
+    mockGetCurrentPosition.mockImplementation((success) => {
+      success({
+        coords: { latitude: 16.6159, longitude: 120.3209 },
+      });
+    });
+
+    render(<SubmitForm />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/16\.62.*120\.32/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows denied warning and retry button when geolocation fails", async () => {
+    mockGetCurrentPosition.mockImplementation((_success, error) => {
+      error({ code: 1, message: "User denied" });
+    });
+
+    render(<SubmitForm />);
+
+    await waitFor(() => {
+      expect(screen.getByText("SubmitForm.locationDenied")).toBeInTheDocument();
+      expect(screen.getByText("SubmitForm.locationRetry")).toBeInTheDocument();
+    });
+  });
+
+  it("retry button re-requests geolocation", async () => {
+    // First call: denied
+    mockGetCurrentPosition.mockImplementationOnce((_success, error) => {
+      error({ code: 1, message: "User denied" });
+    });
+    // Second call: success
+    mockGetCurrentPosition.mockImplementationOnce((success) => {
+      success({
+        coords: { latitude: 16.6159, longitude: 120.3209 },
+      });
+    });
+
+    render(<SubmitForm />);
+
+    await waitFor(() => {
+      expect(screen.getByText("SubmitForm.locationRetry")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("SubmitForm.locationRetry"));
+
+    await waitFor(() => {
+      expect(mockGetCurrentPosition).toHaveBeenCalledTimes(2);
+      expect(screen.getByText(/16\.62.*120\.32/)).toBeInTheDocument();
+    });
+  });
+
+  it("includes auto-captured coordinates in submission payload", async () => {
+    mockGetCurrentPosition.mockImplementation((success) => {
+      success({
+        coords: { latitude: 16.6159, longitude: 120.3209 },
+      });
+    });
+
+    render(<SubmitForm />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: "SubmitForm.barangay" })).toBeInTheDocument();
+    });
+
+    // Fill required fields
+    fireEvent.change(
+      screen.getByPlaceholderText("SubmitForm.contactNamePlaceholder"),
+      { target: { value: "Juan" } }
+    );
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "SubmitForm.barangay" }),
+      { target: { value: "brgy-1" } }
+    );
+    fireEvent.click(screen.getByText("SubmitForm.gap_sustenance"));
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
+      { target: { value: "truck" } }
+    );
+    fireEvent.click(screen.getByText("SubmitForm.urgencyHigh"));
+    fireEvent.click(screen.getByText("SubmitForm.submit"));
+
+    await waitFor(() => {
+      expect(insertSubmission).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lat: 16.6159,
+          lng: 120.3209,
+        })
+      );
+    });
   });
 });

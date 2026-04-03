@@ -30,10 +30,8 @@ export default function SubmitForm() {
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [coords, setCoords] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<"acquiring" | "captured" | "denied" | "idle">("idle");
 
   useEffect(() => {
     let hadCache = false;
@@ -70,18 +68,23 @@ export default function SubmitForm() {
     };
   }, [t]);
 
-  const requestLocation = () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) =>
-          setCoords({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          }),
-        () => {} // silently ignore denial
-      );
-    }
-  };
+  const requestLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) return;
+    setLocationStatus("acquiring");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationStatus("captured");
+      },
+      () => {
+        setLocationStatus("denied");
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
 
   const flushingRef = useRef(false);
 
@@ -189,6 +192,7 @@ export default function SubmitForm() {
             setSavedOffline(false);
             setFormKey((k) => k + 1);
             setCoords(null);
+            setLocationStatus("idle");
           }}
           className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
@@ -335,11 +339,34 @@ export default function SubmitForm() {
 
       {/* Location */}
       <div>
-        {coords ? (
-          <p className="text-sm text-success">
-            {t("SubmitForm.locationCaptured")}
+        {locationStatus === "acquiring" && (
+          <p className="text-sm text-neutral-400">
+            {t("SubmitForm.locationAcquiring")}
           </p>
-        ) : (
+        )}
+        {locationStatus === "captured" && coords && (
+          <p className="text-sm text-success">
+            {t("SubmitForm.locationCaptured", {
+              lat: coords.lat.toFixed(2),
+              lng: coords.lng.toFixed(2),
+            })}
+          </p>
+        )}
+        {locationStatus === "denied" && (
+          <div className="space-y-2">
+            <p className="text-sm text-warning">
+              {t("SubmitForm.locationDenied")}
+            </p>
+            <button
+              type="button"
+              onClick={requestLocation}
+              className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+            >
+              {t("SubmitForm.locationRetry")}
+            </button>
+          </div>
+        )}
+        {locationStatus === "idle" && (
           <button
             type="button"
             onClick={requestLocation}

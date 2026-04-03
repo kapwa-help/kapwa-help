@@ -1,8 +1,8 @@
 {
   "App": {
-    "title": "Kapwa Help",
+    "title": "Kapwa Tulong",
     "description": "Transparency sa Pagtulong sa Sakuna",
-    "loading": "Naglo-load\u2026",
+    "loading": "Naglo-load…",
     "loadError": "Nabigong i-load ang data",
     "retry": "Subukan muli"
   },
@@ -96,7 +96,10 @@
     "errorMessage": "Hindi maisumite. Suriin ang iyong koneksyon at subukang muli.",
     "loadError": "Hindi ma-load ang mga opsyon sa form. Suriin ang iyong koneksyon at subukang muli.",
     "shareLocation": "Ibahagi ang aking lokasyon upang makatulong na bigyang-priyoridad ang tulong",
+    "locationAcquiring": "Pagkuha ng iyong lokasyon...",
     "locationCaptured": "Nakunan ang lokasyon",
+    "locationDenied": "Hindi available ang lokasyon — hindi lalabas ang ulat sa mapa",
+    "locationRetry": "Subukan muli",
     "loadingOptions": "Naglo-load…",
     "savedTitle": "Na-save ang ulat!",
     "savedMessage": "Ipapadala kapag online ka na ulit.",
