@@ -84,6 +84,22 @@ describe("PinDetailSheet", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("calls onClose when backdrop is clicked", () => {
+    const onClose = vi.fn();
+    const { container } = render(
+      <PinDetailSheet
+        point={mockPoint}
+        onClose={onClose}
+        onStatusChange={vi.fn()}
+      />
+    );
+
+    // Backdrop is the first child (aria-hidden div before the dialog)
+    const backdrop = container.querySelector("[aria-hidden='true']")!;
+    fireEvent.click(backdrop);
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it("calls onStatusChange on successful transition", async () => {
     const { updateSubmissionStatus } = await import("@/lib/queries");
     vi.mocked(updateSubmissionStatus).mockResolvedValue(undefined);
