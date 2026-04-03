@@ -70,14 +70,13 @@ describe("NeedsCoordinationMap", () => {
     expect(screen.getByText(/Dashboard.statusInTransit/)).toBeInTheDocument();
   });
 
-  it("excludes completed points from the map", async () => {
+  it("includes all points on the map", async () => {
     const { default: NeedsCoordinationMap } = await import(
       "@/components/NeedsCoordinationMap"
     );
     render(<NeedsCoordinationMap needsPoints={mockPoints} />);
     const map = await screen.findByTestId("needs-map");
-    // 4 total points, but completed is excluded from map → 3 map points
-    expect(map.getAttribute("data-point-count")).toBe("3");
+    expect(map.getAttribute("data-point-count")).toBe("4");
   });
 
   it("sorts sidebar by status priority then urgency", async () => {

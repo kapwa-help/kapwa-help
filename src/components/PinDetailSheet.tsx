@@ -8,7 +8,7 @@ const STATUS_ORDER = ["pending", "verified", "in_transit", "completed", "resolve
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-neutral-400",
   verified: "bg-error",
-  in_transit: "bg-primary",
+  in_transit: "bg-warning",
   completed: "bg-success",
   resolved: "bg-primary",
 };
@@ -16,7 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_RING_COLORS: Record<string, string> = {
   pending: "ring-neutral-400",
   verified: "ring-error",
-  in_transit: "ring-primary",
+  in_transit: "ring-warning",
   completed: "ring-success",
   resolved: "ring-primary",
 };

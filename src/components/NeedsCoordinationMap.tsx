@@ -43,14 +43,15 @@ const URGENCY_STYLES: Record<string, string> = {
 const STATUS_DOT: Record<string, string> = {
   pending: "bg-neutral-400",
   verified: "bg-error",
-  in_transit: "bg-primary",
+  in_transit: "bg-warning",
   completed: "bg-success",
 };
 
 const LEGEND_ITEMS = [
   { status: "pending", dot: "bg-neutral-400", label: "Dashboard.statusPending" },
   { status: "verified", dot: "bg-error", label: "Dashboard.statusVerified" },
-  { status: "in_transit", dot: "bg-primary", label: "Dashboard.statusInTransit" },
+  { status: "in_transit", dot: "bg-warning", label: "Dashboard.statusInTransit" },
+  { status: "completed", dot: "bg-success", label: "Dashboard.statusCompleted" },
 ] as const;
 
 export default function NeedsCoordinationMap({ needsPoints }: Props) {
@@ -67,11 +68,8 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
     [needsPoints, statusOverrides]
   );
 
-  // Map pins: only actionable statuses
-  const mapPoints = useMemo(
-    () => allPoints.filter((p) => p.status !== "completed"),
-    [allPoints]
-  );
+  // Map pins: all active statuses (pending through completed)
+  const mapPoints = allPoints;
 
   // Sidebar: all points, sorted by status priority then urgency
   const sortedPoints = useMemo(() => {
@@ -88,7 +86,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
 
   // Legend counts
   const counts = useMemo(() => {
-    const c: Record<string, number> = { pending: 0, verified: 0, in_transit: 0 };
+    const c: Record<string, number> = { pending: 0, verified: 0, in_transit: 0, completed: 0 };
     for (const p of allPoints) {
       if (p.status in c) c[p.status]++;
     }
@@ -104,26 +102,21 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
 
   return (
     <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-neutral-50">
+      {/* Header + inline legend */}
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 lg:justify-start">
+        <h3 className="w-full text-center text-lg font-semibold text-neutral-50 lg:w-auto lg:text-left lg:text-xl">
           {t("Dashboard.needsMap")}
         </h3>
-        <span className="rounded-full bg-error/20 px-3 py-1 text-xs font-medium text-error">
-          {t("Dashboard.liveNeeds")}
-        </span>
-      </div>
-
-      {/* Horizontal legend with counts */}
-      <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2">
-        {LEGEND_ITEMS.map((item) => (
-          <div key={item.status} className="flex items-center gap-2">
-            <span className={`h-3 w-3 rounded-full ${item.dot}`} />
-            <span className="text-xs text-neutral-400">
-              {counts[item.status]} {t(item.label)}
-            </span>
-          </div>
-        ))}
+        <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+          {LEGEND_ITEMS.map((item) => (
+            <div key={item.status} className="flex items-center gap-1.5 rounded-full bg-base/30 px-3 py-1">
+              <span className={`h-2.5 w-2.5 rounded-full ${item.dot}`} />
+              <span className="text-xs text-neutral-400 lg:text-sm">
+                {counts[item.status]} {t(item.label)}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Map + Sidebar grid */}
