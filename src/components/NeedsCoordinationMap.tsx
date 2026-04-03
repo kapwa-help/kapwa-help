@@ -96,71 +96,89 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
 
         {/* Legend + summary sidebar (1/3 width) */}
         <div className="space-y-4">
-          {/* Status legend */}
-          <div className="rounded-lg bg-base/30 p-4">
-            <h4 className="mb-3 text-sm font-medium text-neutral-50">
-              {t("Dashboard.pinStatus")}
-            </h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-error" />
-                <span className="text-xs text-neutral-400">{t("Dashboard.statusVerified")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-warning" />
-                <span className="text-xs text-neutral-400">{t("Dashboard.statusInTransit")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-success" />
-                <span className="text-xs text-neutral-400">{t("Dashboard.statusCompleted")}</span>
+          {/* Desktop: pin detail replaces sidebar content when a pin is selected */}
+          {selectedPoint ? (
+            <div className="hidden lg:block">
+              <PinDetailSheet
+                point={selectedPoint}
+                onClose={() => setSelectedPoint(null)}
+                onStatusChange={handleStatusChange}
+                variant="panel"
+              />
+            </div>
+          ) : null}
+
+          {/* Sidebar default content: hide on desktop when detail is open */}
+          <div className={selectedPoint ? "lg:hidden" : ""}>
+            {/* Status legend */}
+            <div className="rounded-lg bg-base/30 p-4">
+              <h4 className="mb-3 text-sm font-medium text-neutral-50">
+                {t("Dashboard.pinStatus")}
+              </h4>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-error" />
+                  <span className="text-xs text-neutral-400">{t("Dashboard.statusVerified")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-warning" />
+                  <span className="text-xs text-neutral-400">{t("Dashboard.statusInTransit")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-success" />
+                  <span className="text-xs text-neutral-400">{t("Dashboard.statusCompleted")}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Needs list */}
-          <div className="divide-y divide-neutral-400/20 overflow-y-auto lg:max-h-[20rem]">
-            {filtered.map((need) => (
-              <div
-                key={need.id}
-                className="flex items-start justify-between py-3 first:pt-0 last:pb-0"
-              >
-                <div className="flex items-start gap-2">
-                  <span
-                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                      need.status === "verified"
-                        ? "bg-error"
-                        : need.status === "in_transit"
-                          ? "bg-warning"
-                          : "bg-success"
-                    }`}
-                  />
-                  <div>
-                    <p className="text-sm text-neutral-50">
-                      {need.barangayName}
-                    </p>
-                    <p className="text-xs text-neutral-400">
-                      {need.gapCategory ?? t("Dashboard.unset")}
-                      {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
-                    </p>
+            {/* Needs list */}
+            <div className="mt-4 divide-y divide-neutral-400/20 overflow-y-auto lg:max-h-[20rem]">
+              {filtered.map((need) => (
+                <div
+                  key={need.id}
+                  className="flex items-start justify-between py-3 first:pt-0 last:pb-0"
+                >
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                        need.status === "verified"
+                          ? "bg-error"
+                          : need.status === "in_transit"
+                            ? "bg-warning"
+                            : "bg-success"
+                      }`}
+                    />
+                    <div>
+                      <p className="text-sm text-neutral-50">
+                        {need.barangayName}
+                      </p>
+                      <p className="text-xs text-neutral-400">
+                        {need.gapCategory ?? t("Dashboard.unset")}
+                        {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
+                      </p>
+                    </div>
                   </div>
+                  {need.urgency === "critical" && (
+                    <span className="rounded bg-error/20 px-2 py-0.5 text-xs font-medium text-error">
+                      {t("Dashboard.critical")}
+                    </span>
+                  )}
                 </div>
-                {need.urgency === "critical" && (
-                  <span className="rounded bg-error/20 px-2 py-0.5 text-xs font-medium text-error">
-                    {t("Dashboard.critical")}
-                  </span>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Mobile: bottom sheet overlay */}
       {selectedPoint && (
-        <PinDetailSheet
-          point={selectedPoint}
-          onClose={() => setSelectedPoint(null)}
-          onStatusChange={handleStatusChange}
-        />
+        <div className="lg:hidden">
+          <PinDetailSheet
+            point={selectedPoint}
+            onClose={() => setSelectedPoint(null)}
+            onStatusChange={handleStatusChange}
+          />
+        </div>
       )}
     </div>
   );

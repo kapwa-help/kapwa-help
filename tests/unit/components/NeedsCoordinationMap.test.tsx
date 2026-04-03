@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, within } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
@@ -14,8 +14,8 @@ vi.mock("@/components/maps/NeedsMap", () => ({
   },
 }));
 vi.mock("@/components/PinDetailSheet", () => ({
-  default: ({ point, onClose }: { point: any; onClose: () => void }) => (
-    <div data-testid="pin-detail-sheet">
+  default: ({ point, onClose, variant }: { point: any; onClose: () => void; variant?: string }) => (
+    <div data-testid={variant === "panel" ? "pin-detail-panel" : "pin-detail-sheet"}>
       <span>{point.barangayName}</span>
       <button onClick={onClose}>close</button>
     </div>
@@ -87,8 +87,9 @@ describe("NeedsCoordinationMap", () => {
     expect(sheet).toBeInTheDocument();
     expect(sheet).toHaveTextContent("Urbiztondo");
 
-    // Close the sheet
-    fireEvent.click(screen.getByText("close"));
+    // Close the sheet via the mobile sheet's close button
+    const closeButton = within(sheet).getByText("close");
+    fireEvent.click(closeButton);
     expect(screen.queryByTestId("pin-detail-sheet")).not.toBeInTheDocument();
   });
 });
