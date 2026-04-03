@@ -47,7 +47,7 @@ npm run verify:headed  # Playwright smoke tests (visible browser)
 
 ## Contributing
 
-Main repo: `r0droald/LUaid`. Feature branches (`feat/<name>`, `fix/<name>`) -> PR to `main`.
+Main repo: `kapwa-help/kapwa-help`. Feature branches (`feat/<name>`, `fix/<name>`) -> PR to `main`.
 
 ## Lessons Learned
 
