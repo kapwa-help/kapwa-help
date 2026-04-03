@@ -134,9 +134,10 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
             {/* Needs list */}
             <div className="mt-4 divide-y divide-neutral-400/20 overflow-y-auto lg:max-h-[20rem]">
               {filtered.map((need) => (
-                <div
+                <button
                   key={need.id}
-                  className="flex items-start justify-between py-3 first:pt-0 last:pb-0"
+                  onClick={() => setSelectedPoint(need)}
+                  className="flex w-full items-start justify-between py-3 text-left transition-colors hover:bg-neutral-400/10 first:pt-0 last:pb-0"
                 >
                   <div className="flex items-start gap-2">
                     <span
@@ -163,7 +164,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                       {t("Dashboard.critical")}
                     </span>
                   )}
-                </div>
+                </button>
               ))}
             </div>
           </div>
