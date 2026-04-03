@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import MapSkeleton from "@/components/maps/MapSkeleton";
 import PinDetailSheet from "@/components/PinDetailSheet";
@@ -19,29 +19,81 @@ const ACCESS_KEYS: Record<string, string> = {
   cut_off: "Dashboard.accessCutOff",
 };
 
-const ACCESS_FILTERS = [
-  { value: "all", label: "Dashboard.allAccess" },
-  { value: "truck", label: "Dashboard.accessTruck" },
-  { value: "4x4", label: "Dashboard.access4x4" },
-  { value: "boat", label: "Dashboard.accessBoat" },
-  { value: "foot_only", label: "Dashboard.accessFootOnly" },
-  { value: "cut_off", label: "Dashboard.accessCutOff" },
+const STATUS_PRIORITY: Record<string, number> = {
+  pending: 0,
+  verified: 1,
+  in_transit: 2,
+  completed: 3,
+};
+
+const URGENCY_PRIORITY: Record<string, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
+
+const URGENCY_STYLES: Record<string, string> = {
+  critical: "bg-error/20 text-error",
+  high: "bg-warning/20 text-warning",
+  medium: "bg-neutral-400/20 text-neutral-400",
+  low: "bg-neutral-400/10 text-neutral-400/60",
+};
+
+const STATUS_DOT: Record<string, string> = {
+  pending: "bg-neutral-400",
+  verified: "bg-error",
+  in_transit: "bg-primary",
+  completed: "bg-success",
+};
+
+const LEGEND_ITEMS = [
+  { status: "pending", dot: "bg-neutral-400", label: "Dashboard.statusPending" },
+  { status: "verified", dot: "bg-error", label: "Dashboard.statusVerified" },
+  { status: "in_transit", dot: "bg-primary", label: "Dashboard.statusInTransit" },
 ] as const;
 
 export default function NeedsCoordinationMap({ needsPoints }: Props) {
   const { t } = useTranslation();
-  const [accessFilter, setAccessFilter] = useState("all");
   const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
   const [selectedPoint, setSelectedPoint] = useState<NeedPoint | null>(null);
 
-  const points = needsPoints.map((p) =>
-    statusOverrides[p.id] ? { ...p, status: statusOverrides[p.id] } : p
+  // Apply local status overrides
+  const allPoints = useMemo(
+    () =>
+      needsPoints.map((p) =>
+        statusOverrides[p.id] ? { ...p, status: statusOverrides[p.id] } : p
+      ),
+    [needsPoints, statusOverrides]
   );
 
-  const filtered =
-    accessFilter === "all"
-      ? points
-      : points.filter((p) => p.accessStatus === accessFilter);
+  // Map pins: only actionable statuses
+  const mapPoints = useMemo(
+    () => allPoints.filter((p) => p.status !== "completed"),
+    [allPoints]
+  );
+
+  // Sidebar: all points, sorted by status priority then urgency
+  const sortedPoints = useMemo(() => {
+    return [...allPoints].sort((a, b) => {
+      const statusDiff =
+        (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99);
+      if (statusDiff !== 0) return statusDiff;
+      return (
+        (URGENCY_PRIORITY[a.urgency ?? "low"] ?? 99) -
+        (URGENCY_PRIORITY[b.urgency ?? "low"] ?? 99)
+      );
+    });
+  }, [allPoints]);
+
+  // Legend counts
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { pending: 0, verified: 0, in_transit: 0 };
+    for (const p of allPoints) {
+      if (p.status in c) c[p.status]++;
+    }
+    return c;
+  }, [allPoints]);
 
   function handleStatusChange(id: string, newStatus: string) {
     setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
@@ -52,6 +104,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
 
   return (
     <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+      {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-neutral-50">
           {t("Dashboard.needsMap")}
@@ -61,29 +114,25 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
         </span>
       </div>
 
-      {/* Access filter */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {ACCESS_FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setAccessFilter(f.value)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              accessFilter === f.value
-                ? "bg-primary text-neutral-50"
-                : "bg-base text-neutral-400 hover:text-neutral-50"
-            }`}
-          >
-            {t(f.label)}
-          </button>
+      {/* Horizontal legend with counts */}
+      <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+        {LEGEND_ITEMS.map((item) => (
+          <div key={item.status} className="flex items-center gap-2">
+            <span className={`h-3 w-3 rounded-full ${item.dot}`} />
+            <span className="text-xs text-neutral-400">
+              {counts[item.status]} {t(item.label)}
+            </span>
+          </div>
         ))}
       </div>
 
+      {/* Map + Sidebar grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Map (2/3 width) */}
         <div className="lg:col-span-2">
-          {filtered.length > 0 ? (
+          {mapPoints.length > 0 ? (
             <Suspense fallback={<MapSkeleton />}>
-              <NeedsMap points={filtered} onPinSelect={setSelectedPoint} />
+              <NeedsMap points={mapPoints} onPinSelect={setSelectedPoint} />
             </Suspense>
           ) : (
             <div className="flex h-[28rem] items-center justify-center rounded-lg bg-base/30">
@@ -94,9 +143,9 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
           )}
         </div>
 
-        {/* Legend + summary sidebar (1/3 width) */}
+        {/* Sidebar (1/3 width) */}
         <div className="space-y-4">
-          {/* Desktop: pin detail replaces sidebar content when a pin is selected */}
+          {/* Desktop: pin detail replaces sidebar content */}
           {selectedPoint ? (
             <div className="hidden lg:block">
               <PinDetailSheet
@@ -108,32 +157,10 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
             </div>
           ) : null}
 
-          {/* Sidebar default content: hide on desktop when detail is open */}
+          {/* Needs list (hidden on desktop when detail panel is open) */}
           <div className={selectedPoint ? "lg:hidden" : ""}>
-            {/* Status legend */}
-            <div className="rounded-lg bg-base/30 p-4">
-              <h4 className="mb-3 text-sm font-medium text-neutral-50">
-                {t("Dashboard.pinStatus")}
-              </h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-error" />
-                  <span className="text-xs text-neutral-400">{t("Dashboard.statusVerified")}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-warning" />
-                  <span className="text-xs text-neutral-400">{t("Dashboard.statusInTransit")}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-success" />
-                  <span className="text-xs text-neutral-400">{t("Dashboard.statusCompleted")}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Needs list */}
-            <div className="mt-4 divide-y divide-neutral-400/20 overflow-y-auto lg:max-h-[20rem]">
-              {filtered.map((need) => (
+            <div className="divide-y divide-neutral-400/20 overflow-y-auto lg:max-h-[28rem]">
+              {sortedPoints.map((need) => (
                 <button
                   key={need.id}
                   onClick={() => setSelectedPoint(need)}
@@ -141,27 +168,21 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                 >
                   <div className="flex items-start gap-2">
                     <span
-                      className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                        need.status === "verified"
-                          ? "bg-error"
-                          : need.status === "in_transit"
-                            ? "bg-warning"
-                            : "bg-success"
-                      }`}
+                      className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[need.status] ?? "bg-neutral-400"}`}
                     />
                     <div>
-                      <p className="text-sm text-neutral-50">
+                      <p className={`text-sm ${need.status === "completed" ? "text-neutral-400" : "text-neutral-50"}`}>
                         {need.barangayName}
                       </p>
-                      <p className="text-xs text-neutral-400">
+                      <p className={`text-xs ${need.status === "completed" ? "text-neutral-400/60" : "text-neutral-400"}`}>
                         {need.gapCategory ?? t("Dashboard.unset")}
-                        {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
+                        {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` \u00b7 ${t(ACCESS_KEYS[need.accessStatus])}`}
                       </p>
                     </div>
                   </div>
-                  {need.urgency === "critical" && (
-                    <span className="rounded bg-error/20 px-2 py-0.5 text-xs font-medium text-error">
-                      {t("Dashboard.critical")}
+                  {need.urgency && (
+                    <span className={`rounded px-2 py-0.5 text-xs font-medium ${URGENCY_STYLES[need.urgency] ?? URGENCY_STYLES.low}`}>
+                      {t(`Dashboard.urgency${need.urgency.charAt(0).toUpperCase()}${need.urgency.slice(1)}`)}
                     </span>
                   )}
                 </button>
