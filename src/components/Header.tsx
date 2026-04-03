@@ -29,11 +29,10 @@ function GlobeIcon() {
 }
 
 function navLinkClass(isActive: boolean, mobile = false) {
-  return `rounded-lg px-3 ${mobile ? "py-2" : "py-1.5"} text-sm transition-colors ${
-    isActive
+  return `rounded-lg px-3 ${mobile ? "py-2" : "py-1.5"} text-sm transition-colors ${isActive
       ? "bg-neutral-400/10 text-neutral-50"
       : "text-neutral-400 hover:text-neutral-100"
-  }`;
+    }`;
 }
 
 export default function Header() {
