@@ -4,7 +4,8 @@ import SubmitForm from "@/components/SubmitForm";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts ? `${key}|${Object.values(opts).join(",")}` : key,
     i18n: { changeLanguage: vi.fn() },
   }),
   initReactI18next: { type: "3rdParty", init: () => {} },
