@@ -165,7 +165,6 @@ export async function updateSubmissionStatus(id: string, status: string) {
   if (error) throw error;
 }
 
-
 export async function getActiveEvent() {
   const { data, error } = await supabase
     .from("events")
