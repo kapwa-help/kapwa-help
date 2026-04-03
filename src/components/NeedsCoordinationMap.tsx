@@ -40,19 +40,16 @@ const URGENCY_STYLES: Record<string, string> = {
   low: "bg-neutral-400/10 text-neutral-400/60",
 };
 
-const STATUS_DOT: Record<string, string> = {
-  pending: "bg-neutral-400",
-  verified: "bg-error",
-  in_transit: "bg-warning",
-  completed: "bg-success",
-};
-
-const LEGEND_ITEMS = [
+const STATUS_CONFIG = [
   { status: "pending", dot: "bg-neutral-400", label: "Dashboard.statusPending" },
   { status: "verified", dot: "bg-error", label: "Dashboard.statusVerified" },
   { status: "in_transit", dot: "bg-warning", label: "Dashboard.statusInTransit" },
   { status: "completed", dot: "bg-success", label: "Dashboard.statusCompleted" },
 ] as const;
+
+const STATUS_MAP: Record<string, { dot: string; label: string }> = Object.fromEntries(
+  STATUS_CONFIG.map((s) => [s.status, { dot: s.dot, label: s.label }])
+);
 
 export default function NeedsCoordinationMap({ needsPoints }: Props) {
   const { t } = useTranslation();
@@ -67,9 +64,6 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
       ),
     [needsPoints, statusOverrides]
   );
-
-  // Map pins: all active statuses (pending through completed)
-  const mapPoints = allPoints;
 
   // Sidebar: all points, sorted by status priority then urgency
   const sortedPoints = useMemo(() => {
@@ -108,7 +102,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
           {t("Dashboard.needsMap")}
         </h3>
         <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-          {LEGEND_ITEMS.map((item) => (
+          {STATUS_CONFIG.map((item) => (
             <div key={item.status} className="flex items-center gap-1.5 rounded-full bg-base/30 px-3 py-1">
               <span className={`h-2.5 w-2.5 rounded-full ${item.dot}`} />
               <span className="text-xs text-neutral-400 lg:text-sm">
@@ -123,9 +117,9 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Map (2/3 width) */}
         <div className="lg:col-span-2">
-          {mapPoints.length > 0 ? (
+          {allPoints.length > 0 ? (
             <Suspense fallback={<MapSkeleton />}>
-              <NeedsMap points={mapPoints} onPinSelect={setSelectedPoint} />
+              <NeedsMap points={allPoints} onPinSelect={setSelectedPoint} />
             </Suspense>
           ) : (
             <div className="flex h-[28rem] items-center justify-center rounded-lg bg-base/30">
@@ -161,8 +155,10 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                 >
                   <div className="flex items-start gap-2">
                     <span
-                      className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[need.status] ?? "bg-neutral-400"}`}
+                      className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_MAP[need.status]?.dot ?? "bg-neutral-400"}`}
+                      aria-hidden="true"
                     />
+                    <span className="sr-only">{t(STATUS_MAP[need.status]?.label ?? "Dashboard.statusPending")}</span>
                     <div>
                       <p className={`text-sm ${need.status === "completed" ? "text-neutral-400" : "text-neutral-50"}`}>
                         {need.barangayName}

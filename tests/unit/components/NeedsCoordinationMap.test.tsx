@@ -63,11 +63,11 @@ describe("NeedsCoordinationMap", () => {
     // Map renders
     expect(await screen.findByTestId("needs-map")).toBeInTheDocument();
 
-    // Legend labels present
+    // Legend labels present (also appear as sr-only in sidebar items)
     expect(screen.getByText("Dashboard.needsMap")).toBeInTheDocument();
-    expect(screen.getByText(/Dashboard.statusPending/)).toBeInTheDocument();
-    expect(screen.getByText(/Dashboard.statusVerified/)).toBeInTheDocument();
-    expect(screen.getByText(/Dashboard.statusInTransit/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Dashboard.statusPending/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Dashboard.statusVerified/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Dashboard.statusInTransit/).length).toBeGreaterThan(0);
   });
 
   it("includes all points on the map", async () => {
