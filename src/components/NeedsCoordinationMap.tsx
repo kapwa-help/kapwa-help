@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import MapSkeleton from "@/components/maps/MapSkeleton";
+import PinDetailSheet from "@/components/PinDetailSheet";
 import { lazyWithReload } from "@/lib/lazy-reload";
 import type { NeedPoint } from "@/lib/queries";
 
@@ -30,11 +31,22 @@ const ACCESS_FILTERS = [
 export default function NeedsCoordinationMap({ needsPoints }: Props) {
   const { t } = useTranslation();
   const [accessFilter, setAccessFilter] = useState("all");
+  const [points, setPoints] = useState(needsPoints);
+  const [selectedPoint, setSelectedPoint] = useState<NeedPoint | null>(null);
 
   const filtered =
     accessFilter === "all"
-      ? needsPoints
-      : needsPoints.filter((p) => p.accessStatus === accessFilter);
+      ? points
+      : points.filter((p) => p.accessStatus === accessFilter);
+
+  function handleStatusChange(id: string, newStatus: string) {
+    setPoints((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
+    );
+    setSelectedPoint((prev) =>
+      prev?.id === id ? { ...prev, status: newStatus } : prev
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
@@ -69,7 +81,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
         <div className="lg:col-span-2">
           {filtered.length > 0 ? (
             <Suspense fallback={<MapSkeleton />}>
-              <NeedsMap points={filtered} />
+              <NeedsMap points={filtered} onPinSelect={setSelectedPoint} />
             </Suspense>
           ) : (
             <div className="flex h-[28rem] items-center justify-center rounded-lg bg-base/30">
@@ -140,6 +152,14 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
           </div>
         </div>
       </div>
+
+      {selectedPoint && (
+        <PinDetailSheet
+          point={selectedPoint}
+          onClose={() => setSelectedPoint(null)}
+          onStatusChange={handleStatusChange}
+        />
+      )}
     </div>
   );
 }
