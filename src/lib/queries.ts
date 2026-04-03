@@ -131,7 +131,7 @@ export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
     .select(
       "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, created_at, barangays(name, municipality)"
     )
-    .in("status", ["verified", "in_transit", "completed"])
+    .in("status", ["pending", "verified", "in_transit", "completed"])
     .not("lat", "is", null)
     .not("lng", "is", null);
 
@@ -163,38 +163,6 @@ export async function updateSubmissionStatus(id: string, status: string) {
     .eq("id", id);
 
   if (error) throw error;
-}
-
-export async function getNeedsSummary() {
-  const { data, error } = await supabase
-    .from("submissions")
-    .select("status, gap_category, access_status, urgency")
-    .eq("type", "need");
-
-  if (error) throw error;
-
-  const summary = {
-    total: data.length,
-    byStatus: { pending: 0, verified: 0, in_transit: 0, completed: 0, resolved: 0 },
-    byGap: { lunas: 0, sustenance: 0, shelter: 0 },
-    byAccess: { truck: 0, "4x4": 0, boat: 0, foot_only: 0, cut_off: 0 },
-    critical: 0,
-  };
-
-  for (const row of data) {
-    const s = row.status as keyof typeof summary.byStatus;
-    if (s in summary.byStatus) summary.byStatus[s]++;
-
-    const g = row.gap_category as keyof typeof summary.byGap | null;
-    if (g && g in summary.byGap) summary.byGap[g]++;
-
-    const a = row.access_status as keyof typeof summary.byAccess | null;
-    if (a && a in summary.byAccess) summary.byAccess[a]++;
-
-    if (row.urgency === "critical") summary.critical++;
-  }
-
-  return summary;
 }
 
 export async function getActiveEvent() {

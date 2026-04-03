@@ -2,16 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { NeedsPage } from "@/pages/NeedsPage";
 
-// Mock cache module
 vi.mock("@/lib/cache", () => ({
   getCachedNeeds: vi.fn(),
   setCachedNeeds: vi.fn(),
 }));
 
-// Mock queries module
 vi.mock("@/lib/queries", () => ({
   getNeedsMapPoints: vi.fn(),
-  getNeedsSummary: vi.fn(),
   getActiveEvent: vi.fn(),
 }));
 
@@ -19,7 +16,6 @@ vi.mock("@/components/maps/NeedsMap", () => ({
   default: () => <div data-testid="needs-map" />,
 }));
 
-// Mock react-i18next
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
@@ -28,12 +24,10 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
 
-// Mock outbox-context (Header uses useOutbox)
 vi.mock("@/lib/outbox-context", () => ({
   useOutbox: () => ({ pendingCount: 0, refreshCount: vi.fn() }),
 }));
 
-// Mock react-router (Header uses useParams/useNavigate/useLocation/Link)
 vi.mock("react-router", () => ({
   useParams: () => ({ locale: "en" }),
   useNavigate: () => vi.fn(),
@@ -46,24 +40,11 @@ vi.mock("react-router", () => ({
   ),
 }));
 
-import {
-  getNeedsMapPoints,
-  getNeedsSummary,
-  getActiveEvent,
-} from "@/lib/queries";
+import { getNeedsMapPoints, getActiveEvent } from "@/lib/queries";
 import { getCachedNeeds, setCachedNeeds } from "@/lib/cache";
-
-const emptyNeedsSummary = {
-  total: 0,
-  byStatus: { pending: 0, verified: 0, in_transit: 0, completed: 0, resolved: 0 },
-  byGap: { lunas: 0, sustenance: 0, shelter: 0 },
-  byAccess: { truck: 0, "4x4": 0, boat: 0, foot_only: 0, cut_off: 0 },
-  critical: 0,
-};
 
 const mockQueries = () => {
   vi.mocked(getNeedsMapPoints).mockResolvedValue([]);
-  vi.mocked(getNeedsSummary).mockResolvedValue(emptyNeedsSummary);
   vi.mocked(getActiveEvent).mockResolvedValue(null);
 };
 
@@ -80,50 +61,27 @@ describe("NeedsPage", () => {
     expect(screen.getByText("App.loading")).toBeInTheDocument();
   });
 
-  it("renders hero and needs components after data loads", async () => {
-    vi.mocked(getNeedsSummary).mockResolvedValue({
-      ...emptyNeedsSummary,
-      total: 5,
-      byStatus: { pending: 3, verified: 2, in_transit: 1, completed: 0, resolved: 0 },
-    });
-
+  it("renders hero and map after data loads", async () => {
     render(<NeedsPage />);
 
     await waitFor(() => {
       expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
     });
 
-    // Hero elements
     expect(screen.getByText("Dashboard.subtitle")).toBeInTheDocument();
-
-    // NeedsSummaryCards rendered (verified count = 2)
-    expect(screen.getByText("2")).toBeInTheDocument();
-    // NeedsSummaryCards labels
-    expect(screen.getByText("Dashboard.activeNeeds")).toBeInTheDocument();
-    expect(screen.getByText("Dashboard.inTransit")).toBeInTheDocument();
-
-    // NeedsCoordinationMap rendered (map heading + legend)
     expect(screen.getByText("Dashboard.needsMap")).toBeInTheDocument();
-    expect(screen.getByText("Dashboard.pinStatus")).toBeInTheDocument();
-
-    // StatusFooter
     expect(screen.getByText("Dashboard.online")).toBeInTheDocument();
   });
 
-  it("only calls needs-related queries (not relief queries)", async () => {
+  it("only calls needs-related queries", async () => {
     render(<NeedsPage />);
 
     await waitFor(() => {
       expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
     });
 
-    // Needs queries called
     expect(getNeedsMapPoints).toHaveBeenCalled();
-    expect(getNeedsSummary).toHaveBeenCalled();
     expect(getActiveEvent).toHaveBeenCalled();
-
-    // No relief queries should exist in the mock — the module mock only defines needs queries
-    // This verifies the page doesn't import or call relief-related functions
   });
 
   it("renders error state with retry button on fetch failure", async () => {
@@ -139,20 +97,13 @@ describe("NeedsPage", () => {
   });
 
   it("shows cached data when cache exists", async () => {
-    // Queries will never resolve — only cached data should render
     vi.mocked(getNeedsMapPoints).mockReturnValue(new Promise(() => {}));
-    vi.mocked(getNeedsSummary).mockReturnValue(new Promise(() => {}));
     vi.mocked(getActiveEvent).mockReturnValue(new Promise(() => {}));
 
     vi.mocked(getCachedNeeds).mockResolvedValue({
       data: {
         activeEvent: null,
         needsPoints: [],
-        needsSummary: {
-          ...emptyNeedsSummary,
-          byStatus: { pending: 0, verified: 7, in_transit: 3, completed: 2, resolved: 0 },
-          critical: 4,
-        },
       },
       updatedAt: Date.now(),
     });
@@ -163,11 +114,6 @@ describe("NeedsPage", () => {
       expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
     });
 
-    // Cached summary values rendered (verified=7, critical=4)
-    expect(screen.getByText("7")).toBeInTheDocument();
-    expect(screen.getByText("4")).toBeInTheDocument();
-
-    // Last updated timestamp shown
     expect(screen.getAllByText(/Dashboard.lastUpdated/).length).toBeGreaterThan(0);
   });
 
@@ -175,26 +121,27 @@ describe("NeedsPage", () => {
     vi.mocked(getCachedNeeds).mockResolvedValue({
       data: {
         activeEvent: null,
-        needsPoints: [],
-        needsSummary: {
-          ...emptyNeedsSummary,
-          byStatus: { pending: 0, verified: 5, in_transit: 0, completed: 0, resolved: 0 },
-          critical: 3,
-        },
+        needsPoints: [
+          {
+            id: "1", lat: 16.67, lng: 120.32, status: "verified",
+            gapCategory: "sustenance", accessStatus: "truck", urgency: "high",
+            quantityNeeded: 80, notes: null, contactName: "Maria",
+            barangayName: "Urbiztondo", municipality: "San Juan",
+            createdAt: "2026-04-01T10:00:00Z",
+          },
+        ],
       },
       updatedAt: Date.now(),
     });
 
     const networkError = new Error("Network error");
     vi.mocked(getNeedsMapPoints).mockRejectedValue(networkError);
-    vi.mocked(getNeedsSummary).mockRejectedValue(networkError);
     vi.mocked(getActiveEvent).mockRejectedValue(networkError);
 
     render(<NeedsPage />);
 
-    // Should show cached data, not error state
     await waitFor(() => {
-      expect(screen.getByText("5")).toBeInTheDocument();
+      expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
     });
 
     expect(screen.queryByText("App.loadError")).not.toBeInTheDocument();

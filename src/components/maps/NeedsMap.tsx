@@ -5,6 +5,7 @@ import L from "leaflet";
 import type { NeedPoint } from "@/lib/queries";
 
 const STATUS_COLORS: Record<string, string> = {
+  pending: "var(--color-neutral-400)",
   verified: "var(--color-error)",
   in_transit: "var(--color-warning)",
   completed: "var(--color-success)",
