@@ -38,3 +38,5 @@ CREATE POLICY "anon_read_submissions" ON submissions
   FOR SELECT USING (true);
 CREATE POLICY "anon_insert_submissions" ON submissions
   FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon_update_submissions" ON submissions
+  FOR UPDATE USING (true) WITH CHECK (true);
