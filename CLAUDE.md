@@ -41,6 +41,10 @@ npm run verify         # Playwright smoke tests (headless)
 npm run verify:headed  # Playwright smoke tests (visible browser)
 ```
 
+## Critical Rules
+
+- **Verify your own test plan before finishing a branch.** After completing a feature or fix, run each PR test plan item yourself using Playwright CLI (geolocation mocking, offline simulation, permission flows, etc.). Don't defer UI verification to the reviewer. Unit tests (`npm test`) and smoke tests (`npm run verify`) are permanent; test plan items are ad-hoc per-feature and don't need to become permanent e2e specs unless they keep catching regressions.
+
 ## Contributing
 
 Main repo: `r0droald/LUaid`. Feature branches (`feat/<name>`, `fix/<name>`) -> PR to `main`.
