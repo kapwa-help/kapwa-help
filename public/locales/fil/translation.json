@@ -68,6 +68,31 @@
     "accessLabel": "Access",
     "familyCount": "{{count}} pamilya"
   },
+  "PinDetail": {
+    "statusPending": "Nakabinbin",
+    "statusVerified": "Na-verify",
+    "statusInTransit": "Sa Transit",
+    "statusCompleted": "Nakumpleto",
+    "statusResolved": "Nalutas",
+    "markVerified": "Markahan ang Na-verify",
+    "markInTransit": "Markahan Sa Transit",
+    "markCompleted": "Mark Completed",
+    "markResolved": "Mark Resolved",
+    "offlineMessage": "Ang mga pagbabago sa katayuan ay nangangailangan ng koneksyon sa internet",
+    "resolvedMessage": "Ang pangangailangang ito ay nalutas na",
+    "contactName": "Makipag-ugnayan",
+    "submitted": "Naisumite",
+    "notes": "Mga Tala",
+    "photo": "Larawan",
+    "gapCategory": "Uri ng Pangangailangan",
+    "urgency": "Pagkamadalian",
+    "access": "Access",
+    "families": "Mga pamilya",
+    "close": "Isara ang panel ng detalye",
+    "statusLabel": "Katayuan",
+    "updating": "Updating...",
+    "updateError": "Nabigong i-update ang status. Subukan muli."
+  },
   "Stories": {
     "comingSoon": "Paparating na — mga kuwento ng komunidad, mga natutunan, at mga journal."
   },

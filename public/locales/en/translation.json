@@ -68,6 +68,31 @@
     "accessLabel": "Access",
     "familyCount": "{{count}} families"
   },
+  "PinDetail": {
+    "statusPending": "Pending",
+    "statusVerified": "Verified",
+    "statusInTransit": "In Transit",
+    "statusCompleted": "Completed",
+    "statusResolved": "Resolved",
+    "markVerified": "Mark Verified",
+    "markInTransit": "Mark In Transit",
+    "markCompleted": "Mark Completed",
+    "markResolved": "Mark Resolved",
+    "offlineMessage": "Status changes require an internet connection",
+    "resolvedMessage": "This need has been resolved",
+    "contactName": "Contact",
+    "submitted": "Submitted",
+    "notes": "Notes",
+    "photo": "Photo",
+    "gapCategory": "Type of Need",
+    "urgency": "Urgency",
+    "access": "Access",
+    "families": "Families",
+    "close": "Close detail panel",
+    "statusLabel": "Status",
+    "updating": "Updating...",
+    "updateError": "Failed to update status. Try again."
+  },
   "Stories": {
     "comingSoon": "Coming soon — community stories, learnings, and journals."
   },
