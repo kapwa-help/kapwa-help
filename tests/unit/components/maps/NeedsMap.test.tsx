@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 
 vi.mock("react-leaflet", () => ({
@@ -6,11 +6,16 @@ vi.mock("react-leaflet", () => ({
     <div data-testid="map">{children}</div>
   ),
   TileLayer: () => null,
-  Marker: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="marker">{children}</div>
-  ),
-  Popup: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="popup">{children}</div>
+  Marker: ({
+    children,
+    eventHandlers,
+  }: {
+    children?: React.ReactNode;
+    eventHandlers?: { click?: () => void };
+  }) => (
+    <div data-testid="marker" onClick={eventHandlers?.click}>
+      {children}
+    </div>
   ),
 }));
 vi.mock("leaflet", () => ({
@@ -32,7 +37,7 @@ const mockPoints = [
     contactName: "Maria Santos",
     barangayName: "Urbiztondo",
     municipality: "San Juan",
-    categoryName: "Sustenance",
+    createdAt: "2026-04-01T10:00:00Z",
   },
   {
     id: "2",
@@ -47,26 +52,29 @@ const mockPoints = [
     contactName: "Jose Reyes",
     barangayName: "Bacnotan Proper",
     municipality: "Bacnotan",
-    categoryName: "Lunas",
+    createdAt: "2026-04-01T12:00:00Z",
   },
 ];
 
 describe("NeedsMap", () => {
   it("renders markers for each need point", async () => {
-    const { default: NeedsMap } = await import(
-      "@/components/maps/NeedsMap"
-    );
-    render(<NeedsMap points={mockPoints} />);
+    const { default: NeedsMap } = await import("@/components/maps/NeedsMap");
+    render(<NeedsMap points={mockPoints} onPinSelect={vi.fn()} />);
     expect(screen.getByTestId("map")).toBeInTheDocument();
     expect(screen.getAllByTestId("marker")).toHaveLength(2);
   });
 
-  it("shows access status and urgency in popups", async () => {
-    const { default: NeedsMap } = await import(
-      "@/components/maps/NeedsMap"
-    );
-    render(<NeedsMap points={mockPoints} />);
-    expect(screen.getByText("Food needed")).toBeInTheDocument();
-    expect(screen.getByText("Medical supplies")).toBeInTheDocument();
+  it("calls onPinSelect when a marker is clicked", async () => {
+    const { default: NeedsMap } = await import("@/components/maps/NeedsMap");
+    const onPinSelect = vi.fn();
+    render(<NeedsMap points={mockPoints} onPinSelect={onPinSelect} />);
+    fireEvent.click(screen.getAllByTestId("marker")[0]);
+    expect(onPinSelect).toHaveBeenCalledWith(mockPoints[0]);
+  });
+
+  it("does not render popups", async () => {
+    const { default: NeedsMap } = await import("@/components/maps/NeedsMap");
+    render(<NeedsMap points={mockPoints} onPinSelect={vi.fn()} />);
+    expect(screen.queryByTestId("popup")).not.toBeInTheDocument();
   });
 });

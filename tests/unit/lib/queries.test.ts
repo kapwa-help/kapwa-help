@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 import { supabase } from "@/lib/supabase";
-import { getBarangays, insertSubmission, getNeedsMapPoints } from "@/lib/queries";
+import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus } from "@/lib/queries";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -128,5 +128,29 @@ describe("getNeedsMapPoints", () => {
       gapCategory: "sustenance",
       accessStatus: "truck",
     });
+  });
+});
+
+describe("updateSubmissionStatus", () => {
+  it("calls supabase update with correct id and status", async () => {
+    const mockEq = vi.fn().mockResolvedValue({ error: null });
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq });
+    vi.mocked(supabase.from).mockReturnValue({ update: mockUpdate } as never);
+
+    await updateSubmissionStatus("abc-123", "in_transit");
+
+    expect(supabase.from).toHaveBeenCalledWith("submissions");
+    expect(mockUpdate).toHaveBeenCalledWith({ status: "in_transit" });
+    expect(mockEq).toHaveBeenCalledWith("id", "abc-123");
+  });
+
+  it("throws on supabase error", async () => {
+    const mockEq = vi.fn().mockResolvedValue({
+      error: { message: "RLS violation" },
+    });
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq });
+    vi.mocked(supabase.from).mockReturnValue({ update: mockUpdate } as never);
+
+    await expect(updateSubmissionStatus("abc-123", "verified")).rejects.toThrow();
   });
 });

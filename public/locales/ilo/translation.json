@@ -68,6 +68,31 @@
     "accessLabel": "Pannakaserrek",
     "familyCount": "{{count}} pamilya"
   },
+  "PinDetail": {
+    "statusPending": "Naisardeng biit",
+    "statusVerified": "Naberipikado",
+    "statusInTransit": "Iti Transit",
+    "statusCompleted": "Nalpasen",
+    "statusResolved": "Narisut",
+    "markVerified": "Mark Beripikado",
+    "markInTransit": "Mark Iti Panagbiahe",
+    "markCompleted": "Mark Nalpasen",
+    "markResolved": "Narisut ni Mark",
+    "offlineMessage": "Dagiti panagbalbaliw ti kasasaad ket kasapulan ti koneksion iti internet",
+    "resolvedMessage": "Narisut daytoy a kasapulan",
+    "contactName": "Kontaken",
+    "submitted": "Naisubmitir",
+    "notes": "Dagiti Pakaammo",
+    "photo": "Ladawan",
+    "gapCategory": "Kita ti Kasapulan",
+    "urgency": "Kinaganat",
+    "access": "Access",
+    "families": "Dagiti pamilia",
+    "close": "Serraan ti detalye a panel",
+    "statusLabel": "Estado",
+    "updating": "Updating...",
+    "updateError": "Napaay nga i-update ti kasasaad. Padasem manen."
+  },
   "Stories": {
     "comingSoon": "Coming soon — estoria ti komunidad, nasursuro, ken journal."
   },

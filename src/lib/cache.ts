@@ -20,6 +20,7 @@ export type NeedsData = {
     contactName: string;
     barangayName: string;
     municipality: string;
+    createdAt: string;
   }[];
   needsSummary: {
     total: number;
