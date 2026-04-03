@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import type { NeedPoint } from "@/lib/queries";
@@ -29,6 +30,7 @@ type Props = {
 };
 
 export default function NeedsMap({ points, onPinSelect }: Props) {
+  const { t } = useTranslation();
   const [tilesUnavailable, setTilesUnavailable] = useState(false);
   const errorCount = useRef(0);
 
@@ -76,7 +78,7 @@ export default function NeedsMap({ points, onPinSelect }: Props) {
           className="absolute inset-0 flex items-center justify-center bg-base/80"
         >
           <p className="text-neutral-400 text-sm">
-            Map tiles unavailable offline
+            {t("Dashboard.mapTilesUnavailable")}
           </p>
         </div>
       )}

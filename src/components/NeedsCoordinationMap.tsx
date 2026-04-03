@@ -31,8 +31,12 @@ const ACCESS_FILTERS = [
 export default function NeedsCoordinationMap({ needsPoints }: Props) {
   const { t } = useTranslation();
   const [accessFilter, setAccessFilter] = useState("all");
-  const [points, setPoints] = useState(needsPoints);
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
   const [selectedPoint, setSelectedPoint] = useState<NeedPoint | null>(null);
+
+  const points = needsPoints.map((p) =>
+    statusOverrides[p.id] ? { ...p, status: statusOverrides[p.id] } : p
+  );
 
   const filtered =
     accessFilter === "all"
@@ -40,9 +44,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
       : points.filter((p) => p.accessStatus === accessFilter);
 
   function handleStatusChange(id: string, newStatus: string) {
-    setPoints((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
-    );
+    setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
     setSelectedPoint((prev) =>
       prev?.id === id ? { ...prev, status: newStatus } : prev
     );
