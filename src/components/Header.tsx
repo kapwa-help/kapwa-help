@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useLocation, Link, NavLink } from "react-router";
 import { supportedLocales, type Locale } from "../i18n";
@@ -30,8 +30,8 @@ function GlobeIcon() {
 
 function navLinkClass(isActive: boolean, mobile = false) {
   return `rounded-lg px-3 ${mobile ? "py-2" : "py-1.5"} text-sm transition-colors ${isActive
-      ? "bg-neutral-400/10 text-neutral-50"
-      : "text-neutral-400 hover:text-neutral-100"
+    ? "bg-neutral-400/10 text-neutral-50"
+    : "text-neutral-400 hover:text-neutral-100"
     }`;
 }
 
@@ -42,6 +42,12 @@ export default function Header() {
   const location = useLocation();
   const { pendingCount } = useOutbox();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const subPath = locale ? location.pathname.replace(`/${locale}`, "") : "";
@@ -57,7 +63,20 @@ export default function Header() {
   return (
     <header className="bg-secondary shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link to={`/${locale}`} className="text-xl font-bold text-white hover:text-neutral-100">Kapwa Help</Link>
+        <div className="flex items-center gap-4">
+          <Link to={`/${locale}`} className="font-logo text-xl font-bold text-white hover:text-neutral-100">
+            Kapwa Help
+          </Link>
+
+          <div className="hidden border-l border-neutral-700 pl-4 md:block">
+            <div className="text-sm font-medium text-neutral-200">
+              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            <div className="text-xs text-neutral-400">
+              {currentTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+            </div>
+          </div>
+        </div>
         <nav className="hidden items-center gap-1 sm:flex">
           {navItems.map((item) => (
             <NavLink
