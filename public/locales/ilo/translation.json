@@ -1,8 +1,8 @@
 {
   "App": {
-    "title": "Kapwa Help",
+    "title": "Kapwa Tulong",
     "description": "Kinalawag ti Panangsaranay iti Kalamidad",
-    "loading": "Agkarkarga\u2026",
+    "loading": "Agkarkarga…",
     "loadError": "Napaay a mangikarga ti datos",
     "retry": "Padasem manen"
   },
@@ -96,7 +96,10 @@
     "errorMessage": "Saan a makaisubmitir. Kitaem ti koneksionmo ket padasem manen.",
     "loadError": "Saan a makakarga kadagiti pagpilian ti porma. Kitaem ti koneksionmo ket padasem manen.",
     "shareLocation": "Ibinglayko ti lokasionko tapno makatulong a mangipangpangruna iti tulong",
+    "locationAcquiring": "Panaggun-od ti lokasionmo...",
     "locationCaptured": "Lokasion ti naala",
+    "locationDenied": "Saan a magun-od ti lokasion — saan nga agparang ti report iti mapa",
+    "locationRetry": "Padasem manen",
     "loadingOptions": "Karga ti...",
     "savedTitle": "Naisalakan ti report!",
     "savedMessage": "Ipatulodna inton agsublika nga online.",
