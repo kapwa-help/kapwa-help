@@ -169,7 +169,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                       </p>
                     </div>
                   </div>
-                  {need.urgency && (
+                  {need.urgency && need.urgency in URGENCY_STYLES && (
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${URGENCY_STYLES[need.urgency] ?? URGENCY_STYLES.low}`}>
                       {t(`Dashboard.urgency${need.urgency.charAt(0).toUpperCase()}${need.urgency.slice(1)}`)}
                     </span>
