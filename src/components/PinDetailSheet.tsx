@@ -13,11 +13,12 @@ const STATUS_COLORS: Record<string, string> = {
   resolved: "bg-primary",
 };
 
-const STATUS_BUTTON_COLORS: Record<string, string> = {
-  verified: "bg-error hover:bg-error/80",
-  in_transit: "bg-warning hover:bg-warning/80",
-  completed: "bg-success hover:bg-success/80",
-  resolved: "bg-primary hover:bg-primary/80",
+const STATUS_RING_COLORS: Record<string, string> = {
+  pending: "ring-neutral-400",
+  verified: "ring-error",
+  in_transit: "ring-warning",
+  completed: "ring-success",
+  resolved: "ring-primary",
 };
 
 const STATUS_KEYS: Record<string, string> = {
@@ -26,13 +27,6 @@ const STATUS_KEYS: Record<string, string> = {
   in_transit: "PinDetail.statusInTransit",
   completed: "PinDetail.statusCompleted",
   resolved: "PinDetail.statusResolved",
-};
-
-const MARK_KEYS: Record<string, string> = {
-  verified: "PinDetail.markVerified",
-  in_transit: "PinDetail.markInTransit",
-  completed: "PinDetail.markCompleted",
-  resolved: "PinDetail.markResolved",
 };
 
 const ACCESS_KEYS: Record<string, string> = {
@@ -68,8 +62,6 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
   }, []);
 
   const currentIndex = STATUS_ORDER.indexOf(point.status as typeof STATUS_ORDER[number]);
-  const forwardStatuses = STATUS_ORDER.slice(currentIndex + 1);
-  const isResolved = point.status === "resolved";
 
   async function handleTransition(newStatus: string) {
     if (!isOnline) return;
@@ -155,26 +147,47 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         </div>
       )}
 
-      {/* Step indicator */}
-      <div className="mb-4" aria-hidden="true">
-        <div className="flex items-center justify-between">
+      {/* Interactive status stepper */}
+      <div className="mb-2">
+        {!isOnline && (
+          <p className="mb-2 text-center text-xs text-warning">
+            {t("PinDetail.offlineMessage")}
+          </p>
+        )}
+        <div className="flex items-start">
           {STATUS_ORDER.map((s, i) => {
             const isCurrent = s === point.status;
             const isPast = i < currentIndex;
+            const isUpdating = updating === s;
             return (
-              <div key={s} className="flex flex-1 items-center">
-                <div
-                  className={`h-2.5 w-2.5 rounded-full ${
-                    isCurrent
-                      ? STATUS_COLORS[s]
-                      : isPast
-                        ? STATUS_COLORS[s] + " opacity-60"
-                        : "bg-neutral-400/30"
-                  }`}
-                />
+              <div key={s} className="flex flex-1 items-start">
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => handleTransition(s)}
+                    disabled={isCurrent || !isOnline || updating !== null}
+                    aria-label={t(STATUS_KEYS[s])}
+                    aria-current={isCurrent ? "step" : undefined}
+                    className={`h-7 w-7 rounded-full transition-all ${
+                      isCurrent
+                        ? `${STATUS_COLORS[s]} ring-2 ${STATUS_RING_COLORS[s]} ring-offset-2 ring-offset-secondary`
+                        : isPast
+                          ? `${STATUS_COLORS[s]} opacity-60 hover:opacity-100`
+                          : "bg-neutral-400/30 hover:bg-neutral-400/50"
+                    } disabled:cursor-default ${!isCurrent ? "disabled:opacity-30" : ""}`}
+                  >
+                    {isUpdating && (
+                      <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-neutral-50 border-t-transparent" />
+                    )}
+                  </button>
+                  <span className={`mt-1.5 text-center text-[10px] leading-tight ${
+                    isCurrent ? "font-medium text-neutral-50" : "text-neutral-400"
+                  }`}>
+                    {t(STATUS_KEYS[s])}
+                  </span>
+                </div>
                 {i < STATUS_ORDER.length - 1 && (
                   <div
-                    className={`mx-1 h-0.5 flex-1 ${
+                    className={`mt-3.5 h-0.5 flex-1 ${
                       isPast ? "bg-neutral-400/40" : "bg-neutral-400/20"
                     }`}
                   />
@@ -183,39 +196,10 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
             );
           })}
         </div>
+        {error && (
+          <p className="mt-2 text-center text-xs text-error">{error}</p>
+        )}
       </div>
-
-      {/* Status actions */}
-      {isResolved ? (
-        <p className="text-center text-sm text-neutral-400">
-          {t("PinDetail.resolvedMessage")}
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {!isOnline && (
-            <p className="text-center text-xs text-warning">
-              {t("PinDetail.offlineMessage")}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            {forwardStatuses.map((s) => (
-              <button
-                key={s}
-                onClick={() => handleTransition(s)}
-                disabled={!isOnline || updating !== null}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium text-neutral-50 transition-colors disabled:opacity-50 ${
-                  STATUS_BUTTON_COLORS[s] ?? "bg-neutral-400"
-                }`}
-              >
-                {updating === s ? t("PinDetail.updating") : t(MARK_KEYS[s])}
-              </button>
-            ))}
-          </div>
-          {error && (
-            <p className="text-center text-xs text-error">{error}</p>
-          )}
-        </div>
-      )}
     </>
   );
 

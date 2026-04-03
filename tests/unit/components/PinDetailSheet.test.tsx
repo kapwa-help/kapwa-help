@@ -40,7 +40,7 @@ describe("PinDetailSheet", () => {
     expect(screen.getByText("Food needed urgently")).toBeInTheDocument();
   });
 
-  it("shows forward transition buttons for verified status", () => {
+  it("shows interactive stepper with all statuses and current disabled", () => {
     render(
       <PinDetailSheet
         point={mockPoint}
@@ -49,14 +49,19 @@ describe("PinDetailSheet", () => {
       />
     );
 
-    expect(screen.getByText("PinDetail.markInTransit")).toBeInTheDocument();
-    expect(screen.getByText("PinDetail.markCompleted")).toBeInTheDocument();
-    expect(screen.getByText("PinDetail.markResolved")).toBeInTheDocument();
-    // Should NOT show "Mark Verified" since already verified
-    expect(screen.queryByText("PinDetail.markVerified")).not.toBeInTheDocument();
+    // All status step buttons are visible in the stepper
+    expect(screen.getByLabelText("PinDetail.statusPending")).toBeInTheDocument();
+    expect(screen.getByLabelText("PinDetail.statusInTransit")).toBeInTheDocument();
+    expect(screen.getByLabelText("PinDetail.statusCompleted")).toBeInTheDocument();
+    expect(screen.getByLabelText("PinDetail.statusResolved")).toBeInTheDocument();
+
+    // Current status button (Verified) is disabled; others are enabled
+    expect(screen.getByLabelText("PinDetail.statusVerified")).toBeDisabled();
+    expect(screen.getByLabelText("PinDetail.statusPending")).toBeEnabled();
+    expect(screen.getByLabelText("PinDetail.statusInTransit")).toBeEnabled();
   });
 
-  it("shows no transition buttons for resolved status", () => {
+  it("allows backward transitions from resolved status", () => {
     render(
       <PinDetailSheet
         point={{ ...mockPoint, status: "resolved" }}
@@ -65,9 +70,10 @@ describe("PinDetailSheet", () => {
       />
     );
 
-    expect(screen.getByText("PinDetail.resolvedMessage")).toBeInTheDocument();
-    expect(screen.queryByText("PinDetail.markVerified")).not.toBeInTheDocument();
-    expect(screen.queryByText("PinDetail.markInTransit")).not.toBeInTheDocument();
+    // Resolved is current and disabled, but earlier statuses are enabled
+    expect(screen.getByLabelText("PinDetail.statusResolved")).toBeDisabled();
+    expect(screen.getByLabelText("PinDetail.statusPending")).toBeEnabled();
+    expect(screen.getByLabelText("PinDetail.statusVerified")).toBeEnabled();
   });
 
   it("calls onClose when close button is clicked", () => {
@@ -113,7 +119,7 @@ describe("PinDetailSheet", () => {
       />
     );
 
-    fireEvent.click(screen.getByText("PinDetail.markInTransit"));
+    fireEvent.click(screen.getByLabelText("PinDetail.statusInTransit"));
 
     // Wait for async mutation
     await vi.waitFor(() => {
