@@ -193,7 +193,9 @@ export interface SubmissionInsert {
   urgency: string;
   lat: number | null;
   lng: number | null;
-  photo_url?: string | null;
+  submission_photo_url?: string | null;
+  dispatch_photo_url?: string | null;
+  delivery_photo_url?: string | null;
 }
 
 export async function getBarangays() {

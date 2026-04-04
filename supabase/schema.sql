@@ -76,7 +76,9 @@ CREATE TABLE IF NOT EXISTS submissions (
   quantity_needed integer,
   urgency         text NOT NULL CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
   notes           text,
-  photo_url       text,
+  submission_photo_url text,
+  dispatch_photo_url   text,
+  delivery_photo_url   text,
   -- Timestamps
   verified_at     timestamptz,
   completed_at    timestamptz,
