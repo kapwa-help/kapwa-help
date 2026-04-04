@@ -24,7 +24,8 @@ row.organizations as unknown as { name: string }
 
 Defined in `supabase/rls-policies.sql`:
 - **Anon read**: SELECT on all tables
-- **Anon insert**: INSERT on `submissions` only
+- **Anon insert**: INSERT on `submissions` and `deployments`
+- **Anon update**: UPDATE on `submissions` and `deployments` (demo phase — tighten when auth is implemented)
 
 ## Schema
 

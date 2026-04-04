@@ -52,6 +52,11 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
   const [error, setError] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
+  // Reset photo state when pin status changes (e.g. dispatch → delivery)
+  useEffect(() => {
+    setPhotoFile(null);
+  }, [point.status]);
+
   function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setPhotoFile(file);

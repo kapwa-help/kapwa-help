@@ -31,6 +31,7 @@ CREATE POLICY "anon_read_donations" ON donations
 ALTER TABLE deployments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "anon_read_deployments" ON deployments
   FOR SELECT USING (true);
+-- Demo phase: open anon write access — tighten when auth is implemented
 CREATE POLICY "anon_insert_deployments" ON deployments
   FOR INSERT WITH CHECK (true);
 CREATE POLICY "anon_update_deployments" ON deployments

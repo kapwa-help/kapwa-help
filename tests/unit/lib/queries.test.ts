@@ -157,13 +157,13 @@ describe("updateSubmissionStatus", () => {
 
 describe("createDeploymentForNeed", () => {
   it("inserts deployment and updates submission status", async () => {
-    const mockInsert = vi.fn().mockResolvedValue({ error: null });
+    const mockUpsert = vi.fn().mockResolvedValue({ error: null });
     const mockStatusEq = vi.fn().mockResolvedValue({ error: null });
     const mockStatusUpdate = vi.fn().mockReturnValue({ eq: mockStatusEq });
 
     vi.mocked(supabase.from).mockImplementation((table: string) => {
       if (table === "deployments") {
-        return { insert: mockInsert } as never;
+        return { upsert: mockUpsert } as never;
       }
       if (table === "submissions") {
         return { update: mockStatusUpdate } as never;
@@ -184,7 +184,7 @@ describe("createDeploymentForNeed", () => {
       notes: null,
     });
 
-    expect(mockInsert).toHaveBeenCalled();
+    expect(mockUpsert).toHaveBeenCalled();
     expect(mockStatusUpdate).toHaveBeenCalledWith({ status: "in_transit" });
     expect(mockStatusEq).toHaveBeenCalledWith("id", "sub-1");
   });

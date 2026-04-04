@@ -245,9 +245,10 @@ export interface DeploymentInsert {
 }
 
 export async function createDeploymentForNeed(deployment: DeploymentInsert) {
+  // Upsert on submission_id so retries after partial failure don't create duplicates
   const { error: deployError } = await supabase
     .from("deployments")
-    .insert({ ...deployment, status: "pending" });
+    .upsert({ ...deployment, status: "pending" }, { onConflict: "submission_id" });
 
   if (deployError) throw deployError;
 
@@ -259,7 +260,7 @@ export async function createDeploymentForNeed(deployment: DeploymentInsert) {
   if (statusError) throw statusError;
 }
 
-export async function updateDeploymentStatus(submissionId: string, status: string) {
+export async function updateDeploymentStatus(submissionId: string, status: "pending" | "received") {
   const { error } = await supabase
     .from("deployments")
     .update({ status })
