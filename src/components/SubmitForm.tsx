@@ -229,6 +229,46 @@ export default function SubmitForm() {
 
   return (
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
+      {/* Location */}
+      <div>
+        {locationStatus === "acquiring" && (
+          <p className="text-sm text-neutral-400">
+            {t("SubmitForm.locationAcquiring")}
+          </p>
+        )}
+        {locationStatus === "captured" && coords && (
+          <p className="text-sm text-success">
+            {t("SubmitForm.locationCaptured", {
+              lat: coords.lat.toFixed(2),
+              lng: coords.lng.toFixed(2),
+            })}
+          </p>
+        )}
+        {locationStatus === "denied" && (
+          <div className="space-y-2">
+            <p className="text-sm text-warning">
+              {t("SubmitForm.locationDenied")}
+            </p>
+            <button
+              type="button"
+              onClick={requestLocation}
+              className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+            >
+              {t("SubmitForm.locationRetry")}
+            </button>
+          </div>
+        )}
+        {locationStatus === "idle" && (
+          <button
+            type="button"
+            onClick={requestLocation}
+            className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+          >
+            {t("SubmitForm.shareLocation")}
+          </button>
+        )}
+      </div>
+
       {/* Contact name */}
       <div>
         <label htmlFor="contact_name" className="block text-sm text-neutral-400">
@@ -362,46 +402,6 @@ export default function SubmitForm() {
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.quantityPlaceholder")}
         />
-      </div>
-
-      {/* Location */}
-      <div>
-        {locationStatus === "acquiring" && (
-          <p className="text-sm text-neutral-400">
-            {t("SubmitForm.locationAcquiring")}
-          </p>
-        )}
-        {locationStatus === "captured" && coords && (
-          <p className="text-sm text-success">
-            {t("SubmitForm.locationCaptured", {
-              lat: coords.lat.toFixed(2),
-              lng: coords.lng.toFixed(2),
-            })}
-          </p>
-        )}
-        {locationStatus === "denied" && (
-          <div className="space-y-2">
-            <p className="text-sm text-warning">
-              {t("SubmitForm.locationDenied")}
-            </p>
-            <button
-              type="button"
-              onClick={requestLocation}
-              className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
-            >
-              {t("SubmitForm.locationRetry")}
-            </button>
-          </div>
-        )}
-        {locationStatus === "idle" && (
-          <button
-            type="button"
-            onClick={requestLocation}
-            className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
-          >
-            {t("SubmitForm.shareLocation")}
-          </button>
-        )}
       </div>
 
       {/* Notes */}
