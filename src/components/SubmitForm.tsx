@@ -13,6 +13,7 @@ import {
   getOutboxEntries,
   removeFromOutbox,
 } from "@/lib/form-cache";
+import { encodeGeohash } from "@/lib/geohash";
 import { useOutbox } from "@/lib/outbox-context";
 
 interface Barangay {
@@ -177,6 +178,7 @@ export default function SubmitForm() {
       notes: (formData.get("notes") as string) || null,
       lat: coords?.lat ?? null,
       lng: coords?.lng ?? null,
+      geohash: coords ? encodeGeohash(coords.lat, coords.lng) : null,
     };
 
     try {
