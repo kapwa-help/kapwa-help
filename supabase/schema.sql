@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   contact_phone   text,
   -- Location
   barangay_id     uuid NOT NULL REFERENCES barangays(id),
-  gap_category    text NOT NULL CHECK (gap_category IN ('lunas', 'sustenance', 'shelter')),
+  gap_category    text NOT NULL,
   lat             decimal(9,6),
   lng             decimal(9,6),
   geohash         text,
