@@ -20,10 +20,10 @@ const ACCESS_KEYS: Record<string, string> = {
 };
 
 const STATUS_PRIORITY: Record<string, number> = {
-  pending: 0,
-  verified: 1,
-  in_transit: 2,
-  completed: 3,
+  verified: 0,
+  in_transit: 1,
+  completed: 2,
+  pending: 3,
 };
 
 const URGENCY_PRIORITY: Record<string, number> = {
@@ -41,10 +41,10 @@ const URGENCY_STYLES: Record<string, string> = {
 };
 
 const STATUS_CONFIG = [
-  { status: "pending", dot: "bg-neutral-400", label: "Dashboard.statusPending" },
   { status: "verified", dot: "bg-error", label: "Dashboard.statusVerified" },
   { status: "in_transit", dot: "bg-warning", label: "Dashboard.statusInTransit" },
   { status: "completed", dot: "bg-success", label: "Dashboard.statusCompleted" },
+  { status: "pending", dot: "bg-neutral-400", label: "Dashboard.statusPending" },
 ] as const;
 
 const STATUS_MAP: Record<string, { dot: string; label: string }> = Object.fromEntries(
