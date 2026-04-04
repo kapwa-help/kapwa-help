@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { updateSubmissionStatus } from "@/lib/queries";
+import { updateSubmissionStatus, updateDeploymentStatus } from "@/lib/queries";
 import type { NeedPoint } from "@/lib/queries";
+import ClaimForm from "@/components/ClaimForm";
 
 const STATUS_ORDER = ["pending", "verified", "in_transit", "completed", "resolved"] as const;
 
@@ -49,6 +50,13 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [updating, setUpdating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+
+  function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setPhotoFile(file);
+    // TODO: Upload to Supabase Storage when bucket is configured
+  }
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -69,6 +77,14 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
     setError(null);
     try {
       await updateSubmissionStatus(point.id, newStatus);
+      // When resolving, also mark the linked deployment as received
+      if (newStatus === "resolved") {
+        try {
+          await updateDeploymentStatus(point.id, "received");
+        } catch {
+          // Non-fatal — deployment may not exist (manually advanced pins)
+        }
+      }
       onStatusChange(point.id, newStatus);
     } catch {
       setError(t("PinDetail.updateError"));
@@ -200,6 +216,54 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
           <p className="mt-2 text-center text-xs text-error">{error}</p>
         )}
       </div>
+
+      {/* Claim form — verified pins only */}
+      {point.status === "verified" && (
+        <div className="mt-4">
+          <ClaimForm
+            point={point}
+            onClaimed={() => onStatusChange(point.id, "in_transit")}
+          />
+        </div>
+      )}
+
+      {/* Dispatch photo — in_transit pins only */}
+      {point.status === "in_transit" && (
+        <div className="mt-4">
+          <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-400/20 bg-base/30 py-2.5 text-sm text-neutral-400 hover:text-neutral-50 hover:border-neutral-400/40">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            </svg>
+            {photoFile ? t("PinDetail.photoAdded") : t("PinDetail.addDispatchPhoto")}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhotoSelect}
+              className="hidden"
+            />
+          </label>
+        </div>
+      )}
+
+      {/* Delivery photo — completed pins only */}
+      {point.status === "completed" && (
+        <div className="mt-4">
+          <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-400/20 bg-base/30 py-2.5 text-sm text-neutral-400 hover:text-neutral-50 hover:border-neutral-400/40">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            </svg>
+            {photoFile ? t("PinDetail.photoAdded") : t("PinDetail.addDeliveryPhoto")}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhotoSelect}
+              className="hidden"
+            />
+          </label>
+        </div>
+      )}
     </>
   );
 

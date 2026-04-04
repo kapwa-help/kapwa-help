@@ -7,6 +7,12 @@ vi.mock("react-i18next", () => ({
 }));
 vi.mock("@/lib/queries", () => ({
   updateSubmissionStatus: vi.fn(),
+  updateDeploymentStatus: vi.fn(),
+}));
+vi.mock("@/components/ClaimForm", () => ({
+  default: ({ onClaimed }: { onClaimed: () => void }) => (
+    <button data-testid="mock-claim-form" onClick={onClaimed}>Mock ClaimForm</button>
+  ),
 }));
 
 const mockPoint = {
@@ -125,5 +131,49 @@ describe("PinDetailSheet", () => {
     await vi.waitFor(() => {
       expect(onStatusChange).toHaveBeenCalledWith("abc-123", "in_transit");
     });
+  });
+
+  it("shows ClaimForm for verified pins", () => {
+    render(
+      <PinDetailSheet
+        point={{ ...mockPoint, status: "verified" }}
+        onClose={vi.fn()}
+        onStatusChange={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId("mock-claim-form")).toBeInTheDocument();
+  });
+
+  it("does not show ClaimForm for pending pins", () => {
+    render(
+      <PinDetailSheet
+        point={{ ...mockPoint, status: "pending" }}
+        onClose={vi.fn()}
+        onStatusChange={vi.fn()}
+      />
+    );
+    expect(screen.queryByTestId("mock-claim-form")).not.toBeInTheDocument();
+  });
+
+  it("shows dispatch photo button for in_transit pins", () => {
+    render(
+      <PinDetailSheet
+        point={{ ...mockPoint, status: "in_transit" }}
+        onClose={vi.fn()}
+        onStatusChange={vi.fn()}
+      />
+    );
+    expect(screen.getByText("PinDetail.addDispatchPhoto")).toBeInTheDocument();
+  });
+
+  it("shows delivery photo button for completed pins", () => {
+    render(
+      <PinDetailSheet
+        point={{ ...mockPoint, status: "completed" }}
+        onClose={vi.fn()}
+        onStatusChange={vi.fn()}
+      />
+    );
+    expect(screen.getByText("PinDetail.addDeliveryPhoto")).toBeInTheDocument();
   });
 });
