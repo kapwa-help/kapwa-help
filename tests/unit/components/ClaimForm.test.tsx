@@ -47,7 +47,7 @@ describe("ClaimForm", () => {
       { id: "org-1", name: "DOERS", type: "hub", municipality: "Luna" },
     ]);
     vi.mocked(getAidCategories).mockResolvedValue([
-      { id: "cat-1", name: "Meals", icon: "utensils" },
+      { id: "cat-1", name: "Meals" },
     ]);
 
     render(
@@ -68,7 +68,7 @@ describe("ClaimForm", () => {
       { id: "org-1", name: "DOERS", type: "hub", municipality: "Luna" },
     ]);
     vi.mocked(getAidCategories).mockResolvedValue([
-      { id: "cat-1", name: "Meals", icon: "utensils" },
+      { id: "cat-1", name: "Meals" },
     ]);
     vi.mocked(createDeploymentForNeed).mockResolvedValue(undefined);
     vi.mocked(getActiveEvent).mockResolvedValue({ id: "event-1", name: "Typhoon Emong", slug: "emong", description: null, region: "La Union", started_at: "2024-11-01" });
