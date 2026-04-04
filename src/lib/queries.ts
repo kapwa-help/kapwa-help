@@ -224,6 +224,55 @@ export async function insertSubmission(submission: SubmissionInsert) {
   if (error) throw error;
 }
 
+// --- Matchmaker queries ---
+
+export interface DeploymentInsert {
+  event_id?: string | null;
+  organization_id: string;
+  aid_category_id: string;
+  submission_id: string;
+  barangay_id?: string | null;
+  quantity?: number | null;
+  unit?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  notes?: string | null;
+}
+
+export async function createDeploymentForNeed(deployment: DeploymentInsert) {
+  const { error: deployError } = await supabase
+    .from("deployments")
+    .insert({ ...deployment, status: "pending" });
+
+  if (deployError) throw deployError;
+
+  const { error: statusError } = await supabase
+    .from("submissions")
+    .update({ status: "in_transit" })
+    .eq("id", deployment.submission_id);
+
+  if (statusError) throw statusError;
+}
+
+export async function updateDeploymentStatus(submissionId: string, status: string) {
+  const { error } = await supabase
+    .from("deployments")
+    .update({ status })
+    .eq("submission_id", submissionId);
+
+  if (error) throw error;
+}
+
+export async function getOrganizations() {
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("id, name, type, municipality")
+    .order("name");
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getBeneficiariesByBarangay() {
   const { data, error } = await supabase
     .from("deployments")
