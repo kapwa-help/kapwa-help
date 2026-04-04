@@ -259,66 +259,66 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM deployments WHERE notes = 'demo-seed' LIMIT 1) THEN
 
     -- --- Art Relief Mobile Kitchen (Bacnotan) — 8 deployments ---
-    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_art_relief, v_meals,    v_brgy_bacnotan, 520, 'meals',  16.7345, 120.3475, '2024-11-11', 8, 6.0, 'demo-seed'),
-      (v_art_relief, v_meals,    v_brgy_dili,     480, 'meals',  16.7400, 120.3530, '2024-11-13', 7, 5.5, 'demo-seed'),
-      (v_art_relief, v_meals,    v_brgy_guerrero, 450, 'meals',  16.7260, 120.3550, '2024-11-16', 6, 5.0, 'demo-seed'),
-      (v_art_relief, v_relief,   v_brgy_bacnotan, 380, 'packs',  16.7340, 120.3500, '2024-11-14', 5, 4.0, 'demo-seed'),
-      (v_art_relief, v_relief,   v_brgy_dili,     340, 'packs',  16.7420, 120.3510, '2024-11-17', 4, 3.5, 'demo-seed'),
-      (v_art_relief, v_drinking, v_brgy_guerrero, 220, 'cases',  16.7255, 120.3535, '2024-11-15', 3, 2.0, 'demo-seed'),
-      (v_art_relief, v_drinking, v_brgy_bacnotan, 180, 'cases',  16.7330, 120.3495, '2024-11-18', 3, 2.0, 'demo-seed'),
-      (v_art_relief, v_kiddie,   v_brgy_dili,     120, 'packs',  16.7415, 120.3525, '2024-11-19', 2, 1.5, 'demo-seed');
+    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_art_relief, v_meals,    v_brgy_bacnotan, 520, 'meals',  16.7345, 120.3475, '2024-11-11', 8, 6.0, 'demo-seed', 'received'),
+      (v_art_relief, v_meals,    v_brgy_dili,     480, 'meals',  16.7400, 120.3530, '2024-11-13', 7, 5.5, 'demo-seed', 'received'),
+      (v_art_relief, v_meals,    v_brgy_guerrero, 450, 'meals',  16.7260, 120.3550, '2024-11-16', 6, 5.0, 'demo-seed', 'received'),
+      (v_art_relief, v_relief,   v_brgy_bacnotan, 380, 'packs',  16.7340, 120.3500, '2024-11-14', 5, 4.0, 'demo-seed', 'received'),
+      (v_art_relief, v_relief,   v_brgy_dili,     340, 'packs',  16.7420, 120.3510, '2024-11-17', 4, 3.5, 'demo-seed', 'received'),
+      (v_art_relief, v_drinking, v_brgy_guerrero, 220, 'cases',  16.7255, 120.3535, '2024-11-15', 3, 2.0, 'demo-seed', 'received'),
+      (v_art_relief, v_drinking, v_brgy_bacnotan, 180, 'cases',  16.7330, 120.3495, '2024-11-18', 3, 2.0, 'demo-seed', 'received'),
+      (v_art_relief, v_kiddie,   v_brgy_dili,     120, 'packs',  16.7415, 120.3525, '2024-11-19', 2, 1.5, 'demo-seed', 'received');
 
     -- --- EcoNest Sustainable Food Packaging (Bauang) — 7 deployments ---
-    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_econest, v_relief,       v_brgy_central_east, 420, 'packs',     16.5380, 120.3400, '2024-11-12', 6, 4.5, 'demo-seed'),
-      (v_econest, v_relief,       v_brgy_paringao,     380, 'packs',     16.5150, 120.3290, '2024-11-14', 5, 4.0, 'demo-seed'),
-      (v_econest, v_relief,       v_brgy_baccuit,      350, 'packs',     16.5465, 120.3320, '2024-11-17', 5, 3.5, 'demo-seed'),
-      (v_econest, v_meals,        v_brgy_central_east, 310, 'meals',     16.5375, 120.3390, '2024-11-15', 4, 3.0, 'demo-seed'),
-      (v_econest, v_meals,        v_brgy_paringao,     280, 'meals',     16.5145, 120.3275, '2024-11-18', 4, 3.0, 'demo-seed'),
-      (v_econest, v_cleaning,     v_brgy_baccuit,      160, 'kits',      16.5455, 120.3305, '2024-11-19', 3, 2.0, 'demo-seed'),
-      (v_econest, v_construction, v_brgy_central_east, 120, 'sheets',    16.5360, 120.3410, '2024-11-20', 3, 2.5, 'demo-seed');
+    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_econest, v_relief,       v_brgy_central_east, 420, 'packs',     16.5380, 120.3400, '2024-11-12', 6, 4.5, 'demo-seed', 'received'),
+      (v_econest, v_relief,       v_brgy_paringao,     380, 'packs',     16.5150, 120.3290, '2024-11-14', 5, 4.0, 'demo-seed', 'received'),
+      (v_econest, v_relief,       v_brgy_baccuit,      350, 'packs',     16.5465, 120.3320, '2024-11-17', 5, 3.5, 'demo-seed', 'received'),
+      (v_econest, v_meals,        v_brgy_central_east, 310, 'meals',     16.5375, 120.3390, '2024-11-15', 4, 3.0, 'demo-seed', 'received'),
+      (v_econest, v_meals,        v_brgy_paringao,     280, 'meals',     16.5145, 120.3275, '2024-11-18', 4, 3.0, 'demo-seed', 'received'),
+      (v_econest, v_cleaning,     v_brgy_baccuit,      160, 'kits',      16.5455, 120.3305, '2024-11-19', 3, 2.0, 'demo-seed', 'received'),
+      (v_econest, v_construction, v_brgy_central_east, 120, 'sheets',    16.5360, 120.3410, '2024-11-20', 3, 2.5, 'demo-seed', 'received');
 
     -- --- DOERS (Luna) — 6 deployments ---
-    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_doers, v_meals,        v_brgy_nalvo,        460, 'meals',   16.8090, 120.3690, '2024-11-13', 7, 5.0, 'demo-seed'),
-      (v_doers, v_meals,        v_brgy_poblacion_lu, 420, 'meals',   16.8015, 120.3735, '2024-11-15', 6, 4.5, 'demo-seed'),
-      (v_doers, v_relief,       v_brgy_nalvo,        350, 'packs',   16.8085, 120.3675, '2024-11-16', 5, 3.5, 'demo-seed'),
-      (v_doers, v_relief,       v_brgy_poblacion_lu, 280, 'packs',   16.8010, 120.3720, '2024-11-18', 4, 3.0, 'demo-seed'),
-      (v_doers, v_water_filt,   v_brgy_nalvo,         45, 'filters', 16.8075, 120.3685, '2024-11-19', 3, 2.0, 'demo-seed'),
-      (v_doers, v_construction, v_brgy_poblacion_lu,  150, 'sheets',  16.8005, 120.3740, '2024-11-21', 4, 3.0, 'demo-seed');
+    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_doers, v_meals,        v_brgy_nalvo,        460, 'meals',   16.8090, 120.3690, '2024-11-13', 7, 5.0, 'demo-seed', 'received'),
+      (v_doers, v_meals,        v_brgy_poblacion_lu, 420, 'meals',   16.8015, 120.3735, '2024-11-15', 6, 4.5, 'demo-seed', 'received'),
+      (v_doers, v_relief,       v_brgy_nalvo,        350, 'packs',   16.8085, 120.3675, '2024-11-16', 5, 3.5, 'demo-seed', 'received'),
+      (v_doers, v_relief,       v_brgy_poblacion_lu, 280, 'packs',   16.8010, 120.3720, '2024-11-18', 4, 3.0, 'demo-seed', 'received'),
+      (v_doers, v_water_filt,   v_brgy_nalvo,         45, 'filters', 16.8075, 120.3685, '2024-11-19', 3, 2.0, 'demo-seed', 'received'),
+      (v_doers, v_construction, v_brgy_poblacion_lu,  150, 'sheets',  16.8005, 120.3740, '2024-11-21', 4, 3.0, 'demo-seed', 'received');
 
     -- --- LU Citizen Volunteers (San Juan) — 5 deployments ---
-    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_lu_volunteers, v_meals,    v_brgy_urbiztondo,   500, 'meals', 16.6690, 120.3230, '2024-11-11', 8, 6.0, 'demo-seed'),
-      (v_lu_volunteers, v_meals,    v_brgy_poblacion_sj, 480, 'meals', 16.6640, 120.3290, '2024-11-14', 7, 5.5, 'demo-seed'),
-      (v_lu_volunteers, v_relief,   v_brgy_urbiztondo,   360, 'packs', 16.6685, 120.3220, '2024-11-16', 5, 4.0, 'demo-seed'),
-      (v_lu_volunteers, v_relief,   v_brgy_poblacion_sj, 340, 'packs', 16.6630, 120.3295, '2024-11-18', 5, 3.5, 'demo-seed'),
-      (v_lu_volunteers, v_kiddie,   v_brgy_urbiztondo,   120, 'packs', 16.6675, 120.3235, '2024-11-20', 3, 2.0, 'demo-seed');
+    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_lu_volunteers, v_meals,    v_brgy_urbiztondo,   500, 'meals', 16.6690, 120.3230, '2024-11-11', 8, 6.0, 'demo-seed', 'received'),
+      (v_lu_volunteers, v_meals,    v_brgy_poblacion_sj, 480, 'meals', 16.6640, 120.3290, '2024-11-14', 7, 5.5, 'demo-seed', 'received'),
+      (v_lu_volunteers, v_relief,   v_brgy_urbiztondo,   360, 'packs', 16.6685, 120.3220, '2024-11-16', 5, 4.0, 'demo-seed', 'received'),
+      (v_lu_volunteers, v_relief,   v_brgy_poblacion_sj, 340, 'packs', 16.6630, 120.3295, '2024-11-18', 5, 3.5, 'demo-seed', 'received'),
+      (v_lu_volunteers, v_kiddie,   v_brgy_urbiztondo,   120, 'packs', 16.6675, 120.3235, '2024-11-20', 3, 2.0, 'demo-seed', 'received');
 
     -- --- La Union Surf Club (Bauang) — 5 deployments ---
-    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_lu_surf, v_construction, v_brgy_baccuit,      250, 'sheets', 16.5470, 120.3315, '2024-11-12', 6, 5.0, 'demo-seed'),
-      (v_lu_surf, v_construction, v_brgy_paringao,     200, 'sheets', 16.5135, 120.3285, '2024-11-15', 5, 4.5, 'demo-seed'),
-      (v_lu_surf, v_relief,       v_brgy_central_east, 320, 'packs',  16.5365, 120.3405, '2024-11-17', 4, 3.0, 'demo-seed'),
-      (v_lu_surf, v_relief,       v_brgy_baccuit,      280, 'packs',  16.5458, 120.3318, '2024-11-19', 4, 3.0, 'demo-seed'),
-      (v_lu_surf, v_meals,        v_brgy_paringao,     260, 'meals',  16.5142, 120.3278, '2024-11-20', 3, 2.5, 'demo-seed');
+    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_lu_surf, v_construction, v_brgy_baccuit,      250, 'sheets', 16.5470, 120.3315, '2024-11-12', 6, 5.0, 'demo-seed', 'received'),
+      (v_lu_surf, v_construction, v_brgy_paringao,     200, 'sheets', 16.5135, 120.3285, '2024-11-15', 5, 4.5, 'demo-seed', 'received'),
+      (v_lu_surf, v_relief,       v_brgy_central_east, 320, 'packs',  16.5365, 120.3405, '2024-11-17', 4, 3.0, 'demo-seed', 'received'),
+      (v_lu_surf, v_relief,       v_brgy_baccuit,      280, 'packs',  16.5458, 120.3318, '2024-11-19', 4, 3.0, 'demo-seed', 'received'),
+      (v_lu_surf, v_meals,        v_brgy_paringao,     260, 'meals',  16.5142, 120.3278, '2024-11-20', 3, 2.5, 'demo-seed', 'received');
 
     -- --- Additional Waves4Water deployments (spread to new areas) ---
-    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_waves4water, v_water_filt, v_brgy_bacnotan,    55, 'filters', 16.7338, 120.3492, '2024-11-13', 4, 3.0, 'demo-seed'),
-      (v_waves4water, v_water_filt, v_brgy_central_east, 48, 'filters', 16.5372, 120.3398, '2024-11-15', 3, 2.5, 'demo-seed'),
-      (v_waves4water, v_water_filt, v_brgy_nalvo,        42, 'filters', 16.8082, 120.3678, '2024-11-17', 3, 2.0, 'demo-seed'),
-      (v_waves4water, v_drinking,  v_brgy_guerrero,    200, 'cases',   16.7248, 120.3538, '2024-11-18', 3, 2.0, 'demo-seed'),
-      (v_waves4water, v_drinking,  v_brgy_paringao,    180, 'cases',   16.5138, 120.3282, '2024-11-20', 2, 1.5, 'demo-seed');
+    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_waves4water, v_water_filt, v_brgy_bacnotan,    55, 'filters', 16.7338, 120.3492, '2024-11-13', 4, 3.0, 'demo-seed', 'received'),
+      (v_waves4water, v_water_filt, v_brgy_central_east, 48, 'filters', 16.5372, 120.3398, '2024-11-15', 3, 2.5, 'demo-seed', 'received'),
+      (v_waves4water, v_water_filt, v_brgy_nalvo,        42, 'filters', 16.8082, 120.3678, '2024-11-17', 3, 2.0, 'demo-seed', 'received'),
+      (v_waves4water, v_drinking,  v_brgy_guerrero,    200, 'cases',   16.7248, 120.3538, '2024-11-18', 3, 2.0, 'demo-seed', 'received'),
+      (v_waves4water, v_drinking,  v_brgy_paringao,    180, 'cases',   16.5138, 120.3282, '2024-11-20', 2, 1.5, 'demo-seed', 'received');
 
     -- --- Medical Supplies & Emergency Kits (various orgs) ---
-    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_art_relief,    v_medical,   v_brgy_bacnotan,     185, 'kits',  16.7335, 120.3485, '2024-11-22', 3, 2.0, 'demo-seed'),
-      (v_econest,       v_medical,   v_brgy_central_east, 160, 'kits',  16.5368, 120.3392, '2024-11-23', 3, 2.0, 'demo-seed'),
-      (v_doers,         v_emergency, v_brgy_poblacion_lu, 140, 'kits',  16.8012, 120.3732, '2024-11-22', 4, 2.5, 'demo-seed'),
-      (v_lu_volunteers, v_emergency, v_brgy_poblacion_sj, 130, 'kits',  16.6638, 120.3292, '2024-11-23', 3, 2.0, 'demo-seed'),
-      (v_lu_surf,       v_medical,   v_brgy_baccuit,      120, 'kits',  16.5462, 120.3312, '2024-11-24', 2, 1.5, 'demo-seed');
+    INSERT INTO deployments (organization_id, aid_category_id, barangay_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_art_relief,    v_medical,   v_brgy_bacnotan,     185, 'kits',  16.7335, 120.3485, '2024-11-22', 3, 2.0, 'demo-seed', 'received'),
+      (v_econest,       v_medical,   v_brgy_central_east, 160, 'kits',  16.5368, 120.3392, '2024-11-23', 3, 2.0, 'demo-seed', 'received'),
+      (v_doers,         v_emergency, v_brgy_poblacion_lu, 140, 'kits',  16.8012, 120.3732, '2024-11-22', 4, 2.5, 'demo-seed', 'received'),
+      (v_lu_volunteers, v_emergency, v_brgy_poblacion_sj, 130, 'kits',  16.6638, 120.3292, '2024-11-23', 3, 2.0, 'demo-seed', 'received'),
+      (v_lu_surf,       v_medical,   v_brgy_baccuit,      120, 'kits',  16.5462, 120.3312, '2024-11-24', 2, 1.5, 'demo-seed', 'received');
 
   END IF;
 
@@ -437,33 +437,33 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM deployments WHERE notes = 'demo-seed-linked' LIMIT 1) THEN
 
     -- Thread 1: DOERS responded to Nalvo shelter crisis
-    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_event, v_doers, v_construction, v_brgy_nalvo, v_sub_nalvo_resolved,  200, 'sheets', 16.8090, 120.3690, '2024-11-13', 6, 5.0, 'demo-seed-linked'),
-      (v_event, v_doers, v_construction, v_brgy_nalvo, v_sub_nalvo_completed, 150, 'sheets', 16.8078, 120.3698, '2024-11-15', 5, 4.0, 'demo-seed-linked');
+    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_event, v_doers, v_construction, v_brgy_nalvo, v_sub_nalvo_resolved,  200, 'sheets', 16.8090, 120.3690, '2024-11-13', 6, 5.0, 'demo-seed-linked', 'received'),
+      (v_event, v_doers, v_construction, v_brgy_nalvo, v_sub_nalvo_completed, 150, 'sheets', 16.8078, 120.3698, '2024-11-15', 5, 4.0, 'demo-seed-linked', 'received');
 
     -- Thread 1: Art Relief sending materials to upstream families
-    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_event, v_art_relief, v_construction, v_brgy_poblacion_lu, v_sub_nalvo_intransit, 100, 'sheets', 16.8015, 120.3730, '2024-11-16', 4, 3.0, 'demo-seed-linked');
+    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_event, v_art_relief, v_construction, v_brgy_poblacion_lu, v_sub_nalvo_intransit, 100, 'sheets', 16.8015, 120.3730, '2024-11-16', 4, 3.0, 'demo-seed-linked', 'pending');
 
     -- Thread 2: La Union Surf Club responded to Baccuit medical need
-    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_event, v_lu_surf, v_medical, v_brgy_baccuit, v_sub_bauang_resolved, 120, 'kits', 16.5468, 120.3318, '2024-11-12', 3, 2.0, 'demo-seed-linked');
+    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_event, v_lu_surf, v_medical, v_brgy_baccuit, v_sub_bauang_resolved, 120, 'kits', 16.5468, 120.3318, '2024-11-12', 3, 2.0, 'demo-seed-linked', 'received');
 
     -- Thread 2: EcoNest responded to Central East medical need
-    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_event, v_econest, v_medical, v_brgy_central_east, v_sub_bauang_completed, 160, 'kits', 16.5378, 120.3395, '2024-11-14', 3, 2.0, 'demo-seed-linked');
+    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_event, v_econest, v_medical, v_brgy_central_east, v_sub_bauang_completed, 160, 'kits', 16.5378, 120.3395, '2024-11-14', 3, 2.0, 'demo-seed-linked', 'received');
 
     -- Thread 2: LU Citizen Volunteers en route to Paringao with emergency kits
-    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_event, v_lu_volunteers, v_emergency, v_brgy_paringao, v_sub_bauang_intransit, 80, 'kits', 16.5145, 120.3282, '2024-11-16', 4, 3.0, 'demo-seed-linked');
+    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_event, v_lu_volunteers, v_emergency, v_brgy_paringao, v_sub_bauang_intransit, 80, 'kits', 16.5145, 120.3282, '2024-11-16', 4, 3.0, 'demo-seed-linked', 'pending');
 
     -- Thread 3: LU Citizen Volunteers delivered meals to Poblacion SJ
-    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_event, v_lu_volunteers, v_meals, v_brgy_poblacion_sj, v_sub_sanjuan_completed, 480, 'meals', 16.6642, 120.3288, '2024-11-13', 7, 5.5, 'demo-seed-linked');
+    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_event, v_lu_volunteers, v_meals, v_brgy_poblacion_sj, v_sub_sanjuan_completed, 480, 'meals', 16.6642, 120.3288, '2024-11-13', 7, 5.5, 'demo-seed-linked', 'received');
 
     -- Thread 3: LU Citizen Volunteers sending relief goods to Urbiztondo
-    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes) VALUES
-      (v_event, v_lu_volunteers, v_relief, v_brgy_urbiztondo, v_sub_sanjuan_intransit, 350, 'packs', 16.6688, 120.3225, '2024-11-15', 5, 4.0, 'demo-seed-linked');
+    INSERT INTO deployments (event_id, organization_id, aid_category_id, barangay_id, submission_id, quantity, unit, lat, lng, date, volunteer_count, hours, notes, status) VALUES
+      (v_event, v_lu_volunteers, v_relief, v_brgy_urbiztondo, v_sub_sanjuan_intransit, 350, 'packs', 16.6688, 120.3225, '2024-11-15', 5, 4.0, 'demo-seed-linked', 'pending');
 
   END IF;
 

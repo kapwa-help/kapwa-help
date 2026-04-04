@@ -85,7 +85,29 @@
     "close": "Serraan ti detalye a panel",
     "statusLabel": "Estado",
     "updating": "Updating...",
-    "updateError": "Napaay nga i-update ti kasasaad. Padasem manen."
+    "updateError": "Napaay nga i-update ti kasasaad. Padasem manen.",
+    "addDispatchPhoto": "Add Dispatch Photo",
+    "addDeliveryPhoto": "Add Delivery Photo",
+    "photoAdded": "Naikapet ti ladawan",
+    "photoComingSoon": "Mabiit nga umay ti Photo upload"
+  },
+  "ClaimForm": {
+    "respondButton": "Sungbatan daytoy a Kasapulan",
+    "title": "I-claim daytoy a Kasapulan",
+    "organization": "Organisasion",
+    "organizationPlaceholder": "Pilien ti organisasion",
+    "aidCategory": "Kategoria ti Tulong",
+    "aidCategoryPlaceholder": "Pilien ti kita ti tulong",
+    "quantity": "Kaadu",
+    "quantityPlaceholder": "Gatad",
+    "unit": "Yunit",
+    "unitPlaceholder": "e.g. pakete, kit",
+    "notes": "Dagiti Pakaammo",
+    "notesPlaceholder": "Aniaman a detalye ti koordinasion...",
+    "submit": "Claim & Panag-dispat",
+    "submitting": "Claiming...",
+    "success": "Need claimed — adda iti dalan ti tulong",
+    "error": "Saan a mabalin nga ag-claim. Kitaem ti koneksionmo ket padasem manen."
   },
   "Stories": {
     "comingSoon": "Coming soon — estoria ti komunidad, nasursuro, ken journal."

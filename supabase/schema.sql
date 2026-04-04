@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS deployments (
   organization_id uuid NOT NULL REFERENCES organizations(id),
   aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
   barangay_id     uuid REFERENCES barangays(id),
-  submission_id   uuid REFERENCES submissions(id),
+  submission_id   uuid UNIQUE REFERENCES submissions(id),
   quantity        integer,
   unit            text,
   recipient       text,
@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS deployments (
   volunteer_count integer,
   hours           decimal(5,1),
   notes           text,
+  status          text NOT NULL DEFAULT 'pending'
+                    CHECK (status IN ('pending', 'received')),
   created_at      timestamptz DEFAULT now()
 );
 

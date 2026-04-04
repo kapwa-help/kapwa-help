@@ -134,7 +134,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
         <div className="space-y-4">
           {/* Desktop: pin detail replaces sidebar content */}
           {selectedPoint ? (
-            <div className="hidden lg:block">
+            <div className="hidden lg:block lg:max-h-[28rem] lg:overflow-y-auto">
               <PinDetailSheet
                 point={selectedPoint}
                 onClose={() => setSelectedPoint(null)}
