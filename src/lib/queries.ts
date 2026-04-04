@@ -12,7 +12,8 @@ export async function getTotalDonations() {
 export async function getTotalBeneficiaries() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("quantity");
+    .select("quantity")
+    .eq("status", "received");
 
   if (error) throw error;
   return data.reduce((sum, row) => sum + (row.quantity ?? 0), 0);
@@ -21,7 +22,8 @@ export async function getTotalBeneficiaries() {
 export async function getVolunteerCount() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("volunteer_count");
+    .select("volunteer_count")
+    .eq("status", "received");
 
   if (error) throw error;
   return data.reduce((sum, row) => sum + (row.volunteer_count ?? 0), 0);
@@ -48,7 +50,8 @@ export async function getDonationsByOrganization() {
 export async function getDeploymentHubs() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("organization_id, organizations(name, municipality)");
+    .select("organization_id, organizations(name, municipality)")
+    .eq("status", "received");
 
   if (error) throw error;
 
@@ -70,7 +73,8 @@ export async function getDeploymentHubs() {
 export async function getGoodsByCategory() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("quantity, aid_categories(name, icon)");
+    .select("quantity, aid_categories(name, icon)")
+    .eq("status", "received");
 
   if (error) throw error;
 
@@ -94,7 +98,8 @@ export async function getDeploymentMapPoints() {
     .from("deployments")
     .select("lat, lng, quantity, unit, organizations(name), aid_categories(name)")
     .not("lat", "is", null)
-    .not("lng", "is", null);
+    .not("lng", "is", null)
+    .eq("status", "received");
 
   if (error) throw error;
   return data.map((row) => ({
@@ -277,7 +282,8 @@ export async function getBeneficiariesByBarangay() {
   const { data, error } = await supabase
     .from("deployments")
     .select("quantity, barangays(name, municipality)")
-    .not("barangay_id", "is", null);
+    .not("barangay_id", "is", null)
+    .eq("status", "received");
 
   if (error) throw error;
 

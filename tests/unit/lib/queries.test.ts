@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 import { supabase } from "@/lib/supabase";
-import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations } from "@/lib/queries";
+import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations, getTotalBeneficiaries, getVolunteerCount, getDeploymentHubs, getGoodsByCategory, getDeploymentMapPoints, getBeneficiariesByBarangay } from "@/lib/queries";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -205,5 +205,70 @@ describe("getOrganizations", () => {
     const result = await getOrganizations();
     expect(supabase.from).toHaveBeenCalledWith("organizations");
     expect(result).toEqual(mockData);
+  });
+});
+
+describe("Relief queries filter by received status", () => {
+  it("getTotalBeneficiaries filters by received", async () => {
+    const mockEq = vi.fn().mockResolvedValue({ data: [{ quantity: 50 }], error: null });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({ eq: mockEq }),
+    } as never);
+
+    await getTotalBeneficiaries();
+    expect(mockEq).toHaveBeenCalledWith("status", "received");
+  });
+
+  it("getVolunteerCount filters by received", async () => {
+    const mockEq = vi.fn().mockResolvedValue({ data: [{ volunteer_count: 5 }], error: null });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({ eq: mockEq }),
+    } as never);
+
+    await getVolunteerCount();
+    expect(mockEq).toHaveBeenCalledWith("status", "received");
+  });
+
+  it("getDeploymentHubs filters by received", async () => {
+    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({ eq: mockEq }),
+    } as never);
+
+    await getDeploymentHubs();
+    expect(mockEq).toHaveBeenCalledWith("status", "received");
+  });
+
+  it("getGoodsByCategory filters by received", async () => {
+    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({ eq: mockEq }),
+    } as never);
+
+    await getGoodsByCategory();
+    expect(mockEq).toHaveBeenCalledWith("status", "received");
+  });
+
+  it("getDeploymentMapPoints filters by received", async () => {
+    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const mockNot2 = vi.fn().mockReturnValue({ eq: mockEq });
+    const mockNot1 = vi.fn().mockReturnValue({ not: mockNot2 });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({ not: mockNot1 }),
+    } as never);
+
+    await getDeploymentMapPoints();
+    expect(mockEq).toHaveBeenCalledWith("status", "received");
+  });
+
+  it("getBeneficiariesByBarangay filters by received", async () => {
+    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const mockNot = vi.fn().mockReturnValue({ eq: mockEq });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({ not: mockNot }),
+    } as never);
+
+    await getBeneficiariesByBarangay();
+    expect(mockEq).toHaveBeenCalledWith("status", "received");
   });
 });
