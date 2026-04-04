@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getOrganizations,
@@ -15,6 +15,7 @@ type Props = {
 
 export default function ClaimForm({ point, onClaimed }: Props) {
   const { t } = useTranslation();
+  const formRef = useRef<HTMLFormElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [submitting, setSubmitting] = useState(false);
@@ -44,6 +45,9 @@ export default function ClaimForm({ point, onClaimed }: Props) {
 
   async function handleOpen() {
     setIsOpen(true);
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+    });
     try {
       const [orgData, catData] = await Promise.all([
         getOrganizations(),
@@ -98,7 +102,7 @@ export default function ClaimForm({ point, onClaimed }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-3">
       <h4 className="text-sm font-semibold text-neutral-50">
         {t("ClaimForm.title")}
       </h4>
