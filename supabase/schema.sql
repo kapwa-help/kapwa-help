@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   gap_category    text NOT NULL CHECK (gap_category IN ('lunas', 'sustenance', 'shelter')),
   lat             decimal(9,6),
   lng             decimal(9,6),
+  geohash         text,
   -- Access / passability (scope §5.A)
   access_status   text NOT NULL CHECK (access_status IN ('truck', '4x4', 'boat', 'foot_only', 'cut_off')),
   -- Need details

@@ -193,6 +193,7 @@ export interface SubmissionInsert {
   urgency: string;
   lat: number | null;
   lng: number | null;
+  geohash?: string | null;
   submission_photo_url?: string | null;
   dispatch_photo_url?: string | null;
   delivery_photo_url?: string | null;
