@@ -46,7 +46,7 @@
     "noNeedsData": "Wala pang kailangang iulat",
     "statusPending": "Nakabinbin",
     "statusVerified": "Na-verify",
-    "statusInTransit": "In transit",
+    "statusInTransit": "Nasa transit",
     "statusCompleted": "Nakumpleto",
     "urgencyLow": "Mababa",
     "urgencyMedium": "Katamtaman",
@@ -85,7 +85,29 @@
     "close": "Isara ang panel ng detalye",
     "statusLabel": "Katayuan",
     "updating": "Updating...",
-    "updateError": "Nabigong i-update ang status. Subukan muli."
+    "updateError": "Nabigong i-update ang status. Subukan muli.",
+    "addDispatchPhoto": "Magdagdag ng Dispatch Photo",
+    "addDeliveryPhoto": "Magdagdag ng Delivery Photo",
+    "photoAdded": "Naka-attach na larawan",
+    "photoComingSoon": "Paparating na ang pag-upload ng larawan"
+  },
+  "ClaimForm": {
+    "respondButton": "Tumugon sa Pangangailangan na ito",
+    "title": "I-claim ang Pangangailangan na ito",
+    "organization": "Organisasyon",
+    "organizationPlaceholder": "Pumili ng organisasyon",
+    "aidCategory": "Kategorya ng Tulong",
+    "aidCategoryPlaceholder": "Pumili ng uri ng tulong",
+    "quantity": "Dami",
+    "quantityPlaceholder": "Halaga",
+    "unit": "Yunit",
+    "unitPlaceholder": "hal. mga pakete, mga kit",
+    "notes": "Mga Tala",
+    "notesPlaceholder": "Anumang mga detalye ng koordinasyon...",
+    "submit": "Claim at Dispatch",
+    "submitting": "Claiming...",
+    "success": "Kailangang i-claim — parating na ang tulong",
+    "error": "Hindi ma-claim. Suriin ang iyong koneksyon at subukang muli."
   },
   "Stories": {
     "comingSoon": "Paparating na — mga kuwento ng komunidad, mga natutunan, at mga journal."

@@ -85,7 +85,29 @@
     "close": "Close detail panel",
     "statusLabel": "Status",
     "updating": "Updating...",
-    "updateError": "Failed to update status. Try again."
+    "updateError": "Failed to update status. Try again.",
+    "addDispatchPhoto": "Add Dispatch Photo",
+    "addDeliveryPhoto": "Add Delivery Photo",
+    "photoAdded": "Photo attached",
+    "photoComingSoon": "Photo upload coming soon"
+  },
+  "ClaimForm": {
+    "respondButton": "Respond to this Need",
+    "title": "Claim this Need",
+    "organization": "Organization",
+    "organizationPlaceholder": "Select organization",
+    "aidCategory": "Aid Category",
+    "aidCategoryPlaceholder": "Select aid type",
+    "quantity": "Quantity",
+    "quantityPlaceholder": "Amount",
+    "unit": "Unit",
+    "unitPlaceholder": "e.g. packs, kits",
+    "notes": "Notes",
+    "notesPlaceholder": "Any coordination details...",
+    "submit": "Claim & Dispatch",
+    "submitting": "Claiming...",
+    "success": "Need claimed — aid is on the way",
+    "error": "Could not claim. Check your connection and try again."
   },
   "Stories": {
     "comingSoon": "Coming soon — community stories, learnings, and journals."
