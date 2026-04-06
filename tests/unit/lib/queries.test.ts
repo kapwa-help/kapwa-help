@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 import { supabase } from "@/lib/supabase";
-import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations, getTotalBeneficiaries, getGoodsByCategory, insertPurchase, insertDonation } from "@/lib/queries";
+import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations, getTotalBeneficiaries, getGoodsByCategory, insertPurchase, insertDonation, getDeploymentHubs, getHazards, insertHazard } from "@/lib/queries";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -275,5 +275,115 @@ describe("insertDonation", () => {
       notes: null,
     })).resolves.toBeUndefined();
     expect(supabase.from).toHaveBeenCalledWith("donations");
+  });
+});
+
+describe("getDeploymentHubs", () => {
+  it("returns organizations with lat/lng as hubs with inventory", async () => {
+    const mockOrgs = [
+      { id: "org-1", name: "DSWD", municipality: "San Fernando", lat: 16.6159, lng: 120.3209 },
+    ];
+    const mockPurchases = [
+      { organization_id: "org-1", quantity: 100, aid_categories: { name: "Hot Meals", icon: "🍲" } },
+    ];
+    const mockDeployments = [
+      { organization_id: "org-1", quantity: 30, aid_categories: { name: "Hot Meals", icon: "🍲" } },
+    ];
+
+    vi.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === "organizations") {
+        return {
+          select: vi.fn().mockReturnValue({
+            not: vi.fn().mockReturnValue({
+              not: vi.fn().mockResolvedValue({ data: mockOrgs, error: null }),
+            }),
+          }),
+        } as never;
+      }
+      if (table === "purchases") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: mockPurchases, error: null }),
+          }),
+        } as never;
+      }
+      if (table === "deployments") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ data: mockDeployments, error: null }),
+            }),
+          }),
+        } as never;
+      }
+      return {} as never;
+    });
+
+    const result = await getDeploymentHubs("event-1");
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: "org-1",
+      name: "DSWD",
+      lat: 16.6159,
+      lng: 120.3209,
+    });
+    expect(result[0].inventory[0]).toMatchObject({
+      categoryName: "Hot Meals",
+      available: 70,
+    });
+  });
+});
+
+describe("getHazards", () => {
+  it("returns active hazards for an event", async () => {
+    const mockData = [
+      {
+        id: "h1",
+        hazard_type: "flood",
+        description: "Deep flood",
+        photo_url: null,
+        latitude: 16.63,
+        longitude: 120.34,
+        status: "active",
+        reported_by: "Juan",
+        created_at: "2024-01-01T00:00:00Z",
+      },
+    ];
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+        }),
+      }),
+    } as never);
+
+    const result = await getHazards("event-1");
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: "h1",
+      hazardType: "flood",
+      description: "Deep flood",
+      lat: 16.63,
+      lng: 120.34,
+      status: "active",
+      reportedBy: "Juan",
+    });
+  });
+});
+
+describe("insertHazard", () => {
+  it("inserts a hazard", async () => {
+    vi.mocked(supabase.from).mockReturnValue({
+      insert: vi.fn().mockResolvedValue({ error: null }),
+    } as never);
+
+    await expect(insertHazard({
+      hazard_type: "flood",
+      description: "Test flood",
+      latitude: 16.63,
+      longitude: 120.34,
+      reported_by: null,
+    })).resolves.toBeUndefined();
+    expect(supabase.from).toHaveBeenCalledWith("hazards");
   });
 });

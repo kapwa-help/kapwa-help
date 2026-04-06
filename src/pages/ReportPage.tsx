@@ -4,10 +4,11 @@ import Header from "@/components/Header";
 import SubmitForm from "@/components/SubmitForm";
 import DonationForm from "@/components/DonationForm";
 import PurchaseForm from "@/components/PurchaseForm";
+import HazardForm from "@/components/HazardForm";
 
 export function ReportPage() {
   const { t } = useTranslation();
-  const [formType, setFormType] = useState<"need" | "donation" | "purchase">("need");
+  const [formType, setFormType] = useState<"need" | "donation" | "purchase" | "hazard">("need");
 
   return (
     <div className="min-h-dvh bg-base">
@@ -29,6 +30,7 @@ export function ReportPage() {
             <option value="need">{t("ReportForm.submitNeed")}</option>
             <option value="donation">{t("ReportForm.reportDonation")}</option>
             <option value="purchase">{t("ReportForm.reportPurchase")}</option>
+            <option value="hazard">{t("ReportForm.reportHazard")}</option>
           </select>
         </div>
 
@@ -36,6 +38,7 @@ export function ReportPage() {
         {formType === "need" && <SubmitForm />}
         {formType === "donation" && <DonationForm />}
         {formType === "purchase" && <PurchaseForm />}
+        {formType === "hazard" && <HazardForm />}
       </main>
     </div>
   );

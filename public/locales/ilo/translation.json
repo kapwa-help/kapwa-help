@@ -15,7 +15,9 @@
     "relief": "Operasion ti Relief",
     "stories": "Dagiti Estoria",
     "deployments": "Dagiti pannakaipakat",
-    "reliefOps": "Relief Ops"
+    "reliefOps": "Relief Ops",
+    "reliefMap": "Mapa ti Relief",
+    "transparency": "Kinalawag"
   },
   "Dashboard": {
     "hero": "Koordinasion ti Tulong iti Komunidad",
@@ -138,12 +140,72 @@
     "purchased": "nagatang",
     "deployed": "naipakat"
   },
+  "ReliefMap": {
+    "activeNeeds": "Aktibo a Kasapulan",
+    "hubs": "Dagiti Hub",
+    "hazards": "Dagiti Peligro",
+    "legend": "Tanda",
+    "layerNeeds": "Kasapulan",
+    "layerHubs": "Dagiti Hub ti Panag-deploy",
+    "layerHazards": "Dagiti Peligro",
+    "statusPending": "Naisardeng biit",
+    "statusVerified": "Naberipikado",
+    "statusInTransit": "Iti Transit",
+    "statusCompleted": "Nalpasen"
+  },
+  "HubDetail": {
+    "inventory": "Magun-od nga Imbentaryo",
+    "noInventory": "Awan ti datos ti imbentaryo",
+    "municipality": "Munisipio"
+  },
+  "HazardDetail": {
+    "type": "Kita ti Peligro",
+    "description": "Panangiladawan",
+    "reportedBy": "Impadamag Ni",
+    "reported": "Naipadamag",
+    "flood": "Layos",
+    "landslide": "Panagreggaay ti daga",
+    "road_blocked": "Nabara ti Kalsada",
+    "bridge_out": "Rangtay nga Rummuar",
+    "electrical_hazard": "Peligro ti Kuriente",
+    "other": "Sabali pay",
+    "markResolved": "Narisut ni Mark"
+  },
+  "HazardForm": {
+    "hazardType": "Kita ti Peligro",
+    "description": "Panangiladawan",
+    "descriptionPlaceholder": "Iladawan ti peggad...",
+    "photo": "Ladawan (opsional) .",
+    "reportedBy": "Ti Naganmo (opsional) .",
+    "reportedByPlaceholder": "Opsional — para iti panangsurot",
+    "submit": "Ireport ti Peligro",
+    "submitting": "Submitting...",
+    "success": "Naballigi ti impadamag ti Hazard!",
+    "error": "Napaay a nangipadamag iti peggad",
+    "flood": "Layos",
+    "landslide": "Panagreggaay ti daga",
+    "road_blocked": "Nabara ti Kalsada",
+    "bridge_out": "Rangtay nga Rummuar",
+    "electrical_hazard": "Peligro ti Kuriente",
+    "other": "Sabali pay"
+  },
+  "Transparency": {
+    "title": "Kinalawag ti Relief",
+    "totalDonations": "Dagup a Donasion",
+    "totalSpent": "Dagup a Nagasto",
+    "availableBalance": "Magun-od a Balanse",
+    "barangayEquity": "Panagwarasto ti Tulong ti Barangay",
+    "barangay": "Barangay",
+    "totalReceived": "Dagup ti Naawat",
+    "categories": "Dagiti Kategoria"
+  },
   "ReportForm": {
     "title": "Ipadamag",
     "selectorLabel": "Ania ti kayatmo nga ireport?",
     "submitNeed": "Mangisubmitir iti Kasapulan",
     "reportDonation": "Ireport ti Donasion",
-    "reportPurchase": "Ireport ti Gatang"
+    "reportPurchase": "Ireport ti Gatang",
+    "reportHazard": "Ireport ti Peligro"
   },
   "DonationForm": {
     "organization": "Organisasion",

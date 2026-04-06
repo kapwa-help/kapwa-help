@@ -15,7 +15,9 @@
     "relief": "Mga Relief Operations",
     "stories": "Mga kwento",
     "deployments": "Mga deployment",
-    "reliefOps": "Relief Ops"
+    "reliefOps": "Relief Ops",
+    "reliefMap": "Relief Map",
+    "transparency": "Transparency"
   },
   "Dashboard": {
     "hero": "Koordinasyon ng Tulong sa Komunidad",
@@ -138,12 +140,72 @@
     "purchased": "binili",
     "deployed": "ipinakalat"
   },
+  "ReliefMap": {
+    "activeNeeds": "Mga Aktibong Pangangailangan",
+    "hubs": "Mga hub",
+    "hazards": "Mga panganib",
+    "legend": "Alamat",
+    "layerNeeds": "Pangangailangan",
+    "layerHubs": "Mga Deployment Hub",
+    "layerHazards": "Mga panganib",
+    "statusPending": "Nakabinbin",
+    "statusVerified": "Na-verify",
+    "statusInTransit": "Sa Transit",
+    "statusCompleted": "Nakumpleto"
+  },
+  "HubDetail": {
+    "inventory": "Magagamit na Imbentaryo",
+    "noInventory": "Walang data ng imbentaryo",
+    "municipality": "munisipalidad"
+  },
+  "HazardDetail": {
+    "type": "Uri ng Hazard",
+    "description": "Paglalarawan",
+    "reportedBy": "Iniulat ni",
+    "reported": "Iniulat",
+    "flood": "Baha",
+    "landslide": "Pagguho ng lupa",
+    "road_blocked": "Na-block ang Daan",
+    "bridge_out": "Tulay sa Labas",
+    "electrical_hazard": "Panganib sa Elektrisidad",
+    "other": "Iba pa",
+    "markResolved": "Mark Resolved"
+  },
+  "HazardForm": {
+    "hazardType": "Uri ng Hazard",
+    "description": "Paglalarawan",
+    "descriptionPlaceholder": "Ilarawan ang panganib...",
+    "photo": "Larawan (opsyonal)",
+    "reportedBy": "Iyong Pangalan (opsyonal)",
+    "reportedByPlaceholder": "Opsyonal — para sa follow-up",
+    "submit": "Iulat ang Hazard",
+    "submitting": "Submitting...",
+    "success": "Matagumpay na naiulat ang Hazard!",
+    "error": "Nabigong mag-ulat ng panganib",
+    "flood": "Baha",
+    "landslide": "Pagguho ng lupa",
+    "road_blocked": "Na-block ang Daan",
+    "bridge_out": "Tulay sa Labas",
+    "electrical_hazard": "Panganib sa Elektrisidad",
+    "other": "Iba pa"
+  },
+  "Transparency": {
+    "title": "Relief Transparency",
+    "totalDonations": "Kabuuang mga Donasyon",
+    "totalSpent": "Kabuuang Ginastos",
+    "availableBalance": "Magagamit na Balanse",
+    "barangayEquity": "Pamamahagi ng Tulong sa Barangay",
+    "barangay": "Barangay",
+    "totalReceived": "Kabuuang Natanggap",
+    "categories": "Mga kategorya"
+  },
   "ReportForm": {
     "title": "Ulat",
     "selectorLabel": "Ano ang gusto mong iulat?",
     "submitNeed": "Magsumite ng isang Pangangailangan",
     "reportDonation": "Mag-ulat ng Donasyon",
-    "reportPurchase": "Mag-ulat ng isang Pagbili"
+    "reportPurchase": "Mag-ulat ng isang Pagbili",
+    "reportHazard": "Mag-ulat ng isang Hazard"
   },
   "DonationForm": {
     "organization": "Organisasyon",

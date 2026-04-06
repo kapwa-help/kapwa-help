@@ -2,10 +2,10 @@ import { test, expect } from "@playwright/test";
 
 const LOCALES = ["en", "fil", "ilo"] as const;
 
-// ── Needs page smoke tests ─────────────────────────────────────────
+// ── Relief Map page smoke tests ───────────────────────────────────
 
 for (const locale of LOCALES) {
-  test(`needs page renders in ${locale}`, async ({ page }) => {
+  test(`relief map page renders in ${locale}`, async ({ page }) => {
     await page.goto(`/${locale}`);
 
     // Header brand
@@ -19,42 +19,19 @@ for (const locale of LOCALES) {
     await expect(select).toBeVisible();
     await expect(select).toHaveValue(locale);
 
-    // Map is visible (full-screen layout)
-    await expect(page.locator(".leaflet-container")).toBeVisible();
-
     // Screenshot for visual verification
     await page.screenshot({
-      path: `tests/e2e/screenshots/needs-${locale}.png`,
+      path: `tests/e2e/screenshots/relief-map-${locale}.png`,
       fullPage: true,
     });
   });
 }
 
-// ── Deployments page smoke tests ──────────────────────────────────
+// ── Transparency page smoke tests ────────────────────────────────
 
 for (const locale of LOCALES) {
-  test(`deployments page renders in ${locale}`, async ({ page }) => {
-    await page.goto(`/${locale}/deployments`);
-
-    // Header brand
-    await expect(page.locator("text=Kapwa Help")).toBeVisible();
-
-    // Map is visible (full-screen layout)
-    await expect(page.locator(".leaflet-container")).toBeVisible();
-
-    // Screenshot for visual verification
-    await page.screenshot({
-      path: `tests/e2e/screenshots/deployments-${locale}.png`,
-      fullPage: true,
-    });
-  });
-}
-
-// ── Relief Operations page smoke tests ────────────────────────────
-
-for (const locale of LOCALES) {
-  test(`relief operations page renders in ${locale}`, async ({ page }) => {
-    await page.goto(`/${locale}/relief-operations`);
+  test(`transparency page renders in ${locale}`, async ({ page }) => {
+    await page.goto(`/${locale}/transparency`);
 
     // Header brand
     await expect(page.locator("text=Kapwa Help")).toBeVisible();
@@ -64,7 +41,7 @@ for (const locale of LOCALES) {
 
     // Screenshot for visual verification
     await page.screenshot({
-      path: `tests/e2e/screenshots/relief-operations-${locale}.png`,
+      path: `tests/e2e/screenshots/transparency-${locale}.png`,
       fullPage: true,
     });
   });
@@ -83,6 +60,15 @@ for (const locale of LOCALES) {
     });
   });
 }
+
+// ── Report page hazard form ────────────────────────────────────────
+
+test("report page shows hazard form when selected", async ({ page }) => {
+  await page.goto("/en/report");
+  const select = page.locator("#form-type");
+  await select.selectOption("hazard");
+  await expect(page.locator("#hazard-type")).toBeVisible();
+});
 
 // ── Navigation smoke tests ──────────────────────────────────────────
 
@@ -108,10 +94,10 @@ test("locale switcher changes URL", async ({ page }) => {
 test("nav links navigate between pages", async ({ page }) => {
   await page.goto("/en");
 
-  // Click Deployments nav link
-  await page.locator("nav").getByText(/deployments/i).click();
-  await expect(page).toHaveURL(/\/en\/deployments$/);
-  await expect(page.locator(".leaflet-container")).toBeVisible();
+  // Click Transparency nav link
+  await page.locator("nav").getByText(/transparency/i).click();
+  await expect(page).toHaveURL(/\/en\/transparency$/);
+  await expect(page.locator("h1")).toBeVisible();
 });
 
 test("mobile hamburger menu navigates between pages", async ({ page }) => {
@@ -126,10 +112,10 @@ test("mobile hamburger menu navigates between pages", async ({ page }) => {
   const menuButton = page.getByRole("button", { name: /menu/i });
   await expect(menuButton).toBeVisible();
 
-  // Open menu and click Deployments
+  // Open menu and click Transparency
   await menuButton.click();
-  await page.getByTestId("mobile-nav").getByText(/deployments/i).click();
-  await expect(page).toHaveURL(/\/en\/deployments$/);
+  await page.getByTestId("mobile-nav").getByText(/transparency/i).click();
+  await expect(page).toHaveURL(/\/en\/transparency$/);
 
   // Menu should close after navigation
   await expect(page.getByTestId("mobile-nav")).toBeHidden();

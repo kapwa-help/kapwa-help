@@ -269,6 +269,123 @@ export async function insertDonation(donation: DonationInsert) {
   if (error) throw error;
 }
 
+// --- Hub queries ---
+
+export type HubPoint = {
+  id: string;
+  name: string;
+  municipality: string | null;
+  lat: number;
+  lng: number;
+  inventory: { categoryName: string; categoryIcon: string | null; available: number }[];
+};
+
+export async function getDeploymentHubs(eventId: string): Promise<HubPoint[]> {
+  const { data: orgs, error: orgError } = await supabase
+    .from("organizations")
+    .select("id, name, municipality, lat, lng")
+    .not("lat", "is", null)
+    .not("lng", "is", null);
+  if (orgError) throw orgError;
+  if (!orgs?.length) return [];
+
+  const { data: purchases, error: purchaseError } = await supabase
+    .from("purchases")
+    .select("organization_id, quantity, aid_categories(name, icon)")
+    .eq("event_id", eventId);
+  if (purchaseError) throw purchaseError;
+
+  const { data: deployments, error: deployError } = await supabase
+    .from("deployments")
+    .select("organization_id, quantity, aid_categories(name, icon)")
+    .eq("event_id", eventId)
+    .eq("status", "received");
+  if (deployError) throw deployError;
+
+  const orgInventory = new Map<string, Map<string, { name: string; icon: string | null; purchased: number; deployed: number }>>();
+
+  for (const row of purchases ?? []) {
+    const cat = row.aid_categories as unknown as { name: string; icon: string | null };
+    if (!cat) continue;
+    if (!orgInventory.has(row.organization_id)) orgInventory.set(row.organization_id, new Map());
+    const inv = orgInventory.get(row.organization_id)!;
+    if (!inv.has(cat.name)) inv.set(cat.name, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
+    inv.get(cat.name)!.purchased += row.quantity ?? 0;
+  }
+
+  for (const row of deployments ?? []) {
+    const cat = row.aid_categories as unknown as { name: string; icon: string | null };
+    if (!cat) continue;
+    if (!orgInventory.has(row.organization_id)) orgInventory.set(row.organization_id, new Map());
+    const inv = orgInventory.get(row.organization_id)!;
+    if (!inv.has(cat.name)) inv.set(cat.name, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
+    inv.get(cat.name)!.deployed += row.quantity ?? 0;
+  }
+
+  return orgs.map((org) => ({
+    id: org.id,
+    name: org.name,
+    municipality: org.municipality,
+    lat: Number(org.lat),
+    lng: Number(org.lng),
+    inventory: Array.from(orgInventory.get(org.id)?.values() ?? []).map((item) => ({
+      categoryName: item.name,
+      categoryIcon: item.icon,
+      available: item.purchased - item.deployed,
+    })),
+  }));
+}
+
+// --- Hazard queries ---
+
+export type HazardPoint = {
+  id: string;
+  hazardType: string;
+  description: string | null;
+  photoUrl: string | null;
+  lat: number;
+  lng: number;
+  status: string;
+  reportedBy: string | null;
+  createdAt: string;
+};
+
+export async function getHazards(eventId: string): Promise<HazardPoint[]> {
+  const { data, error } = await supabase
+    .from("hazards")
+    .select("id, hazard_type, description, photo_url, latitude, longitude, status, reported_by, created_at")
+    .eq("event_id", eventId)
+    .eq("status", "active");
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    hazardType: row.hazard_type,
+    description: row.description,
+    photoUrl: row.photo_url,
+    lat: Number(row.latitude),
+    lng: Number(row.longitude),
+    status: row.status,
+    reportedBy: row.reported_by,
+    createdAt: row.created_at as string,
+  }));
+}
+
+export interface HazardInsert {
+  event_id?: string | null;
+  hazard_type: string;
+  description: string | null;
+  photo_url?: string | null;
+  latitude: number;
+  longitude: number;
+  reported_by: string | null;
+}
+
+export async function insertHazard(hazard: HazardInsert) {
+  const { error } = await supabase.from("hazards").insert(hazard);
+  if (error) throw error;
+}
+
 // --- Deployments page queries ---
 
 export async function getBarangayDistribution(eventId: string) {
