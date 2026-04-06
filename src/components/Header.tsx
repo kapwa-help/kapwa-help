@@ -49,9 +49,8 @@ export default function Header() {
   };
 
   const navItems = [
-    { to: `/${locale}`, label: t("Navigation.needs"), end: true },
-    { to: `/${locale}/deployments`, label: t("Navigation.deployments") },
-    { to: `/${locale}/relief-operations`, label: t("Navigation.reliefOps") },
+    { to: `/${locale}`, label: t("Navigation.reliefMap"), end: true },
+    { to: `/${locale}/transparency`, label: t("Navigation.transparency") },
   ];
 
   return (

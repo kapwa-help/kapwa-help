@@ -73,20 +73,18 @@ describe("Header", () => {
     expect(reportLink.querySelector("span")).toBeNull();
   });
 
-  it("renders navigation links for needs, deployments, and relief ops", () => {
+  it("renders navigation links for relief map and transparency", () => {
     renderHeader();
     // Each link appears twice (desktop nav + mobile nav)
-    expect(screen.getAllByRole("link", { name: "Navigation.needs" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "Navigation.deployments" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "Navigation.reliefOps" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Navigation.reliefMap" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Navigation.transparency" })).toHaveLength(2);
   });
 
   it("navigation links point to locale-prefixed routes", () => {
     renderHeader();
     // Check the desktop nav links (first of each pair)
-    expect(screen.getAllByRole("link", { name: "Navigation.needs" })[0]).toHaveAttribute("href", "/en");
-    expect(screen.getAllByRole("link", { name: "Navigation.deployments" })[0]).toHaveAttribute("href", "/en/deployments");
-    expect(screen.getAllByRole("link", { name: "Navigation.reliefOps" })[0]).toHaveAttribute("href", "/en/relief-operations");
+    expect(screen.getAllByRole("link", { name: "Navigation.reliefMap" })[0]).toHaveAttribute("href", "/en");
+    expect(screen.getAllByRole("link", { name: "Navigation.transparency" })[0]).toHaveAttribute("href", "/en/transparency");
   });
 
   it("renders a hamburger menu button on mobile", () => {
@@ -119,6 +117,6 @@ describe("Header", () => {
 
     const mobileNav = screen.getByTestId("mobile-nav");
     const links = mobileNav.querySelectorAll("a");
-    expect(links).toHaveLength(3);
+    expect(links).toHaveLength(2);
   });
 });
