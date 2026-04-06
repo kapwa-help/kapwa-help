@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getOrganizations,
-  getActiveEvent,
   insertDonation,
 } from "@/lib/queries";
 
@@ -34,14 +33,12 @@ export default function DonationForm() {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const event = await getActiveEvent();
       await insertDonation({
         organization_id: formData.get("organization_id") as string,
         amount: Number(formData.get("amount")),
         date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],
         notes: (formData.get("notes") as string) || null,
       });
-      void event; // event_id not on donations table, but available if needed
       setSubmitted(true);
     } catch {
       setError(t("DonationForm.error"));

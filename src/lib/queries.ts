@@ -272,11 +272,12 @@ export async function insertDonation(donation: DonationInsert) {
 // --- Deployments page queries ---
 
 export async function getBarangayDistribution(eventId: string) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("deployments")
     .select("quantity, unit, date, barangays(id, name, municipality, lat, lng), aid_categories(name, icon), organizations(name)")
     .eq("event_id", eventId)
     .eq("status", "received");
+  if (error) throw error;
 
   const byBarangay = new Map<string, {
     id: string;
@@ -333,11 +334,12 @@ export async function getBarangayDistribution(eventId: string) {
 }
 
 export async function getPeopleServed(eventId: string) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("submissions")
     .select("num_adults, num_children, num_seniors_pwd")
     .eq("event_id", eventId)
     .eq("status", "resolved");
+  if (error) throw error;
 
   return (data ?? []).reduce(
     (acc, row) => ({
@@ -350,13 +352,14 @@ export async function getPeopleServed(eventId: string) {
 }
 
 export async function getRecentDeployments(eventId: string) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("deployments")
     .select("id, quantity, unit, date, notes, status, created_at, organizations(name), aid_categories(name, icon), barangays(name, municipality)")
     .eq("event_id", eventId)
     .eq("status", "received")
     .order("date", { ascending: false })
     .limit(10);
+  if (error) throw error;
 
   return (data ?? []).map((row) => ({
     id: row.id,
@@ -375,18 +378,20 @@ export async function getRecentDeployments(eventId: string) {
 // --- Relief Operations page queries ---
 
 export async function getTotalSpent() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("purchases")
     .select("cost");
+  if (error) throw error;
   return (data ?? []).reduce((sum, row) => sum + Number(row.cost ?? 0), 0);
 }
 
 export async function getRecentPurchases(eventId: string) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("purchases")
     .select("id, quantity, unit, cost, date, notes, created_at, organizations(name), aid_categories(name, icon)")
     .eq("event_id", eventId)
     .order("date", { ascending: false });
+  if (error) throw error;
 
   return (data ?? []).map((row) => ({
     id: row.id,
@@ -402,16 +407,18 @@ export async function getRecentPurchases(eventId: string) {
 }
 
 export async function getAvailableInventory(eventId: string) {
-  const { data: purchaseData } = await supabase
+  const { data: purchaseData, error: purchaseError } = await supabase
     .from("purchases")
     .select("quantity, aid_categories(id, name, icon)")
     .eq("event_id", eventId);
+  if (purchaseError) throw purchaseError;
 
-  const { data: deployData } = await supabase
+  const { data: deployData, error: deployError } = await supabase
     .from("deployments")
     .select("quantity, aid_categories(id, name, icon)")
     .eq("event_id", eventId)
     .eq("status", "received");
+  if (deployError) throw deployError;
 
   const inventory = new Map<string, { name: string; icon: string | null; purchased: number; deployed: number }>();
 

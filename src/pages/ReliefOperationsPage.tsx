@@ -73,6 +73,10 @@ export function ReliefOperationsPage() {
       fetchData();
     }
     init();
+
+    const handleOnline = () => fetchData();
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
   }, [fetchData]);
 
   if (loading) {

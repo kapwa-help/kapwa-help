@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -30,7 +30,9 @@ type Props = {
 
 function FlyTo({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
-  map.flyTo([lat, lng], 13, { duration: 0.8 });
+  useEffect(() => {
+    map.flyTo([lat, lng], 13, { duration: 0.8 });
+  }, [map, lat, lng]);
   return null;
 }
 
