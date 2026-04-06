@@ -1,4 +1,4 @@
-@import "@fontsource-variable/nunito";
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
@@ -30,7 +30,7 @@ html {
 body {
   background: var(--color-base);
   color: var(--color-neutral-50);
-  font-family: "Nunito Variable", Nunito, Arial, sans-serif;
+  font-family: "Barlow Condensed", Arial, sans-serif;
 }
 
 .leaflet-popup-content-wrapper {
