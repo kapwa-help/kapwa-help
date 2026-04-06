@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import Header from "@/components/Header";
 import NeedsCoordinationMap from "@/components/NeedsCoordinationMap";
 import StatusFooter from "@/components/StatusFooter";
 import {
@@ -92,6 +93,7 @@ export function NeedsPage() {
 
   return (
     <div className="flex h-screen flex-col bg-base">
+      <Header />
       <main className="relative flex-1 overflow-hidden">
         {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}
       </main>
