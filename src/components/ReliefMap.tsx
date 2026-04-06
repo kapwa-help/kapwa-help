@@ -70,9 +70,9 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
           hubs={hubs}
           hazards={hazards}
           visibleLayers={layers}
-          onNeedSelect={(p) => setSelected({ type: "need", data: p })}
-          onHubSelect={(h) => setSelected({ type: "hub", data: h })}
-          onHazardSelect={(h) => setSelected({ type: "hazard", data: h })}
+          onNeedSelect={(p: NeedPoint) => setSelected({ type: "need", data: p })}
+          onHubSelect={(h: HubPoint) => setSelected({ type: "hub", data: h })}
+          onHazardSelect={(h: HazardPoint) => setSelected({ type: "hazard", data: h })}
         />
       </Suspense>
 

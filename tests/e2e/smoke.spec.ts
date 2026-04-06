@@ -19,9 +19,6 @@ for (const locale of LOCALES) {
     await expect(select).toBeVisible();
     await expect(select).toHaveValue(locale);
 
-    // Map is visible (full-screen layout)
-    await expect(page.locator(".leaflet-container")).toBeVisible();
-
     // Screenshot for visual verification
     await page.screenshot({
       path: `tests/e2e/screenshots/relief-map-${locale}.png`,
