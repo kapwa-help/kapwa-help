@@ -92,7 +92,7 @@ export function NeedsPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-base">
+    <div className="flex h-dvh flex-col bg-base">
       <Header />
       <main className="relative flex-1 overflow-hidden">
         {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}

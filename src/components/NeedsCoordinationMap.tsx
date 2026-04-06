@@ -111,10 +111,10 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
       )}
 
       {/* Status pills overlay — top */}
-      <div className="absolute left-4 right-4 top-4 z-[500] flex flex-wrap items-center justify-center gap-2 lg:right-[340px]">
+      <div className="absolute left-2 right-2 top-3 z-[500] flex items-center justify-center gap-1.5 lg:left-4 lg:right-[340px] lg:top-4 lg:gap-2">
         {STATUS_CONFIG.map((item) => (
-          <div key={item.status} className="flex items-center gap-1.5 rounded-full bg-secondary/85 px-3 py-1 backdrop-blur-sm">
-            <span className={`h-2.5 w-2.5 rounded-full ${item.dot}`} />
+          <div key={item.status} className="flex items-center gap-1 rounded-full bg-secondary/85 px-2 py-0.5 backdrop-blur-sm lg:gap-1.5 lg:px-3 lg:py-1">
+            <span className={`h-2 w-2 rounded-full lg:h-2.5 lg:w-2.5 ${item.dot}`} />
             <span className="text-xs text-neutral-400 lg:text-sm">
               {counts[item.status]} {t(item.label)}
             </span>
