@@ -13,7 +13,9 @@
     "report": "Ipadamag",
     "needs": "Kasapulan",
     "relief": "Operasion ti Relief",
-    "stories": "Dagiti Estoria"
+    "stories": "Dagiti Estoria",
+    "deployments": "Dagiti pannakaipakat",
+    "reliefOps": "Relief Ops"
   },
   "Dashboard": {
     "hero": "Koordinasion ti Tulong iti Komunidad",
@@ -110,6 +112,19 @@
     "submitting": "Claiming...",
     "success": "Need claimed — adda iti dalan ti tulong",
     "error": "Saan a mabalin nga ag-claim. Kitaem ti koneksionmo ket padasem manen."
+  },
+  "Deployments": {
+    "title": "Dagiti pannakaipakat"
+  },
+  "ReliefOps": {
+    "title": "Operasion ti Relief"
+  },
+  "ReportForm": {
+    "title": "Ipadamag",
+    "selectorLabel": "Ania ti kayatmo nga ireport?",
+    "submitNeed": "Mangisubmitir iti Kasapulan",
+    "reportDonation": "Ireport ti Donasion",
+    "reportPurchase": "Ireport ti Gatang"
   },
   "Stories": {
     "comingSoon": "Coming soon — estoria ti komunidad, nasursuro, ken journal."

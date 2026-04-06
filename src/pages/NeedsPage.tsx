@@ -23,10 +23,10 @@ export function NeedsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [needsPoints, activeEvent] = await Promise.all([
-        getNeedsMapPoints(),
-        getActiveEvent(),
-      ]);
+      const activeEvent = await getActiveEvent();
+      const needsPoints = activeEvent
+        ? await getNeedsMapPoints(activeEvent.id)
+        : [];
 
       const freshData: NeedsData = {
         needsPoints,

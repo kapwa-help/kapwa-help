@@ -3,10 +3,13 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   getCachedNeeds,
   setCachedNeeds,
-  getCachedRelief,
-  setCachedRelief,
+  getCachedDeployments,
+  setCachedDeployments,
+  getCachedOperations,
+  setCachedOperations,
   type NeedsData,
-  type ReliefData,
+  type DeploymentsData,
+  type OperationsData,
 } from "@/lib/cache";
 
 beforeEach(() => {
@@ -28,10 +31,15 @@ const sampleNeeds: NeedsData = {
       lat: 16.6,
       lng: 120.3,
       status: "pending",
-      gapCategory: "sustenance",
+      aidCategoryId: "cat-1",
+      aidCategoryName: "Hot Meals",
+      aidCategoryIcon: "🍲",
       accessStatus: "truck",
       urgency: "high",
       quantityNeeded: 100,
+      numAdults: 15,
+      numChildren: 8,
+      numSeniorsPwd: 2,
       notes: "Need rice",
       contactName: "Juan",
       barangayName: "Bauang",
@@ -41,17 +49,20 @@ const sampleNeeds: NeedsData = {
   ],
 };
 
-const sampleRelief: ReliefData = {
+const sampleDeployments: DeploymentsData = {
+  totalDeliveries: 10,
+  peopleServed: { adults: 100, children: 50, seniorsPwd: 20 },
+  barangaysReached: 5,
+  barangayDistribution: [],
+  recentDeployments: [],
+};
+
+const sampleOperations: OperationsData = {
   totalDonations: 50000,
-  totalBeneficiaries: 200,
-  volunteerCount: 15,
+  totalSpent: 30000,
   donationsByOrg: [{ name: "Red Cross", amount: 30000 }],
-  deploymentHubs: [{ name: "Hub A", municipality: "San Fernando", count: 5 }],
-  goodsByCategory: [{ name: "Food", icon: null, total: 100 }],
-  barangays: [{ name: "Bauang", municipality: "Bauang", beneficiaries: 50 }],
-  deploymentPoints: [
-    { lat: 16.6, lng: 120.3, quantity: 10, unit: "kg", orgName: "Red Cross", categoryName: "Food" },
-  ],
+  recentPurchases: [],
+  availableInventory: [],
 };
 
 describe("getCachedNeeds / setCachedNeeds", () => {
@@ -69,17 +80,32 @@ describe("getCachedNeeds / setCachedNeeds", () => {
   });
 });
 
-describe("getCachedRelief / setCachedRelief", () => {
+describe("getCachedDeployments / setCachedDeployments", () => {
   it("returns null when no cached data exists", async () => {
-    const result = await getCachedRelief();
+    const result = await getCachedDeployments();
     expect(result).toBeNull();
   });
 
-  it("round-trips relief data", async () => {
-    await setCachedRelief(sampleRelief);
-    const result = await getCachedRelief();
+  it("round-trips deployments data", async () => {
+    await setCachedDeployments(sampleDeployments);
+    const result = await getCachedDeployments();
     expect(result).not.toBeNull();
-    expect(result!.data).toEqual(sampleRelief);
+    expect(result!.data).toEqual(sampleDeployments);
+    expect(result!.updatedAt).toBeTypeOf("number");
+  });
+});
+
+describe("getCachedOperations / setCachedOperations", () => {
+  it("returns null when no cached data exists", async () => {
+    const result = await getCachedOperations();
+    expect(result).toBeNull();
+  });
+
+  it("round-trips operations data", async () => {
+    await setCachedOperations(sampleOperations);
+    const result = await getCachedOperations();
+    expect(result).not.toBeNull();
+    expect(result!.data).toEqual(sampleOperations);
     expect(result!.updatedAt).toBeTypeOf("number");
   });
 });

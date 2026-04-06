@@ -50,8 +50,8 @@ export default function Header() {
 
   const navItems = [
     { to: `/${locale}`, label: t("Navigation.needs"), end: true },
-    { to: `/${locale}/relief`, label: t("Navigation.relief") },
-    { to: `/${locale}/stories`, label: t("Navigation.stories") },
+    { to: `/${locale}/deployments`, label: t("Navigation.deployments") },
+    { to: `/${locale}/relief-operations`, label: t("Navigation.reliefOps") },
   ];
 
   return (
@@ -89,7 +89,7 @@ export default function Header() {
             </select>
           </div>
           <Link
-            to={`/${locale}/submit`}
+            to={`/${locale}/report`}
             className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200"
           >
             {t("Navigation.report")}

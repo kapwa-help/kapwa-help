@@ -1,9 +1,10 @@
 const DB_NAME = "luaid";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORE_NAME = "dashboard";
 
 const NEEDS_KEY = "needs";
-const RELIEF_KEY = "relief";
+const DEPLOYMENTS_KEY = "deployments";
+const OPERATIONS_KEY = "operations";
 
 export type NeedsData = {
   activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
@@ -12,10 +13,15 @@ export type NeedsData = {
     lat: number;
     lng: number;
     status: string;
-    gapCategory: string | null;
+    aidCategoryId: string | null;
+    aidCategoryName: string | null;
+    aidCategoryIcon: string | null;
     accessStatus: string | null;
     urgency: string | null;
     quantityNeeded: number | null;
+    numAdults: number;
+    numChildren: number;
+    numSeniorsPwd: number;
     notes: string | null;
     contactName: string;
     barangayName: string;
@@ -24,21 +30,52 @@ export type NeedsData = {
   }[];
 };
 
-export type ReliefData = {
-  totalDonations: number;
-  totalBeneficiaries: number;
-  volunteerCount: number;
-  donationsByOrg: { name: string; amount: number }[];
-  deploymentHubs: { name: string; municipality: string; count: number }[];
-  goodsByCategory: { name: string; icon: string | null; total: number }[];
-  barangays: { name: string; municipality: string; beneficiaries: number }[];
-  deploymentPoints: {
+export type DeploymentsData = {
+  totalDeliveries: number;
+  peopleServed: { adults: number; children: number; seniorsPwd: number };
+  barangaysReached: number;
+  barangayDistribution: {
+    id: string;
+    name: string;
+    municipality: string;
     lat: number;
     lng: number;
+    categories: { name: string; icon: string | null; total: number }[];
+    totalQuantity: number;
+  }[];
+  recentDeployments: {
+    id: string;
     quantity: number | null;
     unit: string | null;
+    date: string | null;
     orgName: string;
     categoryName: string;
+    categoryIcon: string | null;
+    barangayName: string;
+    municipality: string;
+  }[];
+};
+
+export type OperationsData = {
+  totalDonations: number;
+  totalSpent: number;
+  donationsByOrg: { name: string; amount: number }[];
+  recentPurchases: {
+    id: string;
+    quantity: number;
+    unit: string | null;
+    cost: number | null;
+    date: string | null;
+    orgName: string;
+    categoryName: string;
+    categoryIcon: string | null;
+  }[];
+  availableInventory: {
+    name: string;
+    icon: string | null;
+    purchased: number;
+    deployed: number;
+    available: number;
   }[];
 };
 
@@ -107,12 +144,22 @@ export function setCachedNeeds(data: NeedsData): Promise<void> {
   return setCached(NEEDS_KEY, data);
 }
 
-// --- Relief cache ---
+// --- Deployments cache ---
 
-export function getCachedRelief(): Promise<CachedEntry<ReliefData> | null> {
-  return getCached<ReliefData>(RELIEF_KEY);
+export function getCachedDeployments(): Promise<CachedEntry<DeploymentsData> | null> {
+  return getCached<DeploymentsData>(DEPLOYMENTS_KEY);
 }
 
-export function setCachedRelief(data: ReliefData): Promise<void> {
-  return setCached(RELIEF_KEY, data);
+export function setCachedDeployments(data: DeploymentsData): Promise<void> {
+  return setCached(DEPLOYMENTS_KEY, data);
+}
+
+// --- Operations cache ---
+
+export function getCachedOperations(): Promise<CachedEntry<OperationsData> | null> {
+  return getCached<OperationsData>(OPERATIONS_KEY);
+}
+
+export function setCachedOperations(data: OperationsData): Promise<void> {
+  return setCached(OPERATIONS_KEY, data);
 }

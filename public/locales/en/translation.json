@@ -13,7 +13,9 @@
     "report": "Report",
     "needs": "Needs",
     "relief": "Relief Operations",
-    "stories": "Stories"
+    "stories": "Stories",
+    "deployments": "Deployments",
+    "reliefOps": "Relief Ops"
   },
   "Dashboard": {
     "hero": "Community Relief Coordination",
@@ -110,6 +112,19 @@
     "submitting": "Claiming...",
     "success": "Need claimed — aid is on the way",
     "error": "Could not claim. Check your connection and try again."
+  },
+  "Deployments": {
+    "title": "Deployments"
+  },
+  "ReliefOps": {
+    "title": "Relief Operations"
+  },
+  "ReportForm": {
+    "title": "Report",
+    "selectorLabel": "What would you like to report?",
+    "submitNeed": "Submit a Need",
+    "reportDonation": "Report a Donation",
+    "reportPurchase": "Report a Purchase"
   },
   "Stories": {
     "comingSoon": "Coming soon — community stories, learnings, and journals."

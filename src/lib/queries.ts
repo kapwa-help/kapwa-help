@@ -19,16 +19,6 @@ export async function getTotalBeneficiaries() {
   return data.reduce((sum, row) => sum + (row.quantity ?? 0), 0);
 }
 
-export async function getVolunteerCount() {
-  const { data, error } = await supabase
-    .from("deployments")
-    .select("volunteer_count")
-    .eq("status", "received");
-
-  if (error) throw error;
-  return data.reduce((sum, row) => sum + (row.volunteer_count ?? 0), 0);
-}
-
 export async function getDonationsByOrganization() {
   const { data, error } = await supabase
     .from("donations")
@@ -45,29 +35,6 @@ export async function getDonationsByOrganization() {
   return Object.entries(grouped)
     .map(([name, amount]) => ({ name, amount }))
     .sort((a, b) => b.amount - a.amount);
-}
-
-export async function getDeploymentHubs() {
-  const { data, error } = await supabase
-    .from("deployments")
-    .select("organization_id, organizations(name, municipality)")
-    .eq("status", "received");
-
-  if (error) throw error;
-
-  const grouped = data.reduce<
-    Record<string, { name: string; municipality: string; count: number }>
-  >((acc, row) => {
-    const org = row.organizations as unknown as { name: string; municipality: string };
-    const id = row.organization_id;
-    if (!acc[id]) {
-      acc[id] = { name: org?.name ?? "Unknown", municipality: org?.municipality ?? "", count: 0 };
-    }
-    acc[id].count++;
-    return acc;
-  }, {});
-
-  return Object.values(grouped).sort((a, b) => b.count - a.count);
 }
 
 export async function getGoodsByCategory() {
@@ -93,25 +60,6 @@ export async function getGoodsByCategory() {
   return Object.values(grouped).sort((a, b) => b.total - a.total);
 }
 
-export async function getDeploymentMapPoints() {
-  const { data, error } = await supabase
-    .from("deployments")
-    .select("lat, lng, quantity, unit, organizations(name), aid_categories(name)")
-    .not("lat", "is", null)
-    .not("lng", "is", null)
-    .eq("status", "received");
-
-  if (error) throw error;
-  return data.map((row) => ({
-    lat: Number(row.lat),
-    lng: Number(row.lng),
-    quantity: row.quantity,
-    unit: row.unit,
-    orgName: (row.organizations as unknown as { name: string })?.name ?? "Unknown",
-    categoryName: (row.aid_categories as unknown as { name: string })?.name ?? "Unknown",
-  }));
-}
-
 // --- Needs coordination queries ---
 
 export type NeedPoint = {
@@ -119,10 +67,15 @@ export type NeedPoint = {
   lat: number;
   lng: number;
   status: string;
-  gapCategory: string | null;
+  aidCategoryId: string | null;
+  aidCategoryName: string | null;
+  aidCategoryIcon: string | null;
   accessStatus: string | null;
   urgency: string | null;
   quantityNeeded: number | null;
+  numAdults: number;
+  numChildren: number;
+  numSeniorsPwd: number;
   notes: string | null;
   contactName: string;
   barangayName: string;
@@ -130,31 +83,38 @@ export type NeedPoint = {
   createdAt: string;
 };
 
-export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
+export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
   const { data, error } = await supabase
     .from("submissions")
     .select(
-      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, created_at, barangays(name, municipality)"
+      "id, lat, lng, status, aid_category_id, access_status, urgency, quantity_needed, num_adults, num_children, num_seniors_pwd, notes, contact_name, created_at, barangays(name, municipality), aid_categories(name, icon)"
     )
-    .in("status", ["pending", "verified", "in_transit", "completed"])
+    .eq("event_id", eventId)
+    .neq("status", "resolved")
     .not("lat", "is", null)
     .not("lng", "is", null);
 
   if (error) throw error;
   return data.map((row) => {
     const brgy = row.barangays as unknown as { name: string; municipality: string };
+    const cat = row.aid_categories as unknown as { name: string; icon: string | null };
     return {
       id: row.id,
       lat: Number(row.lat),
       lng: Number(row.lng),
       status: row.status,
-      gapCategory: row.gap_category,
+      aidCategoryId: row.aid_category_id,
+      aidCategoryName: cat?.name ?? null,
+      aidCategoryIcon: cat?.icon ?? null,
       accessStatus: row.access_status,
       urgency: row.urgency,
       quantityNeeded: row.quantity_needed,
+      numAdults: row.num_adults ?? 0,
+      numChildren: row.num_children ?? 0,
+      numSeniorsPwd: row.num_seniors_pwd ?? 0,
       notes: row.notes,
       contactName: row.contact_name,
-      barangayName: brgy?.name ?? "Unknown",
+      barangayName: brgy?.name ?? "",
       municipality: brgy?.municipality ?? "",
       createdAt: row.created_at as string,
     };
@@ -185,17 +145,19 @@ export async function getActiveEvent() {
 // --- Submission form queries ---
 
 export interface SubmissionInsert {
-  id?: string; // Client-generated UUID for idempotent sync
+  id?: string;
   event_id?: string | null;
-  type: "need";
   contact_name: string;
   contact_phone: string | null;
   barangay_id: string;
-  gap_category: string;
+  aid_category_id: string;
   access_status: string;
   notes: string | null;
   quantity_needed: number | null;
   urgency: string;
+  num_adults: number | null;
+  num_children: number | null;
+  num_seniors_pwd: number | null;
   lat: number | null;
   lng: number | null;
   geohash?: string | null;
@@ -217,7 +179,7 @@ export async function getBarangays() {
 export async function getAidCategories() {
   const { data, error } = await supabase
     .from("aid_categories")
-    .select("id, name")
+    .select("id, name, icon")
     .order("name");
 
   if (error) throw error;
@@ -240,13 +202,10 @@ export interface DeploymentInsert {
   barangay_id?: string | null;
   quantity?: number | null;
   unit?: string | null;
-  lat?: number | null;
-  lng?: number | null;
   notes?: string | null;
 }
 
 export async function createDeploymentForNeed(deployment: DeploymentInsert) {
-  // Upsert on submission_id so retries after partial failure don't create duplicates
   const { error: deployError } = await supabase
     .from("deployments")
     .upsert({ ...deployment, status: "pending" }, { onConflict: "submission_id" });
@@ -273,33 +232,197 @@ export async function updateDeploymentStatus(submissionId: string, status: "pend
 export async function getOrganizations() {
   const { data, error } = await supabase
     .from("organizations")
-    .select("id, name, type, municipality")
+    .select("id, name, municipality")
     .order("name");
 
   if (error) throw error;
   return data;
 }
 
-export async function getBeneficiariesByBarangay() {
-  const { data, error } = await supabase
+// --- Purchase & Donation insert ---
+
+export interface PurchaseInsert {
+  event_id?: string | null;
+  organization_id: string;
+  aid_category_id: string;
+  quantity: number;
+  unit: string | null;
+  cost: number | null;
+  date: string;
+  notes: string | null;
+}
+
+export async function insertPurchase(purchase: PurchaseInsert) {
+  const { error } = await supabase.from("purchases").insert(purchase);
+  if (error) throw error;
+}
+
+export interface DonationInsert {
+  organization_id: string;
+  amount: number;
+  date: string;
+  notes: string | null;
+}
+
+export async function insertDonation(donation: DonationInsert) {
+  const { error } = await supabase.from("donations").insert(donation);
+  if (error) throw error;
+}
+
+// --- Deployments page queries ---
+
+export async function getBarangayDistribution(eventId: string) {
+  const { data } = await supabase
     .from("deployments")
-    .select("quantity, barangays(name, municipality)")
-    .not("barangay_id", "is", null)
+    .select("quantity, barangays(id, name, municipality, lat, lng), aid_categories(name, icon)")
+    .eq("event_id", eventId)
     .eq("status", "received");
 
-  if (error) throw error;
+  const byBarangay = new Map<string, {
+    id: string;
+    name: string;
+    municipality: string;
+    lat: number;
+    lng: number;
+    categories: Map<string, { name: string; icon: string | null; total: number }>;
+    totalQuantity: number;
+  }>();
 
-  const grouped = data.reduce<
-    Record<string, { name: string; municipality: string; beneficiaries: number }>
-  >((acc, row) => {
-    const brgy = row.barangays as unknown as { name: string; municipality: string };
-    const key = brgy?.name ?? "Unknown";
-    if (!acc[key]) {
-      acc[key] = { name: brgy?.name ?? "Unknown", municipality: brgy?.municipality ?? "", beneficiaries: 0 };
+  for (const row of data ?? []) {
+    const brgy = row.barangays as unknown as { id: string; name: string; municipality: string; lat: number; lng: number };
+    const cat = row.aid_categories as unknown as { name: string; icon: string | null };
+    if (!brgy) continue;
+
+    if (!byBarangay.has(brgy.id)) {
+      byBarangay.set(brgy.id, {
+        id: brgy.id,
+        name: brgy.name,
+        municipality: brgy.municipality,
+        lat: brgy.lat,
+        lng: brgy.lng,
+        categories: new Map(),
+        totalQuantity: 0,
+      });
     }
-    acc[key].beneficiaries += row.quantity ?? 0;
-    return acc;
-  }, {});
 
-  return Object.values(grouped).sort((a, b) => b.beneficiaries - a.beneficiaries);
+    const entry = byBarangay.get(brgy.id)!;
+    const catName = cat?.name ?? "Unknown";
+    if (!entry.categories.has(catName)) {
+      entry.categories.set(catName, { name: catName, icon: cat?.icon ?? null, total: 0 });
+    }
+    entry.categories.get(catName)!.total += row.quantity ?? 0;
+    entry.totalQuantity += row.quantity ?? 0;
+  }
+
+  return Array.from(byBarangay.values()).map((b) => ({
+    ...b,
+    categories: Array.from(b.categories.values()),
+  }));
+}
+
+export async function getPeopleServed(eventId: string) {
+  const { data } = await supabase
+    .from("submissions")
+    .select("num_adults, num_children, num_seniors_pwd")
+    .eq("event_id", eventId)
+    .eq("status", "resolved");
+
+  return (data ?? []).reduce(
+    (acc, row) => ({
+      adults: acc.adults + (row.num_adults ?? 0),
+      children: acc.children + (row.num_children ?? 0),
+      seniorsPwd: acc.seniorsPwd + (row.num_seniors_pwd ?? 0),
+    }),
+    { adults: 0, children: 0, seniorsPwd: 0 }
+  );
+}
+
+export async function getRecentDeployments(eventId: string) {
+  const { data } = await supabase
+    .from("deployments")
+    .select("id, quantity, unit, date, notes, status, created_at, organizations(name), aid_categories(name, icon), barangays(name, municipality)")
+    .eq("event_id", eventId)
+    .eq("status", "received")
+    .order("date", { ascending: false })
+    .limit(20);
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    quantity: row.quantity,
+    unit: row.unit,
+    date: row.date,
+    notes: row.notes,
+    orgName: (row.organizations as unknown as { name: string })?.name ?? "",
+    categoryName: (row.aid_categories as unknown as { name: string })?.name ?? "",
+    categoryIcon: (row.aid_categories as unknown as { icon: string | null })?.icon ?? null,
+    barangayName: (row.barangays as unknown as { name: string })?.name ?? "",
+    municipality: (row.barangays as unknown as { municipality: string })?.municipality ?? "",
+  }));
+}
+
+// --- Relief Operations page queries ---
+
+export async function getTotalSpent() {
+  const { data } = await supabase
+    .from("purchases")
+    .select("cost");
+  return (data ?? []).reduce((sum, row) => sum + Number(row.cost ?? 0), 0);
+}
+
+export async function getRecentPurchases(eventId: string) {
+  const { data } = await supabase
+    .from("purchases")
+    .select("id, quantity, unit, cost, date, notes, created_at, organizations(name), aid_categories(name, icon)")
+    .eq("event_id", eventId)
+    .order("date", { ascending: false });
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    quantity: row.quantity,
+    unit: row.unit,
+    cost: row.cost,
+    date: row.date,
+    notes: row.notes,
+    orgName: (row.organizations as unknown as { name: string })?.name ?? "",
+    categoryName: (row.aid_categories as unknown as { name: string })?.name ?? "",
+    categoryIcon: (row.aid_categories as unknown as { icon: string | null })?.icon ?? null,
+  }));
+}
+
+export async function getAvailableInventory(eventId: string) {
+  const { data: purchaseData } = await supabase
+    .from("purchases")
+    .select("quantity, aid_categories(id, name, icon)")
+    .eq("event_id", eventId);
+
+  const { data: deployData } = await supabase
+    .from("deployments")
+    .select("quantity, aid_categories(id, name, icon)")
+    .eq("event_id", eventId)
+    .eq("status", "received");
+
+  const inventory = new Map<string, { name: string; icon: string | null; purchased: number; deployed: number }>();
+
+  for (const row of purchaseData ?? []) {
+    const cat = row.aid_categories as unknown as { id: string; name: string; icon: string | null };
+    if (!cat) continue;
+    if (!inventory.has(cat.id)) {
+      inventory.set(cat.id, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
+    }
+    inventory.get(cat.id)!.purchased += row.quantity ?? 0;
+  }
+
+  for (const row of deployData ?? []) {
+    const cat = row.aid_categories as unknown as { id: string; name: string; icon: string | null };
+    if (!cat) continue;
+    if (!inventory.has(cat.id)) {
+      inventory.set(cat.id, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
+    }
+    inventory.get(cat.id)!.deployed += row.quantity ?? 0;
+  }
+
+  return Array.from(inventory.values()).map((item) => ({
+    ...item,
+    available: item.purchased - item.deployed,
+  }));
 }

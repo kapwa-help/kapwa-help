@@ -1,9 +1,9 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { RootLayout } from "./components/RootLayout";
 import { NeedsPage } from "./pages/NeedsPage";
-import { ReliefPage } from "./pages/ReliefPage";
-import { StoriesPage } from "./pages/StoriesPage";
-import { SubmitPage } from "./pages/SubmitPage";
+import { DeploymentsPage } from "./pages/DeploymentsPage";
+import { ReliefOperationsPage } from "./pages/ReliefOperationsPage";
+import { ReportPage } from "./pages/ReportPage";
 
 export const router = createBrowserRouter([
   {
@@ -15,9 +15,9 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { index: true, element: <NeedsPage /> },
-      { path: "relief", element: <ReliefPage /> },
-      { path: "stories", element: <StoriesPage /> },
-      { path: "submit", element: <SubmitPage /> },
+      { path: "deployments", element: <DeploymentsPage /> },
+      { path: "relief-operations", element: <ReliefOperationsPage /> },
+      { path: "report", element: <ReportPage /> },
     ],
   },
 ]);

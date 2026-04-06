@@ -13,7 +13,9 @@
     "report": "Ulat",
     "needs": "Pangangailangan",
     "relief": "Mga Relief Operations",
-    "stories": "Mga kwento"
+    "stories": "Mga kwento",
+    "deployments": "Mga deployment",
+    "reliefOps": "Relief Ops"
   },
   "Dashboard": {
     "hero": "Koordinasyon ng Tulong sa Komunidad",
@@ -110,6 +112,19 @@
     "submitting": "Claiming...",
     "success": "Kailangang i-claim — parating na ang tulong",
     "error": "Hindi ma-claim. Suriin ang iyong koneksyon at subukang muli."
+  },
+  "Deployments": {
+    "title": "Mga deployment"
+  },
+  "ReliefOps": {
+    "title": "Mga Relief Operations"
+  },
+  "ReportForm": {
+    "title": "Ulat",
+    "selectorLabel": "Ano ang gusto mong iulat?",
+    "submitNeed": "Magsumite ng isang Pangangailangan",
+    "reportDonation": "Mag-ulat ng Donasyon",
+    "reportPurchase": "Mag-ulat ng isang Pagbili"
   },
   "Stories": {
     "comingSoon": "Paparating na — mga kuwento ng komunidad, mga natutunan, at mga journal."
