@@ -137,7 +137,7 @@
     "recentPurchases": "Mga Kamakailang Pagbili",
     "noPurchases": "Wala pang naitalang mga pagbili",
     "availableInventory": "Magagamit na Imbentaryo",
-    "purchased": "binili",
+    "received": "natanggap",
     "deployed": "ipinakalat"
   },
   "ReliefMap": {

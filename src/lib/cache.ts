@@ -87,7 +87,7 @@ export type OperationsData = {
   availableInventory: {
     name: string;
     icon: string | null;
-    purchased: number;
+    received: number;
     deployed: number;
     available: number;
   }[];

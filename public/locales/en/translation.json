@@ -137,7 +137,7 @@
     "recentPurchases": "Recent Purchases",
     "noPurchases": "No purchases recorded yet",
     "availableInventory": "Available Inventory",
-    "purchased": "purchased",
+    "received": "received",
     "deployed": "deployed"
   },
   "ReliefMap": {
