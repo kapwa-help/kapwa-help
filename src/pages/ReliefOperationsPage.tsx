@@ -110,7 +110,7 @@ export function ReliefOperationsPage() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-6">
-            <DonationsByOrg data={data.donationsByOrg} />
+            <DonationsByOrg donations={data.donationsByOrg} />
             <RecentPurchases purchases={data.recentPurchases} />
           </div>
           <AvailableInventory inventory={data.availableInventory} />
