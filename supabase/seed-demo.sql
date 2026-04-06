@@ -472,5 +472,24 @@ BEGIN
   -- Link existing deployments to the event
   UPDATE deployments SET event_id = v_event WHERE notes IN ('demo-seed', 'demo-seed-linked');
 
+  -- ============================================================
+  -- 12. Add coordinates to hub organizations (for Relief Map hub markers)
+  -- ============================================================
+  UPDATE organizations SET lat = 16.6159, lng = 120.3209 WHERE name = 'SJRRHASS' AND lat IS NULL;
+  UPDATE organizations SET lat = 16.6833, lng = 120.3667 WHERE name = 'Citizens for LU' AND lat IS NULL;
+  UPDATE organizations SET lat = 16.5500, lng = 120.3833 WHERE name = 'EcoNest Sustainable Food Packaging' AND lat IS NULL;
+  UPDATE organizations SET lat = 16.6920, lng = 120.3480 WHERE name = 'Art Relief Mobile Kitchen' AND lat IS NULL;
+  UPDATE organizations SET lat = 16.6681, lng = 120.3225 WHERE name = 'Surftown Pride' AND lat IS NULL;
+
+  -- ============================================================
+  -- 13. Insert demo hazards (idempotent via WHERE NOT EXISTS)
+  -- ============================================================
+  IF NOT EXISTS (SELECT 1 FROM hazards WHERE event_id = v_event LIMIT 1) THEN
+    INSERT INTO hazards (event_id, hazard_type, description, latitude, longitude, status) VALUES
+      (v_event, 'flood', 'Flooded road near barangay center, waist-deep', 16.63, 120.34, 'active'),
+      (v_event, 'road_blocked', 'Fallen tree blocking main road to Bacnotan', 16.69, 120.35, 'active'),
+      (v_event, 'electrical_hazard', 'Downed power lines near school', 16.61, 120.32, 'active');
+  END IF;
+
   RAISE NOTICE 'Demo seed complete!';
 END $$;

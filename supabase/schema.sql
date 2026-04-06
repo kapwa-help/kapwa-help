@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS organizations (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name         text NOT NULL,
   municipality text,
+  lat          decimal(9,6),
+  lng          decimal(9,6),
   created_at   timestamptz DEFAULT now()
 );
 
@@ -115,6 +117,23 @@ CREATE TABLE IF NOT EXISTS deployments (
   status          text NOT NULL DEFAULT 'pending'
                     CHECK (status IN ('pending', 'received')),
   created_at      timestamptz DEFAULT now()
+);
+
+-- Hazards: field-reported hazard conditions
+CREATE TABLE IF NOT EXISTS hazards (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id    uuid NOT NULL REFERENCES events(id),
+  hazard_type text NOT NULL CHECK (hazard_type IN (
+                'flood', 'landslide', 'road_blocked',
+                'bridge_out', 'electrical_hazard', 'other'
+              )),
+  description text,
+  photo_url   text,
+  latitude    double precision NOT NULL,
+  longitude   double precision NOT NULL,
+  status      text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'resolved')),
+  reported_by text,
+  created_at  timestamptz DEFAULT now()
 );
 
 -- Seed aid categories (Hannah's unified 9-category list)
