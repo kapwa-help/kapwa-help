@@ -42,7 +42,7 @@ export function StoriesPage() {
               Read about our latest community relief efforts.
             </p>
           </div>
-          <div className="mt-4 lg:mt-0 rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-primary border border-primary/30">
+          <div className="mt-4 lg:mt-0 rounded-full bg-accent/20 px-4 py-1.5 text-sm font-medium text-accent border border-accent/30">
             {t("Stories.comingSoon", "Coming Soon")}
           </div>
         </div>
@@ -76,7 +76,7 @@ export function StoriesPage() {
                     {story.date}
                   </time>
                   <h3 className="mb-3 text-xl font-semibold leading-snug">
-                    <a href="#" className="hover:text-primary transition-colors">
+                    <a href="#" className="hover:text-accent transition-colors">
                       {story.title}
                     </a>
                   </h3>
@@ -88,7 +88,7 @@ export function StoriesPage() {
                 <div className="mt-6 border-t border-neutral-800 pt-4">
                   <a
                     href="#"
-                    className="flex items-center text-sm font-medium text-primary hover:text-primary/80"
+                    className="flex items-center text-sm font-medium text-accent hover:text-accent/80"
                   >
                     Read full story
                     <svg

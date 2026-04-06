@@ -5,13 +5,13 @@ type Props = {
 };
 
 const BAR_COLORS = [
-  "bg-primary",     // #1976D2 Blue
-  "bg-accent",      // #FFC107 Amber
-  "bg-success",     // #388E3C Green
-  "bg-error",       // #D32F2F Red
-  "bg-warning",     // #FFA000 Orange
-  "bg-primary/70",  // Blue variant
-  "bg-accent/70",   // Amber variant
+  "bg-cyan-500",    // Cyan
+  "bg-accent",      // Accent
+  "bg-success",     // Green
+  "bg-error",       // Red
+  "bg-warning",     // Orange
+  "bg-cyan-700",    // Cyan variant
+  "bg-accent/70",   // Accent variant
   "bg-success/70",  // Green variant
 ];
 

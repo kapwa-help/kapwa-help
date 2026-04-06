@@ -18,11 +18,11 @@ export default function NeedsSummaryCards({ summary }: Props) {
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
       {/* Active Needs */}
-      <div className="rounded-2xl border-l-2 border-primary bg-secondary p-5 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+      <div className="rounded-2xl border-l-2 border-accent bg-secondary p-5 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
         <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">
           {t("Dashboard.activeNeeds")}
         </p>
-        <p className="mt-2 text-3xl font-bold text-primary">
+        <p className="mt-2 text-3xl font-bold text-accent">
           {summary.byStatus.verified}
         </p>
         <p className="mt-1 text-xs text-neutral-400">
