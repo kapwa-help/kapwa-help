@@ -259,7 +259,8 @@ BEGIN
       (v_greenpeace,    'in_kind', v_medical,         300, 'kits',    '2026-03-31', 'demo-seed'),
       (v_starlight,     'in_kind', v_drinking_water,  500, 'bottles', '2026-04-01', 'demo-seed'),
       (v_feed_inc,      'in_kind', v_construction,    200, 'bundles', '2026-04-02', 'demo-seed'),
-      (v_surftown,      'in_kind', v_hot_meals,       500, 'meals',   '2026-04-03', 'demo-seed');
+      (v_surftown,      'in_kind', v_hot_meals,       500, 'meals',   '2026-04-03', 'demo-seed'),
+      (v_doers,         'in_kind', v_construction,    150, 'bundles', '2026-04-04', 'demo-seed');
   END IF;
 
   -- ============================================================
