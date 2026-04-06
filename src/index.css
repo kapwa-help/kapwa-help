@@ -10,16 +10,16 @@
 }
 
 @theme inline {
-  --color-primary: #62B6CB;
-  --color-secondary: #1B4965;
-  --color-accent: #BEE9E8;
+  --color-primary: #007EA7;
+  --color-secondary: #003249;
+  --color-accent: #80CED7;
   --color-success: #10B981;
   --color-warning: #FBBF24;
   --color-error: #FF6B6B;
-  --color-neutral-50: #CAE9FF;
-  --color-neutral-100: #CAE9FF;
-  --color-neutral-400: #5FA8D3;
-  --color-base: #102B3C;
+  --color-neutral-50: #CCDBDC;
+  --color-neutral-100: #9AD1D4;
+  --color-neutral-400: #9AD1D4;
+  --color-base: #001A26;
   --font-logo: 'Kagitingan', sans-serif;
 }
 
