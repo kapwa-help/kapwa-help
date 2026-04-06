@@ -29,11 +29,10 @@ function GlobeIcon() {
 }
 
 function navLinkClass(isActive: boolean, mobile = false) {
-  return `rounded-lg px-3 ${mobile ? "py-2" : "py-1.5"} text-sm transition-colors ${
-    isActive
-      ? "bg-neutral-400/10 text-neutral-50"
-      : "text-neutral-400 hover:text-neutral-100"
-  }`;
+  return `rounded-lg px-3 ${mobile ? "py-2" : "py-1.5"} text-sm transition-colors ${isActive
+    ? "bg-neutral-400/10 text-neutral-50"
+    : "text-neutral-400 hover:text-neutral-100"
+    }`;
 }
 
 export default function Header() {
@@ -58,7 +57,9 @@ export default function Header() {
   return (
     <header className="bg-secondary shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link to={`/${locale}`} className="text-xl font-bold text-white hover:text-neutral-100">Kapwa Help</Link>
+        <Link to={`/${locale}`} className="font-logo text-xl font-bold text-white hover:text-neutral-100">
+          Kapwa Help
+        </Link>
         <nav className="hidden items-center gap-1 sm:flex">
           {navItems.map((item) => (
             <NavLink

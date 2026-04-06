@@ -1,18 +1,27 @@
-@import "@fontsource-variable/nunito";
+@import "@fontsource-variable/karla";
+@import "@fontsource-variable/rubik";
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@font-face {
+  font-family: 'Kagitingan';
+  src: url('/fonts/(v2)-Kagitingan-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 @theme inline {
-  --color-primary: #0E9AA7;
-  --color-secondary: #24282e;
-  --color-accent: #F0C456;
-  --color-success: #388E3C;
-  --color-warning: #FFA000;
-  --color-error: #D32F2F;
+  --color-primary: #007EA7;
+  --color-secondary: #003249;
+  --color-accent: #80CED7;
+  --color-success: #10B981;
+  --color-warning: #FBBF24;
+  --color-error: #FF6B6B;
   --color-neutral-50: #FFFFFF;
-  --color-neutral-100: #F3F0ED;
-  --color-neutral-400: #9CA3AF;
-  --color-base: #1a1d21;
+  --color-neutral-100: #CCDBDC;
+  --color-neutral-400: #9AD1D4;
+  --color-base: #001A26;
+  --font-logo: 'Kagitingan', sans-serif;
 }
 
 html {
@@ -22,7 +31,11 @@ html {
 body {
   background: var(--color-base);
   color: var(--color-neutral-50);
-  font-family: "Nunito Variable", Nunito, Arial, sans-serif;
+  font-family: "Karla", Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Rubik", Arial, sans-serif;
 }
 
 .leaflet-popup-content-wrapper {

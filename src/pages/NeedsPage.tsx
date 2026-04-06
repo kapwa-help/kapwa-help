@@ -119,7 +119,7 @@ export function NeedsPage() {
           {data.activeEvent && (
             <p className="mt-3 text-sm text-neutral-400">
               <span>{t("Dashboard.activeEvent")}</span>{" "}
-              <span className="font-medium text-accent">{data.activeEvent.name}</span>
+              <span className="font-bold text-neutral-50">{data.activeEvent.name}</span>
             </p>
           )}
 

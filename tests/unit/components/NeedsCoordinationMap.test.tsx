@@ -89,13 +89,13 @@ describe("NeedsCoordinationMap", () => {
       (btn) => btn.textContent?.includes("sustenance") || btn.textContent?.includes("lunas")
     );
 
-    // Expected order: pending-critical (Poblacion Luna), verified-critical (Bacnotan),
-    // verified-high (Urbiztondo), completed-medium (Poblacion)
+    // Expected order: verified-critical (Bacnotan), verified-high (Urbiztondo),
+    // completed-medium (Poblacion), pending-critical (Poblacion Luna)
     const names = buttons.map((btn) => {
       const nameEl = btn.querySelector("p");
       return nameEl?.textContent;
     });
-    expect(names).toEqual(["Poblacion Luna", "Bacnotan", "Urbiztondo", "Poblacion"]);
+    expect(names).toEqual(["Bacnotan", "Urbiztondo", "Poblacion", "Poblacion Luna"]);
   });
 
   it("shows urgency badge on every list item", async () => {
