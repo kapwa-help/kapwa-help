@@ -2,6 +2,13 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@font-face {
+  font-family: 'Kagitingan';
+  src: url('/fonts/(v2)-Kagitingan-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 @theme inline {
   --color-primary: #0E9AA7;
   --color-secondary: #24282e;
@@ -13,6 +20,7 @@
   --color-neutral-100: #F3F0ED;
   --color-neutral-400: #9CA3AF;
   --color-base: #1a1d21;
+  --font-logo: 'Kagitingan', sans-serif;
 }
 
 html {
