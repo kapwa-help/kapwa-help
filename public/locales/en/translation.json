@@ -208,8 +208,14 @@
     "reportHazard": "Report a Hazard"
   },
   "DonationForm": {
+    "type": "Donation Type",
+    "typeCash": "Cash",
+    "typeInKind": "In-Kind (Physical Goods)",
     "organization": "Organization",
     "amount": "Amount (₱)",
+    "category": "Aid Category",
+    "quantity": "Quantity",
+    "unit": "Unit (optional)",
     "date": "Date",
     "notes": "Notes (optional)",
     "submit": "Report Donation",
