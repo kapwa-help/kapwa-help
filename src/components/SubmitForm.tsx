@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getBarangays,
+  getAidCategories,
   insertSubmission,
   type SubmissionInsert,
 } from "@/lib/queries";
@@ -12,6 +13,7 @@ import {
   getOutboxEntries,
   removeFromOutbox,
 } from "@/lib/form-cache";
+import { encodeGeohash } from "@/lib/geohash";
 import { useOutbox } from "@/lib/outbox-context";
 
 interface Barangay {
@@ -20,20 +22,24 @@ interface Barangay {
   municipality: string;
 }
 
+interface AidCategory {
+  id: string;
+  name: string;
+}
+
 export default function SubmitForm() {
   const { t } = useTranslation();
   const { refreshCount } = useOutbox();
   const [barangays, setBarangays] = useState<Barangay[]>([]);
+  const [categories, setCategories] = useState<AidCategory[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [savedOffline, setSavedOffline] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [coords, setCoords] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<"acquiring" | "captured" | "denied" | "idle">("idle");
 
   useEffect(() => {
     let hadCache = false;
@@ -65,23 +71,46 @@ export default function SubmitForm() {
         });
     });
 
+    // Load aid categories (same cache-first pattern)
+    getCachedOptions<AidCategory>("aidCategories").then((cachedC) => {
+      if (cancelled) return;
+      if (cachedC?.data.length) {
+        setCategories(cachedC.data);
+      }
+
+      getAidCategories()
+        .then((freshC) => {
+          if (cancelled) return;
+          setCategories(freshC);
+          setCachedOptions("aidCategories", freshC);
+        })
+        .catch(() => {
+          // Non-critical — cached or empty list is acceptable
+        });
+    });
+
     return () => {
       cancelled = true;
     };
   }, [t]);
 
-  const requestLocation = () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) =>
-          setCoords({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          }),
-        () => {} // silently ignore denial
-      );
-    }
-  };
+  const requestLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) return;
+    setLocationStatus("acquiring");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationStatus("captured");
+      },
+      () => {
+        setLocationStatus("denied");
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
 
   const flushingRef = useRef(false);
 
@@ -149,6 +178,7 @@ export default function SubmitForm() {
       notes: (formData.get("notes") as string) || null,
       lat: coords?.lat ?? null,
       lng: coords?.lng ?? null,
+      geohash: coords ? encodeGeohash(coords.lat, coords.lng) : null,
     };
 
     try {
@@ -189,6 +219,7 @@ export default function SubmitForm() {
             setSavedOffline(false);
             setFormKey((k) => k + 1);
             setCoords(null);
+            setLocationStatus("idle");
           }}
           className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
@@ -200,6 +231,46 @@ export default function SubmitForm() {
 
   return (
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
+      {/* Location */}
+      <div>
+        {locationStatus === "acquiring" && (
+          <p className="text-sm text-neutral-400">
+            {t("SubmitForm.locationAcquiring")}
+          </p>
+        )}
+        {locationStatus === "captured" && coords && (
+          <p className="text-sm text-success">
+            {t("SubmitForm.locationCaptured", {
+              lat: coords.lat.toFixed(2),
+              lng: coords.lng.toFixed(2),
+            })}
+          </p>
+        )}
+        {locationStatus === "denied" && (
+          <div className="space-y-2">
+            <p className="text-sm text-warning">
+              {t("SubmitForm.locationDenied")}
+            </p>
+            <button
+              type="button"
+              onClick={requestLocation}
+              className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+            >
+              {t("SubmitForm.locationRetry")}
+            </button>
+          </div>
+        )}
+        {locationStatus === "idle" && (
+          <button
+            type="button"
+            onClick={requestLocation}
+            className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
+          >
+            {t("SubmitForm.shareLocation")}
+          </button>
+        )}
+      </div>
+
       {/* Contact name */}
       <div>
         <label htmlFor="contact_name" className="block text-sm text-neutral-400">
@@ -253,27 +324,29 @@ export default function SubmitForm() {
       </div>
 
       {/* Gap category */}
-      <fieldset>
-        <legend className="text-sm text-neutral-400">
+      <div>
+        <label htmlFor="gap_category" className="block text-sm text-neutral-400">
           {t("SubmitForm.gapCategory")}
-        </legend>
-        <div className="mt-2 flex gap-2">
-          {(["lunas", "sustenance", "shelter"] as const).map((gap) => (
-            <label key={gap} className="flex-1 cursor-pointer">
-              <input
-                type="radio"
-                name="gap_category"
-                value={gap}
-                required
-                className="peer sr-only"
-              />
-              <span className="block rounded-xl border border-neutral-400/20 bg-base px-2 py-3 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
-                {t(`SubmitForm.gap_${gap}`)}
-              </span>
-            </label>
+        </label>
+        <select
+          id="gap_category"
+          name="gap_category"
+          required
+          disabled={!categories.length}
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+        >
+          <option value="">
+            {categories.length
+              ? t("SubmitForm.gapPlaceholder")
+              : t("SubmitForm.loadingOptions")}
+          </option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.name}>
+              {c.name}
+            </option>
           ))}
-        </div>
-      </fieldset>
+        </select>
+      </div>
 
       {/* Access status */}
       <div>
@@ -331,23 +404,6 @@ export default function SubmitForm() {
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.quantityPlaceholder")}
         />
-      </div>
-
-      {/* Location */}
-      <div>
-        {coords ? (
-          <p className="text-sm text-success">
-            {t("SubmitForm.locationCaptured")}
-          </p>
-        ) : (
-          <button
-            type="button"
-            onClick={requestLocation}
-            className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm text-neutral-400 hover:border-primary hover:text-neutral-50 transition-colors"
-          >
-            {t("SubmitForm.shareLocation")}
-          </button>
-        )}
       </div>
 
       {/* Notes */}

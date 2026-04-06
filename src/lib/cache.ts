@@ -20,14 +20,8 @@ export type NeedsData = {
     contactName: string;
     barangayName: string;
     municipality: string;
+    createdAt: string;
   }[];
-  needsSummary: {
-    total: number;
-    byStatus: { pending: number; verified: number; in_transit: number; completed: number; resolved: number };
-    byGap: { lunas: number; sustenance: number; shelter: number };
-    byAccess: { truck: number; "4x4": number; boat: number; foot_only: number; cut_off: number };
-    critical: number;
-  };
 };
 
 export type ReliefData = {

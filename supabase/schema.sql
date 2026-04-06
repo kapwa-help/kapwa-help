@@ -67,16 +67,19 @@ CREATE TABLE IF NOT EXISTS submissions (
   contact_phone   text,
   -- Location
   barangay_id     uuid NOT NULL REFERENCES barangays(id),
-  gap_category    text NOT NULL CHECK (gap_category IN ('lunas', 'sustenance', 'shelter')),
+  gap_category    text NOT NULL,
   lat             decimal(9,6),
   lng             decimal(9,6),
+  geohash         text,
   -- Access / passability (scope §5.A)
   access_status   text NOT NULL CHECK (access_status IN ('truck', '4x4', 'boat', 'foot_only', 'cut_off')),
   -- Need details
   quantity_needed integer,
   urgency         text NOT NULL CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
   notes           text,
-  photo_url       text,
+  submission_photo_url text,
+  dispatch_photo_url   text,
+  delivery_photo_url   text,
   -- Timestamps
   verified_at     timestamptz,
   completed_at    timestamptz,
@@ -91,7 +94,7 @@ CREATE TABLE IF NOT EXISTS deployments (
   organization_id uuid NOT NULL REFERENCES organizations(id),
   aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
   barangay_id     uuid REFERENCES barangays(id),
-  submission_id   uuid REFERENCES submissions(id),
+  submission_id   uuid UNIQUE REFERENCES submissions(id),
   quantity        integer,
   unit            text,
   recipient       text,
@@ -101,6 +104,8 @@ CREATE TABLE IF NOT EXISTS deployments (
   volunteer_count integer,
   hours           decimal(5,1),
   notes           text,
+  status          text NOT NULL DEFAULT 'pending'
+                    CHECK (status IN ('pending', 'received')),
   created_at      timestamptz DEFAULT now()
 );
 

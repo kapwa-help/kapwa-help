@@ -12,7 +12,8 @@ export async function getTotalDonations() {
 export async function getTotalBeneficiaries() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("quantity");
+    .select("quantity")
+    .eq("status", "received");
 
   if (error) throw error;
   return data.reduce((sum, row) => sum + (row.quantity ?? 0), 0);
@@ -21,7 +22,8 @@ export async function getTotalBeneficiaries() {
 export async function getVolunteerCount() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("volunteer_count");
+    .select("volunteer_count")
+    .eq("status", "received");
 
   if (error) throw error;
   return data.reduce((sum, row) => sum + (row.volunteer_count ?? 0), 0);
@@ -48,7 +50,8 @@ export async function getDonationsByOrganization() {
 export async function getDeploymentHubs() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("organization_id, organizations(name, municipality)");
+    .select("organization_id, organizations(name, municipality)")
+    .eq("status", "received");
 
   if (error) throw error;
 
@@ -70,7 +73,8 @@ export async function getDeploymentHubs() {
 export async function getGoodsByCategory() {
   const { data, error } = await supabase
     .from("deployments")
-    .select("quantity, aid_categories(name, icon)");
+    .select("quantity, aid_categories(name, icon)")
+    .eq("status", "received");
 
   if (error) throw error;
 
@@ -94,7 +98,8 @@ export async function getDeploymentMapPoints() {
     .from("deployments")
     .select("lat, lng, quantity, unit, organizations(name), aid_categories(name)")
     .not("lat", "is", null)
-    .not("lng", "is", null);
+    .not("lng", "is", null)
+    .eq("status", "received");
 
   if (error) throw error;
   return data.map((row) => ({
@@ -122,15 +127,16 @@ export type NeedPoint = {
   contactName: string;
   barangayName: string;
   municipality: string;
+  createdAt: string;
 };
 
 export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
   const { data, error } = await supabase
     .from("submissions")
     .select(
-      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, barangays(name, municipality)"
+      "id, lat, lng, status, gap_category, access_status, urgency, quantity_needed, notes, contact_name, created_at, barangays(name, municipality)"
     )
-    .in("status", ["verified", "in_transit", "completed"])
+    .in("status", ["pending", "verified", "in_transit", "completed"])
     .not("lat", "is", null)
     .not("lng", "is", null);
 
@@ -150,40 +156,18 @@ export async function getNeedsMapPoints(): Promise<NeedPoint[]> {
       contactName: row.contact_name,
       barangayName: brgy?.name ?? "Unknown",
       municipality: brgy?.municipality ?? "",
+      createdAt: row.created_at as string,
     };
   });
 }
 
-export async function getNeedsSummary() {
-  const { data, error } = await supabase
+export async function updateSubmissionStatus(id: string, status: string) {
+  const { error } = await supabase
     .from("submissions")
-    .select("status, gap_category, access_status, urgency")
-    .eq("type", "need");
+    .update({ status })
+    .eq("id", id);
 
   if (error) throw error;
-
-  const summary = {
-    total: data.length,
-    byStatus: { pending: 0, verified: 0, in_transit: 0, completed: 0, resolved: 0 },
-    byGap: { lunas: 0, sustenance: 0, shelter: 0 },
-    byAccess: { truck: 0, "4x4": 0, boat: 0, foot_only: 0, cut_off: 0 },
-    critical: 0,
-  };
-
-  for (const row of data) {
-    const s = row.status as keyof typeof summary.byStatus;
-    if (s in summary.byStatus) summary.byStatus[s]++;
-
-    const g = row.gap_category as keyof typeof summary.byGap | null;
-    if (g && g in summary.byGap) summary.byGap[g]++;
-
-    const a = row.access_status as keyof typeof summary.byAccess | null;
-    if (a && a in summary.byAccess) summary.byAccess[a]++;
-
-    if (row.urgency === "critical") summary.critical++;
-  }
-
-  return summary;
 }
 
 export async function getActiveEvent() {
@@ -214,7 +198,10 @@ export interface SubmissionInsert {
   urgency: string;
   lat: number | null;
   lng: number | null;
-  photo_url?: string | null;
+  geohash?: string | null;
+  submission_photo_url?: string | null;
+  dispatch_photo_url?: string | null;
+  delivery_photo_url?: string | null;
 }
 
 export async function getBarangays() {
@@ -243,11 +230,62 @@ export async function insertSubmission(submission: SubmissionInsert) {
   if (error) throw error;
 }
 
+// --- Matchmaker queries ---
+
+export interface DeploymentInsert {
+  event_id?: string | null;
+  organization_id: string;
+  aid_category_id: string;
+  submission_id: string;
+  barangay_id?: string | null;
+  quantity?: number | null;
+  unit?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  notes?: string | null;
+}
+
+export async function createDeploymentForNeed(deployment: DeploymentInsert) {
+  // Upsert on submission_id so retries after partial failure don't create duplicates
+  const { error: deployError } = await supabase
+    .from("deployments")
+    .upsert({ ...deployment, status: "pending" }, { onConflict: "submission_id" });
+
+  if (deployError) throw deployError;
+
+  const { error: statusError } = await supabase
+    .from("submissions")
+    .update({ status: "in_transit" })
+    .eq("id", deployment.submission_id);
+
+  if (statusError) throw statusError;
+}
+
+export async function updateDeploymentStatus(submissionId: string, status: "pending" | "received") {
+  const { error } = await supabase
+    .from("deployments")
+    .update({ status })
+    .eq("submission_id", submissionId);
+
+  if (error) throw error;
+}
+
+export async function getOrganizations() {
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("id, name, type, municipality")
+    .order("name");
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getBeneficiariesByBarangay() {
   const { data, error } = await supabase
     .from("deployments")
     .select("quantity, barangays(name, municipality)")
-    .not("barangay_id", "is", null);
+    .not("barangay_id", "is", null)
+    .eq("status", "received");
 
   if (error) throw error;
 

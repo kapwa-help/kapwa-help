@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
-import NeedsSummaryCards from "@/components/NeedsSummaryCards";
 import NeedsCoordinationMap from "@/components/NeedsCoordinationMap";
 import StatusFooter from "@/components/StatusFooter";
 import {
@@ -11,7 +10,6 @@ import {
 } from "@/lib/cache";
 import {
   getNeedsMapPoints,
-  getNeedsSummary,
   getActiveEvent,
 } from "@/lib/queries";
 
@@ -26,19 +24,13 @@ export function NeedsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [
-        needsPoints,
-        needsSummary,
-        activeEvent,
-      ] = await Promise.all([
+      const [needsPoints, activeEvent] = await Promise.all([
         getNeedsMapPoints(),
-        getNeedsSummary(),
         getActiveEvent(),
       ]);
 
       const freshData: NeedsData = {
         needsPoints,
-        needsSummary,
         activeEvent,
       };
 
@@ -148,9 +140,6 @@ export function NeedsPage() {
             )}
           </p>
         </div>
-
-        {/* Primary: Needs summary */}
-        {data.needsSummary && <NeedsSummaryCards summary={data.needsSummary} />}
 
         {/* Primary: Needs coordination map */}
         {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}

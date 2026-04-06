@@ -24,7 +24,8 @@ row.organizations as unknown as { name: string }
 
 Defined in `supabase/rls-policies.sql`:
 - **Anon read**: SELECT on all tables
-- **Anon insert**: INSERT on `submissions` only
+- **Anon insert**: INSERT on `submissions` and `deployments`
+- **Anon update**: UPDATE on `submissions` and `deployments` (demo phase — tighten when auth is implemented)
 
 ## Schema
 
@@ -43,6 +44,5 @@ Key relationships: `deployments` and `submissions` both reference `events` for d
 
 ## Seed Data
 
-Real Typhoon Emong data in `data/` (KML exports). Seed script: `supabase/seed-kml.ts`.
-Demo data: `supabase/seed-demo.sql` (self-contained — no dependency on seed-kml.ts).
+Demo data: `supabase/seed-demo.sql` (self-contained, idempotent).
 Deploy path: drop all tables, run `schema.sql`, then `seed-demo.sql`.
