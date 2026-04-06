@@ -116,10 +116,23 @@
     "error": "Could not claim. Check your connection and try again."
   },
   "Deployments": {
-    "title": "Deployments"
+    "title": "Deployments",
+    "totalDeliveries": "Total Deliveries",
+    "peopleServed": "People Served",
+    "barangaysReached": "Barangays Reached",
+    "recentDeployments": "Recent Deployments",
+    "noData": "No deployment data available"
   },
   "ReliefOps": {
-    "title": "Relief Operations"
+    "title": "Relief Operations",
+    "totalDonations": "Total Donations",
+    "totalSpent": "Total Spent",
+    "goodsAvailable": "Goods Available",
+    "recentPurchases": "Recent Purchases",
+    "noPurchases": "No purchases recorded yet",
+    "availableInventory": "Available Inventory",
+    "purchased": "purchased",
+    "deployed": "deployed"
   },
   "ReportForm": {
     "title": "Report",
@@ -127,6 +140,27 @@
     "submitNeed": "Submit a Need",
     "reportDonation": "Report a Donation",
     "reportPurchase": "Report a Purchase"
+  },
+  "DonationForm": {
+    "organization": "Organization",
+    "amount": "Amount (₱)",
+    "date": "Date",
+    "notes": "Notes (optional)",
+    "submit": "Report Donation",
+    "success": "Donation reported successfully!",
+    "error": "Failed to report donation"
+  },
+  "PurchaseForm": {
+    "organization": "Organization",
+    "category": "Aid Category",
+    "quantity": "Quantity",
+    "unit": "Unit (optional)",
+    "cost": "Cost (₱)",
+    "date": "Date",
+    "notes": "Notes (optional)",
+    "submit": "Report Purchase",
+    "success": "Purchase reported successfully!",
+    "error": "Failed to report purchase"
   },
   "Stories": {
     "comingSoon": "Coming soon — community stories, learnings, and journals."

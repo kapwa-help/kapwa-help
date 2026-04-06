@@ -116,10 +116,23 @@
     "error": "Saan a mabalin nga ag-claim. Kitaem ti koneksionmo ket padasem manen."
   },
   "Deployments": {
-    "title": "Dagiti pannakaipakat"
+    "title": "Dagiti pannakaipakat",
+    "totalDeliveries": "Dagup nga Deliveries",
+    "peopleServed": "Nagserbi dagiti Tattao",
+    "barangaysReached": "Nadanon dagiti Barangay",
+    "recentDeployments": "Dagiti Kabarbaro a Deployment",
+    "noData": "Awan ti magun-od a datos ti deployment"
   },
   "ReliefOps": {
-    "title": "Operasion ti Relief"
+    "title": "Operasion ti Relief",
+    "totalDonations": "Dagup a Donasion",
+    "totalSpent": "Dagup a Nagasto",
+    "goodsAvailable": "Dagiti Saniweng a Magun-od",
+    "recentPurchases": "Dagiti Kabarbaro a Gatang",
+    "noPurchases": "Awan pay ti nairekord a ginatang",
+    "availableInventory": "Magun-od nga Imbentaryo",
+    "purchased": "nagatang",
+    "deployed": "naipakat"
   },
   "ReportForm": {
     "title": "Ipadamag",
@@ -127,6 +140,27 @@
     "submitNeed": "Mangisubmitir iti Kasapulan",
     "reportDonation": "Ireport ti Donasion",
     "reportPurchase": "Ireport ti Gatang"
+  },
+  "DonationForm": {
+    "organization": "Organisasion",
+    "amount": "Kantidad (₱) .",
+    "date": "Petsa",
+    "notes": "Dagiti Pakaammo (opsional) .",
+    "submit": "Ireport ti Donasion",
+    "success": "Naballigi ti naipadamag a donasion!",
+    "error": "Napaay a nangipadamag iti donasion"
+  },
+  "PurchaseForm": {
+    "organization": "Organisasion",
+    "category": "Kategoria ti Tulong",
+    "quantity": "Kaadu",
+    "unit": "Yunit (opsional) .",
+    "cost": "Gastos (₱) .",
+    "date": "Petsa",
+    "notes": "Dagiti Pakaammo (opsional) .",
+    "submit": "Report ti Panaggatang",
+    "success": "Naballigi ti naipadamag a panaggatang!",
+    "error": "Napaay a nangipadamag iti panaggatang"
   },
   "Stories": {
     "comingSoon": "Coming soon — estoria ti komunidad, nasursuro, ken journal."

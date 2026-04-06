@@ -116,10 +116,23 @@
     "error": "Hindi ma-claim. Suriin ang iyong koneksyon at subukang muli."
   },
   "Deployments": {
-    "title": "Mga deployment"
+    "title": "Mga deployment",
+    "totalDeliveries": "Kabuuang Paghahatid",
+    "peopleServed": "Mga taong Pinagsilbihan",
+    "barangaysReached": "Naabot ang mga Barangay",
+    "recentDeployments": "Mga Kamakailang Deployment",
+    "noData": "Walang available na data sa pag-deploy"
   },
   "ReliefOps": {
-    "title": "Mga Relief Operations"
+    "title": "Mga Relief Operations",
+    "totalDonations": "Kabuuang mga Donasyon",
+    "totalSpent": "Kabuuang Ginastos",
+    "goodsAvailable": "Magagamit na mga kalakal",
+    "recentPurchases": "Mga Kamakailang Pagbili",
+    "noPurchases": "Wala pang naitalang mga pagbili",
+    "availableInventory": "Magagamit na Imbentaryo",
+    "purchased": "binili",
+    "deployed": "ipinakalat"
   },
   "ReportForm": {
     "title": "Ulat",
@@ -127,6 +140,27 @@
     "submitNeed": "Magsumite ng isang Pangangailangan",
     "reportDonation": "Mag-ulat ng Donasyon",
     "reportPurchase": "Mag-ulat ng isang Pagbili"
+  },
+  "DonationForm": {
+    "organization": "Organisasyon",
+    "amount": "Halaga (₱)",
+    "date": "Petsa",
+    "notes": "Mga Tala (opsyonal)",
+    "submit": "Iulat ang Donasyon",
+    "success": "Matagumpay na naiulat ang donasyon!",
+    "error": "Nabigong mag-ulat ng donasyon"
+  },
+  "PurchaseForm": {
+    "organization": "Organisasyon",
+    "category": "Kategorya ng Tulong",
+    "quantity": "Dami",
+    "unit": "Yunit (opsyonal)",
+    "cost": "Gastos (₱)",
+    "date": "Petsa",
+    "notes": "Mga Tala (opsyonal)",
+    "submit": "Iulat ang Pagbili",
+    "success": "Matagumpay na naiulat ang pagbili!",
+    "error": "Nabigong iulat ang pagbili"
   },
   "Stories": {
     "comingSoon": "Paparating na — mga kuwento ng komunidad, mga natutunan, at mga journal."

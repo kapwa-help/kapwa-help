@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import SubmitForm from "@/components/SubmitForm";
+import DonationForm from "@/components/DonationForm";
+import PurchaseForm from "@/components/PurchaseForm";
 
 export function ReportPage() {
   const { t } = useTranslation();
@@ -32,12 +34,8 @@ export function ReportPage() {
 
         {/* Form content */}
         {formType === "need" && <SubmitForm />}
-        {formType === "donation" && (
-          <p className="text-neutral-400">Coming soon</p>
-        )}
-        {formType === "purchase" && (
-          <p className="text-neutral-400">Coming soon</p>
-        )}
+        {formType === "donation" && <DonationForm />}
+        {formType === "purchase" && <PurchaseForm />}
       </main>
     </div>
   );
