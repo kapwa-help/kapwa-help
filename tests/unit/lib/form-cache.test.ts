@@ -11,15 +11,17 @@ import {
 } from "@/lib/form-cache";
 
 const samplePayload: SubmissionInsert = {
-  type: "need",
   contact_name: "Juan Dela Cruz",
   contact_phone: null,
   barangay_id: "b1",
-  gap_category: "sustenance",
+  aid_category_id: "cat-1",
   access_status: "truck",
   notes: null,
   quantity_needed: 50,
   urgency: "high",
+  num_adults: 10,
+  num_children: 5,
+  num_seniors_pwd: 2,
   lat: null,
   lng: null,
 };

@@ -44,8 +44,8 @@ import { getNeedsMapPoints, getActiveEvent } from "@/lib/queries";
 import { getCachedNeeds, setCachedNeeds } from "@/lib/cache";
 
 const mockQueries = () => {
+  vi.mocked(getActiveEvent).mockResolvedValue({ id: "e1", name: "Test", slug: "test", description: null, region: "LU", started_at: "2024-01-01" });
   vi.mocked(getNeedsMapPoints).mockResolvedValue([]);
-  vi.mocked(getActiveEvent).mockResolvedValue(null);
 };
 
 describe("NeedsPage", () => {
@@ -120,8 +120,10 @@ describe("NeedsPage", () => {
         needsPoints: [
           {
             id: "1", lat: 16.67, lng: 120.32, status: "verified",
-            gapCategory: "sustenance", accessStatus: "truck", urgency: "high",
-            quantityNeeded: 80, notes: null, contactName: "Maria",
+            aidCategoryId: "cat-1", aidCategoryName: "Hot Meals", aidCategoryIcon: "🍲",
+            accessStatus: "truck", urgency: "high",
+            quantityNeeded: 80, numAdults: 10, numChildren: 5, numSeniorsPwd: 2,
+            notes: null, contactName: "Maria",
             barangayName: "Urbiztondo", municipality: "San Juan",
             createdAt: "2026-04-01T10:00:00Z",
           },

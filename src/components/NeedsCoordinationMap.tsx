@@ -152,7 +152,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                       {need.barangayName}
                     </p>
                     <p className={`text-xs ${need.status === "completed" ? "text-neutral-400/60" : "text-neutral-400"}`}>
-                      {need.gapCategory ?? t("Dashboard.unset")}
+                      {need.aidCategoryIcon ? `${need.aidCategoryIcon} ` : ""}{need.aidCategoryName ?? t("Dashboard.unset")}
                       {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
                     </p>
                   </div>
@@ -233,7 +233,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
                         {need.barangayName}
                       </p>
                       <p className={`text-xs ${need.status === "completed" ? "text-neutral-400/60" : "text-neutral-400"}`}>
-                        {need.gapCategory ?? t("Dashboard.unset")}
+                        {need.aidCategoryIcon ? `${need.aidCategoryIcon} ` : ""}{need.aidCategoryName ?? t("Dashboard.unset")}
                         {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
                       </p>
                     </div>

@@ -77,8 +77,6 @@ export default function ClaimForm({ point, onClaimed }: Props) {
         barangay_id: null,
         quantity: quantity ? parseInt(quantity, 10) : null,
         unit: unit || null,
-        lat: point.lat,
-        lng: point.lng,
         notes: notes || null,
       });
       onClaimed();

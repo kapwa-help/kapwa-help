@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 import { supabase } from "@/lib/supabase";
-import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations, getTotalBeneficiaries, getVolunteerCount, getDeploymentHubs, getGoodsByCategory, getDeploymentMapPoints, getBeneficiariesByBarangay } from "@/lib/queries";
+import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations, getTotalBeneficiaries, getGoodsByCategory, insertPurchase, insertDonation } from "@/lib/queries";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -49,15 +49,17 @@ describe("insertSubmission", () => {
     } as never);
 
     const payload = {
-      type: "need" as const,
       contact_name: "Juan Dela Cruz",
       contact_phone: null,
       barangay_id: "b1",
-      gap_category: "sustenance",
+      aid_category_id: "cat-1",
       access_status: "truck",
       notes: null,
       quantity_needed: 50,
       urgency: "high",
+      num_adults: 10,
+      num_children: 5,
+      num_seniors_pwd: 2,
       lat: null,
       lng: null,
     };
@@ -73,15 +75,17 @@ describe("insertSubmission", () => {
     } as never);
 
     const payload = {
-      type: "need" as const,
       contact_name: "Juan",
       contact_phone: null,
       barangay_id: "b1",
-      gap_category: "sustenance",
+      aid_category_id: "cat-1",
       access_status: "truck",
       notes: null,
       quantity_needed: null,
       urgency: "low",
+      num_adults: null,
+      num_children: null,
+      num_seniors_pwd: null,
       lat: null,
       lng: null,
     };
@@ -91,42 +95,53 @@ describe("insertSubmission", () => {
 });
 
 describe("getNeedsMapPoints", () => {
-  it("returns formatted need points from Supabase", async () => {
+  it("returns formatted need points with aid category fields", async () => {
     const mockData = [
       {
         id: "abc",
         lat: 16.67,
         lng: 120.32,
         status: "verified",
-        gap_category: "sustenance",
+        aid_category_id: "cat-1",
         access_status: "truck",
         urgency: "high",
         quantity_needed: 80,
+        num_adults: 15,
+        num_children: 8,
+        num_seniors_pwd: 2,
         notes: "Food needed",
         contact_name: "Test",
+        created_at: "2024-01-01T00:00:00Z",
         barangays: { name: "Urbiztondo", municipality: "San Juan" },
-        aid_categories: { name: "Sustenance" },
+        aid_categories: { name: "Hot Meals", icon: "🍲" },
       },
     ];
     vi.mocked(supabase.from).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        in: vi.fn().mockReturnValue({
-          not: vi.fn().mockReturnValue({
-            not: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+        eq: vi.fn().mockReturnValue({
+          neq: vi.fn().mockReturnValue({
+            not: vi.fn().mockReturnValue({
+              not: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+            }),
           }),
         }),
       }),
     } as never);
 
-    const result = await getNeedsMapPoints();
+    const result = await getNeedsMapPoints("event-1");
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       id: "abc",
       lat: 16.67,
       lng: 120.32,
       status: "verified",
-      gapCategory: "sustenance",
+      aidCategoryId: "cat-1",
+      aidCategoryName: "Hot Meals",
+      aidCategoryIcon: "🍲",
       accessStatus: "truck",
+      numAdults: 15,
+      numChildren: 8,
+      numSeniorsPwd: 2,
     });
   });
 });
@@ -179,8 +194,6 @@ describe("createDeploymentForNeed", () => {
       barangay_id: "brgy-1",
       quantity: 100,
       unit: "packs",
-      lat: 16.67,
-      lng: 120.32,
       notes: null,
     });
 
@@ -193,8 +206,8 @@ describe("createDeploymentForNeed", () => {
 describe("getOrganizations", () => {
   it("returns organizations sorted by name", async () => {
     const mockData = [
-      { id: "1", name: "DOERS", type: "hub", municipality: "Luna" },
-      { id: "2", name: "EcoNest", type: "donor", municipality: "Bauang" },
+      { id: "1", name: "DOERS", municipality: "Luna" },
+      { id: "2", name: "EcoNest", municipality: "Bauang" },
     ];
     vi.mocked(supabase.from).mockReturnValue({
       select: vi.fn().mockReturnValue({
@@ -219,26 +232,6 @@ describe("Relief queries filter by received status", () => {
     expect(mockEq).toHaveBeenCalledWith("status", "received");
   });
 
-  it("getVolunteerCount filters by received", async () => {
-    const mockEq = vi.fn().mockResolvedValue({ data: [{ volunteer_count: 5 }], error: null });
-    vi.mocked(supabase.from).mockReturnValue({
-      select: vi.fn().mockReturnValue({ eq: mockEq }),
-    } as never);
-
-    await getVolunteerCount();
-    expect(mockEq).toHaveBeenCalledWith("status", "received");
-  });
-
-  it("getDeploymentHubs filters by received", async () => {
-    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
-    vi.mocked(supabase.from).mockReturnValue({
-      select: vi.fn().mockReturnValue({ eq: mockEq }),
-    } as never);
-
-    await getDeploymentHubs();
-    expect(mockEq).toHaveBeenCalledWith("status", "received");
-  });
-
   it("getGoodsByCategory filters by received", async () => {
     const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
     vi.mocked(supabase.from).mockReturnValue({
@@ -248,27 +241,39 @@ describe("Relief queries filter by received status", () => {
     await getGoodsByCategory();
     expect(mockEq).toHaveBeenCalledWith("status", "received");
   });
+});
 
-  it("getDeploymentMapPoints filters by received", async () => {
-    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
-    const mockNot2 = vi.fn().mockReturnValue({ eq: mockEq });
-    const mockNot1 = vi.fn().mockReturnValue({ not: mockNot2 });
+describe("insertPurchase", () => {
+  it("inserts a purchase", async () => {
     vi.mocked(supabase.from).mockReturnValue({
-      select: vi.fn().mockReturnValue({ not: mockNot1 }),
+      insert: vi.fn().mockResolvedValue({ error: null }),
     } as never);
 
-    await getDeploymentMapPoints();
-    expect(mockEq).toHaveBeenCalledWith("status", "received");
+    await expect(insertPurchase({
+      organization_id: "org-1",
+      aid_category_id: "cat-1",
+      quantity: 100,
+      unit: "kits",
+      cost: 5000,
+      date: "2024-01-01",
+      notes: null,
+    })).resolves.toBeUndefined();
+    expect(supabase.from).toHaveBeenCalledWith("purchases");
   });
+});
 
-  it("getBeneficiariesByBarangay filters by received", async () => {
-    const mockEq = vi.fn().mockResolvedValue({ data: [], error: null });
-    const mockNot = vi.fn().mockReturnValue({ eq: mockEq });
+describe("insertDonation", () => {
+  it("inserts a donation", async () => {
     vi.mocked(supabase.from).mockReturnValue({
-      select: vi.fn().mockReturnValue({ not: mockNot }),
+      insert: vi.fn().mockResolvedValue({ error: null }),
     } as never);
 
-    await getBeneficiariesByBarangay();
-    expect(mockEq).toHaveBeenCalledWith("status", "received");
+    await expect(insertDonation({
+      organization_id: "org-1",
+      amount: 50000,
+      date: "2024-01-01",
+      notes: null,
+    })).resolves.toBeUndefined();
+    expect(supabase.from).toHaveBeenCalledWith("donations");
   });
 });

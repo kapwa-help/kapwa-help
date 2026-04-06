@@ -130,7 +130,10 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
       <div className="mb-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
         <div>
           <span className="text-neutral-400">{t("PinDetail.gapCategory")}</span>
-          <p className="text-neutral-50">{point.gapCategory ?? t("Dashboard.unset")}</p>
+          <p className="text-neutral-50">
+            {point.aidCategoryIcon && `${point.aidCategoryIcon} `}
+            {point.aidCategoryName ?? t("Dashboard.unset")}
+          </p>
         </div>
         <div>
           <span className="text-neutral-400">{t("PinDetail.urgency")}</span>
@@ -147,8 +150,8 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
           </p>
         </div>
         <div>
-          <span className="text-neutral-400">{t("PinDetail.families")}</span>
-          <p className="text-neutral-50">{point.quantityNeeded ?? "—"}</p>
+          <span className="text-neutral-400">{t("PinDetail.people")}</span>
+          <p className="text-neutral-50">{point.numAdults + point.numChildren + point.numSeniorsPwd || "—"}</p>
         </div>
         <div>
           <span className="text-neutral-400">{t("PinDetail.contactName")}</span>

@@ -25,6 +25,7 @@ interface Barangay {
 interface AidCategory {
   id: string;
   name: string;
+  icon: string | null;
 }
 
 export default function SubmitForm() {
@@ -165,15 +166,23 @@ export default function SubmitForm() {
 
     const payload: SubmissionInsert = {
       id,
-      type: "need",
       contact_name: formData.get("contact_name") as string,
       contact_phone: (formData.get("contact_phone") as string) || null,
       barangay_id: formData.get("barangay_id") as string,
-      gap_category: formData.get("gap_category") as string,
+      aid_category_id: formData.get("aid_category_id") as string,
       access_status: formData.get("access_status") as string,
       urgency: formData.get("urgency") as string,
       quantity_needed: formData.get("quantity_needed")
         ? Number(formData.get("quantity_needed"))
+        : null,
+      num_adults: formData.get("num_adults")
+        ? Number(formData.get("num_adults"))
+        : null,
+      num_children: formData.get("num_children")
+        ? Number(formData.get("num_children"))
+        : null,
+      num_seniors_pwd: formData.get("num_seniors_pwd")
+        ? Number(formData.get("num_seniors_pwd"))
         : null,
       notes: (formData.get("notes") as string) || null,
       lat: coords?.lat ?? null,
@@ -323,14 +332,14 @@ export default function SubmitForm() {
         </select>
       </div>
 
-      {/* Gap category */}
+      {/* Aid category */}
       <div>
-        <label htmlFor="gap_category" className="block text-sm text-neutral-400">
+        <label htmlFor="aid_category_id" className="block text-sm text-neutral-400">
           {t("SubmitForm.gapCategory")}
         </label>
         <select
-          id="gap_category"
-          name="gap_category"
+          id="aid_category_id"
+          name="aid_category_id"
           required
           disabled={!categories.length}
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
@@ -341,8 +350,8 @@ export default function SubmitForm() {
               : t("SubmitForm.loadingOptions")}
           </option>
           {categories.map((c) => (
-            <option key={c.id} value={c.name}>
-              {c.name}
+            <option key={c.id} value={c.id}>
+              {c.icon ? `${c.icon} ` : ""}{c.name}
             </option>
           ))}
         </select>
@@ -404,6 +413,49 @@ export default function SubmitForm() {
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.quantityPlaceholder")}
         />
+      </div>
+
+      {/* Beneficiary counts */}
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label htmlFor="num_adults" className="block text-sm text-neutral-400">
+            {t("SubmitForm.numAdults")}
+          </label>
+          <input
+            id="num_adults"
+            name="num_adults"
+            type="number"
+            min="0"
+            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="0"
+          />
+        </div>
+        <div>
+          <label htmlFor="num_children" className="block text-sm text-neutral-400">
+            {t("SubmitForm.numChildren")}
+          </label>
+          <input
+            id="num_children"
+            name="num_children"
+            type="number"
+            min="0"
+            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="0"
+          />
+        </div>
+        <div>
+          <label htmlFor="num_seniors_pwd" className="block text-sm text-neutral-400">
+            {t("SubmitForm.numSeniorsPwd")}
+          </label>
+          <input
+            id="num_seniors_pwd"
+            name="num_seniors_pwd"
+            type="number"
+            min="0"
+            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="0"
+          />
+        </div>
       </div>
 
       {/* Notes */}

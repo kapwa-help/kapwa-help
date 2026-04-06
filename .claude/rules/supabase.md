@@ -24,23 +24,24 @@ row.organizations as unknown as { name: string }
 
 Defined in `supabase/rls-policies.sql`:
 - **Anon read**: SELECT on all tables
-- **Anon insert**: INSERT on `submissions` and `deployments`
+- **Anon insert**: INSERT on `submissions`, `deployments`, and `purchases`
 - **Anon update**: UPDATE on `submissions` and `deployments` (demo phase — tighten when auth is implemented)
 
 ## Schema
 
-Seven tables, event-scoped. Full SQL in `supabase/schema.sql`.
+Eight tables, event-scoped. Full SQL in `supabase/schema.sql`.
 All primary keys are UUIDs — designed for future offline sync with collision-free IDs.
 
 - `events` — disaster operations that scope all data (e.g., "Typhoon Emong Relief")
-- `organizations` — donors and deployment hubs
-- `aid_categories` — 7 pre-seeded aid types
-- `barangays` — geographic aggregation
+- `organizations` — donors and deployment hubs (no type column — role derived from usage)
+- `aid_categories` — 9 unified categories (Hot Meals, Drinking Water, Water Filtration, Temporary Shelter, Clothing, Construction Materials, Medical Supplies, Hygiene Kits, Canned Food)
+- `barangays` — geographic aggregation (lat/lng for map display)
 - `donations` — monetary contributions
-- `submissions` — needs from the field. Follow pin lifecycle: `pending→verified→in_transit→completed→resolved`. Required fields: `gap_category` NOT NULL (lunas/sustenance/shelter), `access_status` NOT NULL (truck/4x4/boat/foot_only/cut_off), `urgency` NOT NULL (low/medium/high/critical)
+- `purchases` — goods bought with donation money, linked to org + aid category
+- `submissions` — needs from the field. Follow pin lifecycle: `pending→verified→in_transit→completed→resolved`. Uses `aid_category_id` FK (not text). Includes `num_adults`, `num_children`, `num_seniors_pwd` for beneficiary counts. Required fields: `access_status` NOT NULL (truck/4x4/boat/foot_only/cut_off), `urgency` NOT NULL (low/medium/high/critical)
 - `deployments` — aid delivery events, optionally linked to a specific need via `submission_id`
 
-Key relationships: `deployments` and `submissions` both reference `events` for disaster scoping. `deployments.submission_id` links a relief action to the specific need it fulfills.
+Key relationships: `deployments` and `submissions` both reference `events` for disaster scoping. `deployments.submission_id` links a relief action to the specific need it fulfills. `purchases` track goods bought with donations — inventory = purchased minus deployed.
 
 ## Seed Data
 

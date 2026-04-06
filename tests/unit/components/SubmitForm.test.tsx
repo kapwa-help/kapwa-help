@@ -65,10 +65,10 @@ beforeEach(() => {
     { id: "brgy-2", name: "Pagdalagan", municipality: "San Fernando" },
   ]);
   vi.mocked(getAidCategories).mockResolvedValue([
-    { id: "cat-1", name: "Lunas" },
-    { id: "cat-2", name: "Sustenance" },
-    { id: "cat-3", name: "Shelter" },
-    { id: "cat-4", name: "Meals" },
+    { id: "cat-1", name: "Hot Meals", icon: "🍲" },
+    { id: "cat-2", name: "Medical Supplies", icon: "🏥" },
+    { id: "cat-3", name: "Temporary Shelter", icon: "🏕️" },
+    { id: "cat-4", name: "Drinking Water", icon: "💧" },
   ]);
   vi.mocked(insertSubmission).mockResolvedValue(undefined);
 });
@@ -120,7 +120,7 @@ describe("SubmitForm", () => {
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
-      { target: { value: "Sustenance" } }
+      { target: { value: "cat-2" } }
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
@@ -135,10 +135,9 @@ describe("SubmitForm", () => {
       expect(insertSubmission).toHaveBeenCalledWith(
         expect.objectContaining({
           id: "test-uuid-123",
-          type: "need",
           contact_name: "Juan Dela Cruz",
           barangay_id: "brgy-1",
-          gap_category: "Sustenance",
+          aid_category_id: "cat-2",
           access_status: "truck",
           urgency: "high",
         })
@@ -163,7 +162,7 @@ describe("SubmitForm", () => {
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
-      { target: { value: "Lunas" } }
+      { target: { value: "cat-1" } }
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
@@ -198,7 +197,7 @@ describe("SubmitForm", () => {
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
-      { target: { value: "Sustenance" } }
+      { target: { value: "cat-2" } }
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
@@ -211,10 +210,9 @@ describe("SubmitForm", () => {
       expect(addToOutbox).toHaveBeenCalledWith(
         expect.objectContaining({
           id: "test-uuid-123",
-          type: "need",
           contact_name: "Juan",
           barangay_id: "brgy-1",
-          gap_category: "Sustenance",
+          aid_category_id: "cat-2",
           access_status: "truck",
         })
       );
@@ -268,15 +266,17 @@ describe("SubmitForm", () => {
         key: 1,
         payload: {
           id: "uuid-1",
-          type: "need" as const,
           contact_name: "Juan",
           contact_phone: null,
           barangay_id: "brgy-1",
-          gap_category: "Sustenance",
+          aid_category_id: "cat-1",
           access_status: "truck",
           notes: null,
           quantity_needed: null,
           urgency: "high",
+          num_adults: null,
+          num_children: null,
+          num_seniors_pwd: null,
           lat: null,
           lng: null,
         },
@@ -285,15 +285,17 @@ describe("SubmitForm", () => {
         key: 2,
         payload: {
           id: "uuid-2",
-          type: "need" as const,
           contact_name: "Maria",
           contact_phone: null,
           barangay_id: "brgy-2",
-          gap_category: "lunas",
+          aid_category_id: "cat-2",
           access_status: "4x4",
           notes: null,
           quantity_needed: null,
           urgency: "critical",
+          num_adults: null,
+          num_children: null,
+          num_seniors_pwd: null,
           lat: null,
           lng: null,
         },
@@ -329,15 +331,17 @@ describe("SubmitForm", () => {
         key: 1,
         payload: {
           id: "uuid-dup",
-          type: "need" as const,
           contact_name: "Juan",
           contact_phone: null,
           barangay_id: "brgy-1",
-          gap_category: "Sustenance",
+          aid_category_id: "cat-1",
           access_status: "truck",
           notes: null,
           quantity_needed: null,
           urgency: "high",
+          num_adults: null,
+          num_children: null,
+          num_seniors_pwd: null,
           lat: null,
           lng: null,
         },
@@ -378,7 +382,7 @@ describe("SubmitForm", () => {
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
-      { target: { value: "Shelter" } }
+      { target: { value: "cat-3" } }
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),
@@ -491,7 +495,7 @@ describe("SubmitForm", () => {
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.gapCategory" }),
-      { target: { value: "Sustenance" } }
+      { target: { value: "cat-2" } }
     );
     fireEvent.change(
       screen.getByRole("combobox", { name: "SubmitForm.accessStatus" }),

@@ -1,46 +1,59 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
-import NeedsCoordinationMap from "@/components/NeedsCoordinationMap";
 import StatusFooter from "@/components/StatusFooter";
+import DeploymentsCoordinationMap from "@/components/DeploymentsCoordinationMap";
 import {
-  getCachedNeeds,
-  setCachedNeeds,
-  type NeedsData,
+  getCachedDeployments,
+  setCachedDeployments,
+  type DeploymentsData,
 } from "@/lib/cache";
 import {
-  getNeedsMapPoints,
   getActiveEvent,
+  getBarangayDistribution,
+  getPeopleServed,
+  getRecentDeployments,
 } from "@/lib/queries";
 
-export function NeedsPage() {
+export function DeploymentsPage() {
   const { t } = useTranslation();
-  const [data, setData] = useState<NeedsData | null>(null);
+  const [data, setData] = useState<DeploymentsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [eventName, setEventName] = useState<string | undefined>(undefined);
   const hasDataRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     try {
-      const activeEvent = await getActiveEvent();
-      const needsPoints = activeEvent
-        ? await getNeedsMapPoints(activeEvent.id)
-        : [];
+      const event = await getActiveEvent();
+      setEventName(event?.name ?? undefined);
+      if (!event) {
+        setData({ peopleServed: { adults: 0, children: 0, seniorsPwd: 0 }, barangayDistribution: [], recentDeployments: [] });
+        setLoading(false);
+        return;
+      }
 
-      const freshData: NeedsData = {
-        needsPoints,
-        activeEvent,
+      const [distribution, people, recent] = await Promise.all([
+        getBarangayDistribution(event.id),
+        getPeopleServed(event.id),
+        getRecentDeployments(event.id),
+      ]);
+
+      const fresh: DeploymentsData = {
+        peopleServed: people,
+        barangayDistribution: distribution,
+        recentDeployments: recent,
       };
 
-      setData(freshData);
+      setData(fresh);
       setUpdatedAt(new Date());
       setError(null);
       hasDataRef.current = true;
-      setCachedNeeds(freshData);
+      setCachedDeployments(fresh);
     } catch (e) {
       if (!hasDataRef.current) {
-        setError(e instanceof Error ? e.message : "Failed to load needs data");
+        setError(e instanceof Error ? e.message : "Failed to load");
       }
     } finally {
       setLoading(false);
@@ -49,7 +62,7 @@ export function NeedsPage() {
 
   useEffect(() => {
     async function init() {
-      const cached = await getCachedNeeds();
+      const cached = await getCachedDeployments();
       if (cached) {
         setData(cached.data);
         setUpdatedAt(new Date(cached.updatedAt));
@@ -91,16 +104,22 @@ export function NeedsPage() {
     );
   }
 
+  const totalDeliveries = data.barangayDistribution.reduce((sum, b) => sum + b.deployments.length, 0);
+  const totalPeople = data.peopleServed.adults + data.peopleServed.children + data.peopleServed.seniorsPwd;
+
   return (
     <div className="flex h-dvh flex-col bg-base">
       <Header />
       <main className="relative flex-1 overflow-hidden">
-        {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}
+        <DeploymentsCoordinationMap
+          barangayDistribution={data.barangayDistribution}
+          recentDeployments={data.recentDeployments}
+          totalDeliveries={totalDeliveries}
+          peopleServed={totalPeople}
+          barangaysReached={data.barangayDistribution.length}
+        />
       </main>
-      <StatusFooter
-        eventName={data.activeEvent?.name}
-        updatedAt={updatedAt}
-      />
+      <StatusFooter eventName={eventName} updatedAt={updatedAt} />
     </div>
   );
 }

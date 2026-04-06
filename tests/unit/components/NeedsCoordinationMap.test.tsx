@@ -25,29 +25,37 @@ vi.mock("@/components/PinDetailSheet", () => ({
 const mockPoints = [
   {
     id: "1", lat: 16.67, lng: 120.32, status: "verified",
-    gapCategory: "sustenance", accessStatus: "truck", urgency: "high",
-    quantityNeeded: 80, notes: "Food needed", contactName: "Maria",
+    aidCategoryId: "cat-1", aidCategoryName: "Hot Meals", aidCategoryIcon: "🍲",
+    accessStatus: "truck", urgency: "high",
+    quantityNeeded: 80, numAdults: 15, numChildren: 8, numSeniorsPwd: 2,
+    notes: "Food needed", contactName: "Maria",
     barangayName: "Urbiztondo", municipality: "San Juan",
     createdAt: "2026-04-01T10:00:00Z",
   },
   {
     id: "2", lat: 16.73, lng: 120.35, status: "verified",
-    gapCategory: "lunas", accessStatus: "boat", urgency: "critical",
-    quantityNeeded: 50, notes: "Medical", contactName: "Jose",
+    aidCategoryId: "cat-2", aidCategoryName: "Medical Supplies", aidCategoryIcon: "🏥",
+    accessStatus: "boat", urgency: "critical",
+    quantityNeeded: 50, numAdults: 30, numChildren: 10, numSeniorsPwd: 5,
+    notes: "Medical", contactName: "Jose",
     barangayName: "Bacnotan", municipality: "Bacnotan",
     createdAt: "2026-04-01T12:00:00Z",
   },
   {
     id: "3", lat: 16.66, lng: 120.33, status: "completed",
-    gapCategory: "sustenance", accessStatus: "truck", urgency: "medium",
-    quantityNeeded: 70, notes: "Delivered", contactName: "Elena",
+    aidCategoryId: "cat-1", aidCategoryName: "Hot Meals", aidCategoryIcon: "🍲",
+    accessStatus: "truck", urgency: "medium",
+    quantityNeeded: 70, numAdults: 20, numChildren: 10, numSeniorsPwd: 3,
+    notes: "Delivered", contactName: "Elena",
     barangayName: "Poblacion", municipality: "San Juan",
     createdAt: "2026-04-01T08:00:00Z",
   },
   {
     id: "4", lat: 16.80, lng: 120.37, status: "pending",
-    gapCategory: "sustenance", accessStatus: "cut_off", urgency: "critical",
-    quantityNeeded: 45, notes: "Unverified", contactName: "Caller",
+    aidCategoryId: "cat-1", aidCategoryName: "Hot Meals", aidCategoryIcon: "🍲",
+    accessStatus: "cut_off", urgency: "critical",
+    quantityNeeded: 45, numAdults: 0, numChildren: 0, numSeniorsPwd: 0,
+    notes: "Unverified", contactName: "Caller",
     barangayName: "Poblacion Luna", municipality: "Luna",
     createdAt: "2026-04-01T14:00:00Z",
   },
@@ -100,7 +108,7 @@ describe("NeedsCoordinationMap", () => {
     render(<NeedsCoordinationMap needsPoints={mockPoints} />);
 
     const buttons = screen.getAllByRole("button").filter(
-      (btn) => btn.textContent?.includes("sustenance") || btn.textContent?.includes("lunas")
+      (btn) => btn.textContent?.includes("Hot Meals") || btn.textContent?.includes("Medical Supplies")
     );
 
     // Expected order: verified-critical (Bacnotan), verified-high (Urbiztondo),

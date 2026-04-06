@@ -28,25 +28,25 @@ npm run verify:headed   # Headed — watch in browser
 
 | Route | Page | Key Elements |
 |-------|------|-------------|
-| `/:locale` | Needs | Header (`Kapwa Help`), `<h1>`, locale `<select>`, `<nav>` |
-| `/:locale/relief` | Relief | Header, `<h1>` |
-| `/:locale/stories` | Stories | Header, `<h1>` |
-| `/:locale/submit` | Submit Form | Header, `<h1>`, `<form>`, required fields (contact, barangay, access) |
+| `/:locale` | Needs | Header (`Kapwa Help`), map, locale `<select>`, `<nav>` |
+| `/:locale/deployments` | Deployments | Header, `<h1>`, summary cards, bubble map, recent deployments |
+| `/:locale/relief-operations` | Relief Operations | Header, `<h1>`, summary cards, donations, purchases, inventory |
+| `/:locale/report` | Report | Header, `<h1>`, form type selector, need/donation/purchase forms |
 
 Supported locales: `en`, `fil`, `ilo`
 
 ## Screenshots
 
 Smoke tests save full-page screenshots to `tests/e2e/screenshots/`:
-`needs-{en,fil,ilo}.png`, `relief-{en,fil,ilo}.png`, `stories-{en,fil,ilo}.png`, `submit-{en,fil,ilo}.png`, `mobile-nav.png`
+`needs-{en,fil,ilo}.png`, `deployments-{en,fil,ilo}.png`, `relief-operations-{en,fil,ilo}.png`, `report-{en,fil,ilo}.png`, `mobile-nav.png`
 
 ## Filtering Tests
 
 ```bash
 npx playwright test --grep "needs"
-npx playwright test --grep "relief"
-npx playwright test --grep "stories"
-npx playwright test --grep "submit"
+npx playwright test --grep "deployments"
+npx playwright test --grep "relief operations"
+npx playwright test --grep "report"
 npx playwright test --grep "locale switcher"
 npx playwright test --grep "nav links"
 npx playwright test --grep "mobile hamburger"
