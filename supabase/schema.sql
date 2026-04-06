@@ -54,6 +54,11 @@ CREATE TABLE IF NOT EXISTS donations (
   aid_category_id uuid REFERENCES aid_categories(id),
   quantity        integer,
   unit            text,
+  -- Ensure cash has amount, in-kind has category+quantity
+  CHECK (
+    (type = 'cash' AND amount IS NOT NULL) OR
+    (type = 'in_kind' AND aid_category_id IS NOT NULL AND quantity IS NOT NULL)
+  ),
   -- Common fields
   date            date NOT NULL,
   notes           text,

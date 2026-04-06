@@ -79,13 +79,13 @@ BEGIN
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Emerging Islands');
   SELECT id INTO v_emerging FROM organizations WHERE name = 'Emerging Islands';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'CURMA', 'San Juan'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'CURMA', 'San Juan', 16.6650, 120.3260
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'CURMA');
   SELECT id INTO v_curma FROM organizations WHERE name = 'CURMA';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'Waves4Water', 'San Juan'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'Waves4Water', 'San Juan', 16.6670, 120.3240
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Waves4Water');
   SELECT id INTO v_waves4water FROM organizations WHERE name = 'Waves4Water';
 
@@ -119,7 +119,7 @@ BEGIN
 
   -- ============================================================
   -- 4. Insert new organizations (idempotent via WHERE NOT EXISTS)
-  --    8 of 14 orgs have lat/lng for hub markers
+  --    8 of 14 orgs have lat/lng (deployment hubs visible on map)
   -- ============================================================
   INSERT INTO organizations (name, municipality)
     SELECT 'SJRRHASS', 'San Juan'
@@ -136,8 +136,8 @@ BEGIN
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'FEED Inc');
   SELECT id INTO v_feed_inc FROM organizations WHERE name = 'FEED Inc';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'Starlight Raniag Tin San Juan', 'San Juan'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'Starlight Raniag Tin San Juan', 'San Juan', 16.6645, 120.3295
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Starlight Raniag Tin San Juan');
   SELECT id INTO v_starlight FROM organizations WHERE name = 'Starlight Raniag Tin San Juan';
 
@@ -146,28 +146,28 @@ BEGIN
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Greenpeace Philippines');
   SELECT id INTO v_greenpeace FROM organizations WHERE name = 'Greenpeace Philippines';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'Art Relief Mobile Kitchen', 'Bacnotan'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'Art Relief Mobile Kitchen', 'Bacnotan', 16.7340, 120.3500
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Art Relief Mobile Kitchen');
   SELECT id INTO v_art_relief FROM organizations WHERE name = 'Art Relief Mobile Kitchen';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'EcoNest Sustainable Food Packaging', 'Bauang'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'EcoNest Sustainable Food Packaging', 'Bauang', 16.5380, 120.3400
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'EcoNest Sustainable Food Packaging');
   SELECT id INTO v_econest FROM organizations WHERE name = 'EcoNest Sustainable Food Packaging';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'DOERS', 'Luna'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'DOERS', 'Luna', 16.8070, 120.3700
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'DOERS');
   SELECT id INTO v_doers FROM organizations WHERE name = 'DOERS';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'LU Citizen Volunteers', 'San Juan'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'LU Citizen Volunteers', 'San Juan', 16.6660, 120.3270
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'LU Citizen Volunteers');
   SELECT id INTO v_lu_volunteers FROM organizations WHERE name = 'LU Citizen Volunteers';
 
-  INSERT INTO organizations (name, municipality)
-    SELECT 'La Union Surf Club', 'Bauang'
+  INSERT INTO organizations (name, municipality, lat, lng)
+    SELECT 'La Union Surf Club', 'Bauang', 16.5450, 120.3320
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'La Union Surf Club');
   SELECT id INTO v_lu_surf FROM organizations WHERE name = 'La Union Surf Club';
 
@@ -505,8 +505,21 @@ BEGIN
   -- 12. Hazards (environmental hazards on the map)
   --     6 entries: mix of active/resolved, varied types
   -- ============================================================
-  -- Note: hazards table doesn't exist yet — this section is a placeholder
-  -- for when the hazards feature is implemented.
+  IF NOT EXISTS (SELECT 1 FROM hazards WHERE reported_by = 'demo-seed' LIMIT 1) THEN
+    INSERT INTO hazards (event_id, hazard_type, description, latitude, longitude, status, reported_by, created_at) VALUES
+      (v_event, 'flood',             'Flash flooding along Nalvo Norte river — water level 1.5m above normal, multiple homes submerged',
+       16.8085, 120.3692, 'active',   'demo-seed', '2026-03-25 07:00:00+08'),
+      (v_event, 'landslide',         'Hillside collapse partially blocking Bacnotan–Luna road, single lane passable by 4x4',
+       16.7380, 120.3510, 'resolved', 'demo-seed', '2026-03-26 06:30:00+08'),
+      (v_event, 'bridge_out',        'Concrete bridge to Dili barangay collapsed — foot crossing only via temporary bamboo walkway',
+       16.7420, 120.3525, 'active',   'demo-seed', '2026-03-25 09:00:00+08'),
+      (v_event, 'road_blocked',      'Fallen trees and debris blocking coastal road to Paringao — boat access recommended',
+       16.5145, 120.3275, 'active',   'demo-seed', '2026-03-26 08:00:00+08'),
+      (v_event, 'electrical_hazard', 'Downed power lines near Central East evacuation center — LUECO notified, area cordoned off',
+       16.5372, 120.3390, 'resolved', 'demo-seed', '2026-03-27 11:00:00+08'),
+      (v_event, 'flood',             'Rising water in Poblacion Luna from upstream runoff — families in low-lying areas evacuating',
+       16.8010, 120.3735, 'active',   'demo-seed', '2026-03-28 06:00:00+08');
+  END IF;
 
   -- Link existing deployments to the event
   UPDATE deployments SET event_id = v_event WHERE notes IN ('demo-seed', 'demo-seed-linked');
