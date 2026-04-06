@@ -60,7 +60,9 @@
     "accessFootOnly": "Foot Only",
     "accessCutOff": "Cut Off",
     "accessLabel": "Access",
-    "familyCount": "{{count}} families"
+    "familyCount": "{{count}} families",
+    "showNeedsList": "Show needs list",
+    "needsList": "Needs list"
   },
   "PinDetail": {
     "statusPending": "Pending",
