@@ -108,12 +108,11 @@ export function ReliefOperationsPage() {
           goodsAvailable={totalAvailable}
         />
 
+        <AvailableInventory inventory={data.availableInventory} />
+
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-6">
-            <DonationsByOrg donations={data.donationsByOrg} />
-            <RecentPurchases purchases={data.recentPurchases} />
-          </div>
-          <AvailableInventory inventory={data.availableInventory} />
+          <DonationsByOrg donations={data.donationsByOrg} />
+          <RecentPurchases purchases={data.recentPurchases} />
         </div>
       </main>
       <StatusFooter eventName={eventName} updatedAt={updatedAt} />
