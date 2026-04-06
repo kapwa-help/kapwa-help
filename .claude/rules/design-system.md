@@ -17,16 +17,16 @@ Source of truth: `src/index.css` via Tailwind v4 `@theme inline`.
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `primary` | `#0E9AA7` | Buttons, links, navigation highlights (warm teal) |
-| `secondary` | `#24282e` | Card backgrounds (warm slate) |
-| `accent` | `#F0C456` | Highlights, status indicators (soft gold) |
-| `success` | `#388E3C` | Positive values, online status, monetary amounts |
-| `warning` | `#FFA000` | Caution states |
-| `error` | `#D32F2F` | Errors, map markers |
+| `primary` | `#007EA7` | Buttons, links, navigation highlights (cerulean) |
+| `secondary` | `#003249` | Card backgrounds (midnight blue) |
+| `accent` | `#80CED7` | Highlights, status indicators (light cyan) |
+| `success` | `#10B981` | Positive values, online status, monetary amounts |
+| `warning` | `#FBBF24` | Caution states |
+| `error` | `#FF6B6B` | Errors, map markers |
 | `neutral-50` | `#FFFFFF` | Primary text (headings, values) |
-| `neutral-100` | `#F3F0ED` | Secondary text (warm off-white) |
-| `neutral-400` | `#9CA3AF` | Muted text, borders, labels (true gray) |
-| `base` | `#1a1d21` | Page background (warm ink) |
+| `neutral-100` | `#CCDBDC` | Secondary text (cool off-white) |
+| `neutral-400` | `#9AD1D4` | Muted text, borders, labels (soft teal) |
+| `base` | `#001A26` | Page background (deep navy) |
 
 ## Theme
 
@@ -39,9 +39,11 @@ Single dark theme. Dark `bg-base` background with `bg-secondary` card surfaces.
 - **Buttons:** `bg-primary hover:bg-primary/80 text-neutral-50 rounded-lg px-4 py-2`
 - **Opacity variants:** Use `/` syntax — `text-neutral-400/60`, `border-neutral-400/20`, `bg-error/20`
 
-## Font
+## Fonts
 
-Nunito Variable loaded locally via `@fontsource-variable/nunito` (no CDN — offline-first). Rounded terminals give approachable personality. Weight 700 (bold) for metric/KPI numbers.
+- **Body:** Karla Variable via `@fontsource-variable/karla` (no CDN — offline-first)
+- **Headings:** Rubik Variable via `@fontsource-variable/rubik`
+- **Logo:** Kagitingan Bold (custom, loaded from `public/fonts/` via `@font-face`; use `font-logo` utility)
 
 ## Leaflet Override
 
