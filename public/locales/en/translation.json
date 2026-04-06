@@ -15,7 +15,9 @@
     "relief": "Relief Operations",
     "stories": "Stories",
     "deployments": "Deployments",
-    "reliefOps": "Relief Ops"
+    "reliefOps": "Relief Ops",
+    "reliefMap": "Relief Map",
+    "transparency": "Transparency"
   },
   "Dashboard": {
     "hero": "Community Relief Coordination",
@@ -138,12 +140,72 @@
     "purchased": "purchased",
     "deployed": "deployed"
   },
+  "ReliefMap": {
+    "activeNeeds": "Active Needs",
+    "hubs": "Hubs",
+    "hazards": "Hazards",
+    "legend": "Legend",
+    "layerNeeds": "Needs",
+    "layerHubs": "Deployment Hubs",
+    "layerHazards": "Hazards",
+    "statusPending": "Pending",
+    "statusVerified": "Verified",
+    "statusInTransit": "In Transit",
+    "statusCompleted": "Completed"
+  },
+  "HubDetail": {
+    "inventory": "Available Inventory",
+    "noInventory": "No inventory data",
+    "municipality": "Municipality"
+  },
+  "HazardDetail": {
+    "type": "Hazard Type",
+    "description": "Description",
+    "reportedBy": "Reported By",
+    "reported": "Reported",
+    "flood": "Flood",
+    "landslide": "Landslide",
+    "road_blocked": "Road Blocked",
+    "bridge_out": "Bridge Out",
+    "electrical_hazard": "Electrical Hazard",
+    "other": "Other",
+    "markResolved": "Mark Resolved"
+  },
+  "HazardForm": {
+    "hazardType": "Hazard Type",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the hazard...",
+    "photo": "Photo (optional)",
+    "reportedBy": "Your Name (optional)",
+    "reportedByPlaceholder": "Optional — for follow-up",
+    "submit": "Report Hazard",
+    "submitting": "Submitting...",
+    "success": "Hazard reported successfully!",
+    "error": "Failed to report hazard",
+    "flood": "Flood",
+    "landslide": "Landslide",
+    "road_blocked": "Road Blocked",
+    "bridge_out": "Bridge Out",
+    "electrical_hazard": "Electrical Hazard",
+    "other": "Other"
+  },
+  "Transparency": {
+    "title": "Relief Transparency",
+    "totalDonations": "Total Donations",
+    "totalSpent": "Total Spent",
+    "availableBalance": "Available Balance",
+    "barangayEquity": "Barangay Aid Distribution",
+    "barangay": "Barangay",
+    "totalReceived": "Total Received",
+    "categories": "Categories"
+  },
   "ReportForm": {
     "title": "Report",
     "selectorLabel": "What would you like to report?",
     "submitNeed": "Submit a Need",
     "reportDonation": "Report a Donation",
-    "reportPurchase": "Report a Purchase"
+    "reportPurchase": "Report a Purchase",
+    "reportHazard": "Report a Hazard"
   },
   "DonationForm": {
     "organization": "Organization",
