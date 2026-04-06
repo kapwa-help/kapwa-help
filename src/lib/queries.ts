@@ -301,6 +301,13 @@ export async function getDeploymentHubs(eventId: string): Promise<HubPoint[]> {
     .eq("event_id", eventId);
   if (purchaseError) throw purchaseError;
 
+  // In-kind donated goods per org
+  const { data: inKindDonations, error: inKindError } = await supabase
+    .from("donations")
+    .select("organization_id, quantity, aid_categories(name, icon)")
+    .eq("type", "in_kind");
+  if (inKindError) throw inKindError;
+
   const { data: deployments, error: deployError } = await supabase
     .from("deployments")
     .select("organization_id, quantity, aid_categories(name, icon)")
@@ -308,24 +315,31 @@ export async function getDeploymentHubs(eventId: string): Promise<HubPoint[]> {
     .eq("status", "received");
   if (deployError) throw deployError;
 
-  const orgInventory = new Map<string, Map<string, { name: string; icon: string | null; purchased: number; deployed: number }>>();
+  const orgInventory = new Map<string, Map<string, { name: string; icon: string | null; received: number; deployed: number }>>();
+
+  const upsertOrg = (orgId: string, catName: string, catIcon: string | null) => {
+    if (!orgInventory.has(orgId)) orgInventory.set(orgId, new Map());
+    const inv = orgInventory.get(orgId)!;
+    if (!inv.has(catName)) inv.set(catName, { name: catName, icon: catIcon, received: 0, deployed: 0 });
+    return inv.get(catName)!;
+  };
 
   for (const row of purchases ?? []) {
     const cat = row.aid_categories as unknown as { name: string; icon: string | null };
     if (!cat) continue;
-    if (!orgInventory.has(row.organization_id)) orgInventory.set(row.organization_id, new Map());
-    const inv = orgInventory.get(row.organization_id)!;
-    if (!inv.has(cat.name)) inv.set(cat.name, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
-    inv.get(cat.name)!.purchased += row.quantity ?? 0;
+    upsertOrg(row.organization_id, cat.name, cat.icon).received += row.quantity ?? 0;
+  }
+
+  for (const row of inKindDonations ?? []) {
+    const cat = row.aid_categories as unknown as { name: string; icon: string | null };
+    if (!cat) continue;
+    upsertOrg(row.organization_id, cat.name, cat.icon).received += row.quantity ?? 0;
   }
 
   for (const row of deployments ?? []) {
     const cat = row.aid_categories as unknown as { name: string; icon: string | null };
     if (!cat) continue;
-    if (!orgInventory.has(row.organization_id)) orgInventory.set(row.organization_id, new Map());
-    const inv = orgInventory.get(row.organization_id)!;
-    if (!inv.has(cat.name)) inv.set(cat.name, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
-    inv.get(cat.name)!.deployed += row.quantity ?? 0;
+    upsertOrg(row.organization_id, cat.name, cat.icon).deployed += row.quantity ?? 0;
   }
 
   return orgs.map((org) => ({
@@ -337,7 +351,7 @@ export async function getDeploymentHubs(eventId: string): Promise<HubPoint[]> {
     inventory: Array.from(orgInventory.get(org.id)?.values() ?? []).map((item) => ({
       categoryName: item.name,
       categoryIcon: item.icon,
-      available: item.purchased - item.deployed,
+      available: item.received - item.deployed,
     })),
   }));
 }

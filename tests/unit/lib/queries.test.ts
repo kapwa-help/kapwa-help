@@ -351,6 +351,13 @@ describe("getDeploymentHubs", () => {
           }),
         } as never;
       }
+      if (table === "donations") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+        } as never;
+      }
       if (table === "deployments") {
         return {
           select: vi.fn().mockReturnValue({
