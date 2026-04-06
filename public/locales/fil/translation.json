@@ -86,6 +86,8 @@
     "urgency": "Pagkamadalian",
     "access": "Access",
     "families": "Mga pamilya",
+    "people": "Mga tao",
+    "deliveryPhotoRequired": "Kinakailangan ang larawan ng paghahatid upang malutas",
     "close": "Isara ang panel ng detalye",
     "statusLabel": "Katayuan",
     "updating": "Updating...",
@@ -169,6 +171,9 @@
     "access4x4": "4x4 na sasakyan lang",
     "accessBoat": "Bangka lang",
     "accessFootOnly": "Foot traffic lang",
-    "accessCutOff": "Ganap na pinutol"
+    "accessCutOff": "Ganap na pinutol",
+    "numAdults": "Mga matatanda",
+    "numChildren": "Mga bata",
+    "numSeniorsPwd": "Mga nakatatanda/PWD"
   }
 }

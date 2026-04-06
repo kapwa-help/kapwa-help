@@ -17,10 +17,15 @@ const mockPoint = {
   lat: 16.67,
   lng: 120.32,
   status: "verified",
-  gapCategory: "sustenance",
+  aidCategoryId: "cat-1",
+  aidCategoryName: "Hot Meals",
+  aidCategoryIcon: "🍲",
   accessStatus: "truck",
   urgency: "high",
   quantityNeeded: 80,
+  numAdults: 15,
+  numChildren: 8,
+  numSeniorsPwd: 2,
   notes: null,
   contactName: "Maria",
   barangayName: "Urbiztondo",
@@ -44,7 +49,7 @@ describe("ClaimForm", () => {
   it("expands form when respond button is clicked", async () => {
     const { getOrganizations, getAidCategories } = await import("@/lib/queries");
     vi.mocked(getOrganizations).mockResolvedValue([
-      { id: "org-1", name: "DOERS", type: "hub", municipality: "Luna" },
+      { id: "org-1", name: "DOERS", municipality: "Luna" },
     ]);
     vi.mocked(getAidCategories).mockResolvedValue([
       { id: "cat-1", name: "Meals" },
@@ -65,7 +70,7 @@ describe("ClaimForm", () => {
   it("submits claim and calls onClaimed", async () => {
     const { getOrganizations, getAidCategories, createDeploymentForNeed, getActiveEvent } = await import("@/lib/queries");
     vi.mocked(getOrganizations).mockResolvedValue([
-      { id: "org-1", name: "DOERS", type: "hub", municipality: "Luna" },
+      { id: "org-1", name: "DOERS", municipality: "Luna" },
     ]);
     vi.mocked(getAidCategories).mockResolvedValue([
       { id: "cat-1", name: "Meals" },

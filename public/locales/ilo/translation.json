@@ -86,6 +86,8 @@
     "urgency": "Kinaganat",
     "access": "Access",
     "families": "Dagiti pamilia",
+    "people": "Tattao",
+    "deliveryPhotoRequired": "Masapul ti delivery photo tapno masolbar",
     "close": "Serraan ti detalye a panel",
     "statusLabel": "Estado",
     "updating": "Updating...",
@@ -169,6 +171,9 @@
     "access4x4": "4x4 a lugan laeng",
     "accessBoat": "Bangka laeng",
     "accessFootOnly": "Trapiko ti saka laeng",
-    "accessCutOff": "Naan-anay a naputed"
+    "accessCutOff": "Naan-anay a naputed",
+    "numAdults": "Dagiti nataengan",
+    "numChildren": "Ubbing",
+    "numSeniorsPwd": "Dagiti Senior/PWD"
   }
 }

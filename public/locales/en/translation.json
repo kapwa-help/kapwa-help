@@ -86,6 +86,8 @@
     "urgency": "Urgency",
     "access": "Access",
     "families": "Families",
+    "people": "People",
+    "deliveryPhotoRequired": "Delivery photo required to resolve",
     "close": "Close detail panel",
     "statusLabel": "Status",
     "updating": "Updating...",
@@ -169,6 +171,9 @@
     "access4x4": "4x4 vehicle only",
     "accessBoat": "Boat only",
     "accessFootOnly": "Foot traffic only",
-    "accessCutOff": "Completely cut off"
+    "accessCutOff": "Completely cut off",
+    "numAdults": "Adults",
+    "numChildren": "Children",
+    "numSeniorsPwd": "Seniors/PWDs"
   }
 }

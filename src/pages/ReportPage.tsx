@@ -1,13 +1,43 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
+import SubmitForm from "@/components/SubmitForm";
 
 export function ReportPage() {
   const { t } = useTranslation();
+  const [formType, setFormType] = useState<"need" | "donation" | "purchase">("need");
+
   return (
     <div className="min-h-dvh bg-base">
       <Header />
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        <h1 className="text-2xl font-bold text-neutral-50">{t("ReportForm.title")}</h1>
+      <main className="mx-auto max-w-xl px-4 py-8">
+        <h1 className="mb-6 text-2xl font-bold text-neutral-50">{t("ReportForm.title")}</h1>
+
+        {/* Form type selector */}
+        <div className="mb-6">
+          <label htmlFor="form-type" className="block text-sm text-neutral-400">
+            {t("ReportForm.selectorLabel")}
+          </label>
+          <select
+            id="form-type"
+            value={formType}
+            onChange={(e) => setFormType(e.target.value as typeof formType)}
+            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-secondary px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="need">{t("ReportForm.submitNeed")}</option>
+            <option value="donation">{t("ReportForm.reportDonation")}</option>
+            <option value="purchase">{t("ReportForm.reportPurchase")}</option>
+          </select>
+        </div>
+
+        {/* Form content */}
+        {formType === "need" && <SubmitForm />}
+        {formType === "donation" && (
+          <p className="text-neutral-400">Coming soon</p>
+        )}
+        {formType === "purchase" && (
+          <p className="text-neutral-400">Coming soon</p>
+        )}
       </main>
     </div>
   );
