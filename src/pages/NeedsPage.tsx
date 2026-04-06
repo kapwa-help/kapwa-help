@@ -19,7 +19,6 @@ export function NeedsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const hasDataRef = useRef(false);
 
   const fetchData = useCallback(async () => {
@@ -66,17 +65,10 @@ export function NeedsPage() {
   }, [fetchData]);
 
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOffline(false);
-      fetchData();
-    };
-    const handleOffline = () => setIsOffline(true);
-
+    const handleOnline = () => fetchData();
     window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
     return () => {
       window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
     };
   }, [fetchData]);
 
@@ -103,48 +95,15 @@ export function NeedsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base">
+    <div className="flex h-screen flex-col bg-base">
       <Header />
-      <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
-        {/* Site identity */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-50">
-            {t("Dashboard.hero")}
-          </h1>
-          <p className="mt-1 text-sm text-neutral-400">
-            {t("Dashboard.subtitle")}
-          </p>
-
-          {/* Active event banner */}
-          {data.activeEvent && (
-            <p className="mt-3 text-sm text-neutral-400">
-              <span>{t("Dashboard.activeEvent")}</span>{" "}
-              <span className="font-bold text-neutral-50">{data.activeEvent.name}</span>
-            </p>
-          )}
-
-          <p className="mt-2 text-sm text-neutral-400">
-            {updatedAt
-              ? `${t("Dashboard.lastUpdated")}: ${updatedAt.toLocaleString("en-PH", {
-                  timeZone: "Asia/Manila",
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                })}`
-              : ""}
-            {isOffline && (
-              <span className="ml-2 text-warning">{"\u00b7"} {t("Dashboard.offline")}</span>
-            )}
-          </p>
-        </div>
-
-        {/* Primary: Needs coordination map */}
+      <main className="relative flex-1 overflow-hidden">
         {data.needsPoints && <NeedsCoordinationMap needsPoints={data.needsPoints} />}
       </main>
-      <StatusFooter />
+      <StatusFooter
+        eventName={data.activeEvent?.name}
+        updatedAt={updatedAt}
+      />
     </div>
   );
 }
