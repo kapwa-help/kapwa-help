@@ -30,30 +30,42 @@ export type NeedsData = {
   }[];
 };
 
+export type BarangayDeployment = {
+  orgName: string;
+  categoryName: string;
+  categoryIcon: string | null;
+  quantity: number | null;
+  unit: string | null;
+  date: string | null;
+};
+
+export type BarangayDistributionEntry = {
+  id: string;
+  name: string;
+  municipality: string;
+  lat: number;
+  lng: number;
+  categories: { name: string; icon: string | null; total: number }[];
+  totalQuantity: number;
+  deployments: BarangayDeployment[];
+};
+
+export type RecentDeploymentEntry = {
+  id: string;
+  quantity: number | null;
+  unit: string | null;
+  date: string | null;
+  orgName: string;
+  categoryName: string;
+  categoryIcon: string | null;
+  barangayName: string;
+  municipality: string;
+};
+
 export type DeploymentsData = {
-  totalDeliveries: number;
   peopleServed: { adults: number; children: number; seniorsPwd: number };
-  barangaysReached: number;
-  barangayDistribution: {
-    id: string;
-    name: string;
-    municipality: string;
-    lat: number;
-    lng: number;
-    categories: { name: string; icon: string | null; total: number }[];
-    totalQuantity: number;
-  }[];
-  recentDeployments: {
-    id: string;
-    quantity: number | null;
-    unit: string | null;
-    date: string | null;
-    orgName: string;
-    categoryName: string;
-    categoryIcon: string | null;
-    barangayName: string;
-    municipality: string;
-  }[];
+  barangayDistribution: BarangayDistributionEntry[];
+  recentDeployments: RecentDeploymentEntry[];
 };
 
 export type OperationsData = {

@@ -50,9 +50,7 @@ const sampleNeeds: NeedsData = {
 };
 
 const sampleDeployments: DeploymentsData = {
-  totalDeliveries: 10,
   peopleServed: { adults: 100, children: 50, seniorsPwd: 20 },
-  barangaysReached: 5,
   barangayDistribution: [],
   recentDeployments: [],
 };

@@ -121,7 +121,11 @@
     "peopleServed": "Nagserbi dagiti Tattao",
     "barangaysReached": "Nadanon dagiti Barangay",
     "recentDeployments": "Dagiti Kabarbaro a Deployment",
-    "noData": "Awan ti magun-od a datos ti deployment"
+    "noData": "Awan ti magun-od a datos ti deployment",
+    "totalItems": "dagiti banag",
+    "categories": "dagiti kategorya",
+    "aidBreakdown": "Pannakabukod ti Tulong",
+    "deliveryHistory": "Pakasaritaan ti Panagideliver"
   },
   "ReliefOps": {
     "title": "Operasion ti Relief",

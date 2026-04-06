@@ -39,8 +39,8 @@ for (const locale of LOCALES) {
     // Header brand
     await expect(page.locator("text=Kapwa Help")).toBeVisible();
 
-    // Page has an h1
-    await expect(page.locator("h1")).toBeVisible();
+    // Map is visible (full-screen layout)
+    await expect(page.locator(".leaflet-container")).toBeVisible();
 
     // Screenshot for visual verification
     await page.screenshot({
@@ -111,7 +111,7 @@ test("nav links navigate between pages", async ({ page }) => {
   // Click Deployments nav link
   await page.locator("nav").getByText(/deployments/i).click();
   await expect(page).toHaveURL(/\/en\/deployments$/);
-  await expect(page.locator("h1")).toBeVisible();
+  await expect(page.locator(".leaflet-container")).toBeVisible();
 });
 
 test("mobile hamburger menu navigates between pages", async ({ page }) => {

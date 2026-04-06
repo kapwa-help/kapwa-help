@@ -274,7 +274,7 @@ export async function insertDonation(donation: DonationInsert) {
 export async function getBarangayDistribution(eventId: string) {
   const { data } = await supabase
     .from("deployments")
-    .select("quantity, barangays(id, name, municipality, lat, lng), aid_categories(name, icon)")
+    .select("quantity, unit, date, barangays(id, name, municipality, lat, lng), aid_categories(name, icon), organizations(name)")
     .eq("event_id", eventId)
     .eq("status", "received");
 
@@ -286,11 +286,13 @@ export async function getBarangayDistribution(eventId: string) {
     lng: number;
     categories: Map<string, { name: string; icon: string | null; total: number }>;
     totalQuantity: number;
+    deployments: { orgName: string; categoryName: string; categoryIcon: string | null; quantity: number | null; unit: string | null; date: string | null }[];
   }>();
 
   for (const row of data ?? []) {
     const brgy = row.barangays as unknown as { id: string; name: string; municipality: string; lat: number; lng: number };
     const cat = row.aid_categories as unknown as { name: string; icon: string | null };
+    const org = row.organizations as unknown as { name: string };
     if (!brgy) continue;
 
     if (!byBarangay.has(brgy.id)) {
@@ -302,6 +304,7 @@ export async function getBarangayDistribution(eventId: string) {
         lng: brgy.lng,
         categories: new Map(),
         totalQuantity: 0,
+        deployments: [],
       });
     }
 
@@ -312,11 +315,20 @@ export async function getBarangayDistribution(eventId: string) {
     }
     entry.categories.get(catName)!.total += row.quantity ?? 0;
     entry.totalQuantity += row.quantity ?? 0;
+    entry.deployments.push({
+      orgName: org?.name ?? "",
+      categoryName: catName,
+      categoryIcon: cat?.icon ?? null,
+      quantity: row.quantity,
+      unit: row.unit,
+      date: row.date,
+    });
   }
 
   return Array.from(byBarangay.values()).map((b) => ({
     ...b,
     categories: Array.from(b.categories.values()),
+    deployments: b.deployments.sort((a, c) => (c.date ?? "").localeCompare(a.date ?? "")),
   }));
 }
 
@@ -344,7 +356,7 @@ export async function getRecentDeployments(eventId: string) {
     .eq("event_id", eventId)
     .eq("status", "received")
     .order("date", { ascending: false })
-    .limit(20);
+    .limit(10);
 
   return (data ?? []).map((row) => ({
     id: row.id,

@@ -121,7 +121,11 @@
     "peopleServed": "Mga taong Pinagsilbihan",
     "barangaysReached": "Naabot ang mga Barangay",
     "recentDeployments": "Mga Kamakailang Deployment",
-    "noData": "Walang available na data sa pag-deploy"
+    "noData": "Walang available na data sa pag-deploy",
+    "totalItems": "mga bagay",
+    "categories": "mga kategorya",
+    "aidBreakdown": "Breakdown ng Tulong",
+    "deliveryHistory": "Kasaysayan ng Paghahatid"
   },
   "ReliefOps": {
     "title": "Mga Relief Operations",

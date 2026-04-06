@@ -121,7 +121,11 @@
     "peopleServed": "People Served",
     "barangaysReached": "Barangays Reached",
     "recentDeployments": "Recent Deployments",
-    "noData": "No deployment data available"
+    "noData": "No deployment data available",
+    "totalItems": "items",
+    "categories": "categories",
+    "aidBreakdown": "Aid Breakdown",
+    "deliveryHistory": "Delivery History"
   },
   "ReliefOps": {
     "title": "Relief Operations",

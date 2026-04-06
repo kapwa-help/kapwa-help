@@ -1,10 +1,8 @@
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import StatusFooter from "@/components/StatusFooter";
-import DeploymentSummaryCards from "@/components/DeploymentSummaryCards";
-import RecentDeployments from "@/components/RecentDeployments";
-import MapSkeleton from "@/components/maps/MapSkeleton";
+import DeploymentsCoordinationMap from "@/components/DeploymentsCoordinationMap";
 import {
   getCachedDeployments,
   setCachedDeployments,
@@ -16,9 +14,6 @@ import {
   getPeopleServed,
   getRecentDeployments,
 } from "@/lib/queries";
-import { lazyWithReload } from "@/lib/lazy-reload";
-
-const BarangayBubbleMap = lazyWithReload(() => import("@/components/maps/BarangayBubbleMap"));
 
 export function DeploymentsPage() {
   const { t } = useTranslation();
@@ -27,13 +22,14 @@ export function DeploymentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [eventName, setEventName] = useState<string | undefined>(undefined);
+  const hasDataRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     try {
       const event = await getActiveEvent();
       setEventName(event?.name ?? undefined);
       if (!event) {
-        setData({ totalDeliveries: 0, peopleServed: { adults: 0, children: 0, seniorsPwd: 0 }, barangaysReached: 0, barangayDistribution: [], recentDeployments: [] });
+        setData({ peopleServed: { adults: 0, children: 0, seniorsPwd: 0 }, barangayDistribution: [], recentDeployments: [] });
         setLoading(false);
         return;
       }
@@ -45,9 +41,7 @@ export function DeploymentsPage() {
       ]);
 
       const fresh: DeploymentsData = {
-        totalDeliveries: recent.length,
         peopleServed: people,
-        barangaysReached: distribution.length,
         barangayDistribution: distribution,
         recentDeployments: recent,
       };
@@ -55,9 +49,10 @@ export function DeploymentsPage() {
       setData(fresh);
       setUpdatedAt(new Date());
       setError(null);
+      hasDataRef.current = true;
       setCachedDeployments(fresh);
     } catch (e) {
-      if (!data) {
+      if (!hasDataRef.current) {
         setError(e instanceof Error ? e.message : "Failed to load");
       }
     } finally {
@@ -72,15 +67,24 @@ export function DeploymentsPage() {
         setData(cached.data);
         setUpdatedAt(new Date(cached.updatedAt));
         setLoading(false);
+        hasDataRef.current = true;
       }
       fetchData();
     }
     init();
   }, [fetchData]);
 
+  useEffect(() => {
+    const handleOnline = () => fetchData();
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [fetchData]);
+
   if (loading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-base">
+      <div className="flex min-h-screen items-center justify-center">
         <p className="text-neutral-400">{t("App.loading")}</p>
       </div>
     );
@@ -88,36 +92,32 @@ export function DeploymentsPage() {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-base">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <p className="text-error">{t("App.loadError")}</p>
-        <button onClick={fetchData} className="rounded-lg bg-primary px-4 py-2 text-sm text-neutral-50 hover:bg-primary/80">
+        <button
+          onClick={fetchData}
+          className="rounded-lg bg-primary px-4 py-2 text-sm text-neutral-50 hover:bg-primary/80"
+        >
           {t("App.retry")}
         </button>
       </div>
     );
   }
 
+  const totalDeliveries = data.barangayDistribution.reduce((sum, b) => sum + b.deployments.length, 0);
+  const totalPeople = data.peopleServed.adults + data.peopleServed.children + data.peopleServed.seniorsPwd;
+
   return (
-    <div className="flex min-h-dvh flex-col bg-base">
+    <div className="flex h-dvh flex-col bg-base">
       <Header />
-      <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-4 py-6">
-        <h1 className="text-2xl font-bold text-neutral-50">{t("Deployments.title")}</h1>
-
-        <DeploymentSummaryCards
-          totalDeliveries={data.totalDeliveries}
-          peopleServed={data.peopleServed}
-          barangaysReached={data.barangaysReached}
+      <main className="relative flex-1 overflow-hidden">
+        <DeploymentsCoordinationMap
+          barangayDistribution={data.barangayDistribution}
+          recentDeployments={data.recentDeployments}
+          totalDeliveries={totalDeliveries}
+          peopleServed={totalPeople}
+          barangaysReached={data.barangayDistribution.length}
         />
-
-        {/* Map + Recent deployments */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="h-[400px] overflow-hidden rounded-2xl border border-neutral-400/20">
-            <Suspense fallback={<MapSkeleton />}>
-              <BarangayBubbleMap barangays={data.barangayDistribution} />
-            </Suspense>
-          </div>
-          <RecentDeployments deployments={data.recentDeployments} />
-        </div>
       </main>
       <StatusFooter eventName={eventName} updatedAt={updatedAt} />
     </div>
