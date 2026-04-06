@@ -43,11 +43,18 @@ CREATE TABLE IF NOT EXISTS barangays (
   created_at   timestamptz DEFAULT now()
 );
 
--- Donations: monetary contributions
+-- Donations: monetary or in-kind contributions
 CREATE TABLE IF NOT EXISTS donations (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL REFERENCES organizations(id),
-  amount          decimal(12,2) NOT NULL,
+  type            text NOT NULL DEFAULT 'cash' CHECK (type IN ('cash', 'in_kind')),
+  -- Cash donations
+  amount          decimal(12,2),
+  -- In-kind donations
+  aid_category_id uuid REFERENCES aid_categories(id),
+  quantity        integer,
+  unit            text,
+  -- Common fields
   date            date NOT NULL,
   notes           text,
   created_at      timestamptz DEFAULT now()
