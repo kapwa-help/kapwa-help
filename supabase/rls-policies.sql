@@ -37,6 +37,11 @@ CREATE POLICY "anon_insert_deployments" ON deployments
 CREATE POLICY "anon_update_deployments" ON deployments
   FOR UPDATE USING (true) WITH CHECK (true);
 
+-- Purchases
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+CREATE POLICY anon_read_purchases ON purchases FOR SELECT TO anon USING (true);
+CREATE POLICY anon_insert_purchases ON purchases FOR INSERT TO anon WITH CHECK (true);
+
 -- Submissions (anon read + insert for field reporting)
 ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "anon_read_submissions" ON submissions

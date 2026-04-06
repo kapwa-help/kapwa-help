@@ -19,10 +19,7 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE TABLE IF NOT EXISTS organizations (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name         text NOT NULL,
-  type         text NOT NULL CHECK (type IN ('donor', 'hub', 'both')),
   municipality text,
-  lat          decimal(9,6),
-  lng          decimal(9,6),
   created_at   timestamptz DEFAULT now()
 );
 
@@ -54,12 +51,25 @@ CREATE TABLE IF NOT EXISTS donations (
   created_at      timestamptz DEFAULT now()
 );
 
+-- Purchases: goods bought with donation money
+CREATE TABLE IF NOT EXISTS purchases (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id        uuid REFERENCES events(id),
+  organization_id uuid NOT NULL REFERENCES organizations(id),
+  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
+  quantity        integer NOT NULL,
+  unit            text,
+  cost            decimal(12,2),
+  date            date DEFAULT CURRENT_DATE,
+  notes           text,
+  created_at      timestamptz DEFAULT now()
+);
+
 -- Submissions: needs from the field
 -- "Needs" follow the KapwaRelief pin lifecycle (docs/scope §5.B)
 CREATE TABLE IF NOT EXISTS submissions (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id        uuid REFERENCES events(id),
-  type            text NOT NULL CHECK (type IN ('need')),
   status          text NOT NULL DEFAULT 'pending'
                     CHECK (status IN ('pending', 'verified', 'in_transit', 'completed', 'resolved')),
   -- Contact
@@ -67,7 +77,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   contact_phone   text,
   -- Location
   barangay_id     uuid NOT NULL REFERENCES barangays(id),
-  gap_category    text NOT NULL,
+  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
   lat             decimal(9,6),
   lng             decimal(9,6),
   geohash         text,
@@ -76,6 +86,9 @@ CREATE TABLE IF NOT EXISTS submissions (
   -- Need details
   quantity_needed integer,
   urgency         text NOT NULL CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
+  num_adults      integer DEFAULT 0,
+  num_children    integer DEFAULT 0,
+  num_seniors_pwd integer DEFAULT 0,
   notes           text,
   submission_photo_url text,
   dispatch_photo_url   text,
@@ -97,33 +110,22 @@ CREATE TABLE IF NOT EXISTS deployments (
   submission_id   uuid UNIQUE REFERENCES submissions(id),
   quantity        integer,
   unit            text,
-  recipient       text,
-  lat             decimal(9,6),
-  lng             decimal(9,6),
   date            date,
-  volunteer_count integer,
-  hours           decimal(5,1),
   notes           text,
   status          text NOT NULL DEFAULT 'pending'
                     CHECK (status IN ('pending', 'received')),
   created_at      timestamptz DEFAULT now()
 );
 
--- Seed aid categories
--- Original dashboard categories
+-- Seed aid categories (Hannah's unified 9-category list)
 INSERT INTO aid_categories (name, icon) VALUES
-  ('Water Filtration', 'droplet'),
-  ('Meals', 'utensils'),
-  ('Relief Goods', 'package'),
-  ('Construction Materials', 'hammer'),
-  ('Cleaning Supplies', 'sparkles'),
-  ('Drinking Water', 'glass-water'),
-  ('Kiddie Packs', 'baby')
-ON CONFLICT (name) DO NOTHING;
-
--- Scope-aligned gap categories (KapwaRelief "The Gap" taxonomy)
-INSERT INTO aid_categories (name, icon) VALUES
-  ('Lunas', 'heart-pulse'),
-  ('Sustenance', 'utensils'),
-  ('Shelter', 'house')
+  ('Hot Meals', '🍲'),
+  ('Drinking Water', '💧'),
+  ('Water Filtration', '🚰'),
+  ('Temporary Shelter', '🏕️'),
+  ('Clothing', '👕'),
+  ('Construction Materials', '🔨'),
+  ('Medical Supplies', '🏥'),
+  ('Hygiene Kits', '🧼'),
+  ('Canned Food', '🥫')
 ON CONFLICT (name) DO NOTHING;
