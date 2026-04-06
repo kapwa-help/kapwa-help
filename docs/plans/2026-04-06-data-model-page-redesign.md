@@ -40,6 +40,7 @@ These are the source of truth across the entire app — submit form, claim form,
 ### 2. Submissions Table Changes
 
 **Remove:**
+- `type` — always 'need', single-value column adds nothing
 - `gap_category` (text) — replaced by FK
 
 **Add:**
@@ -48,9 +49,28 @@ These are the source of truth across the entire app — submit form, claim form,
 - `num_children` (integer, optional, default 0)
 - `num_seniors_pwd` (integer, optional, default 0)
 
+**Keep (photo fields per scope §5.B):**
+- `submission_photo_url` — "Proof of Need" (will become required when upload UI is added)
+- `dispatch_photo_url` — "Proof of Relief in transit" (optional)
+- `delivery_photo_url` — "Proof of Fulfillment" (gates completed → resolved transition)
+
 Beneficiary count = `num_adults + num_children + num_seniors_pwd`, aggregated per barangay for the deployments page.
 
-### 3. New Table: purchases
+### 3. Deployments Table Changes
+
+**Remove:**
+- `recipient` — beneficiary data moves to submission-level counts
+- `volunteer_count` — volunteer tracking deferred to future iteration
+- `hours` — same, deferred
+- `lat` / `lng` — deployments aggregate at barangay level; barangay already has coordinates
+
+### 4. Organizations Table Changes
+
+**Remove:**
+- `type` (donor/hub/both) — redundant with data. If an org has donations rows, it's a donor. If it has deployments rows, it's a hub. No label needed.
+- `lat` / `lng` — no longer showing org locations on map; deployments aggregate by barangay
+
+### 5. New Table: purchases
 
 ```sql
 CREATE TABLE purchases (
@@ -60,7 +80,7 @@ CREATE TABLE purchases (
   aid_category_id uuid REFERENCES aid_categories(id) NOT NULL,
   quantity        integer NOT NULL,
   unit            text,
-  cost            decimal,
+  cost            decimal(12,2),
   date            date DEFAULT CURRENT_DATE,
   notes           text,
   created_at      timestamptz DEFAULT now()
@@ -69,9 +89,9 @@ CREATE TABLE purchases (
 
 Records when an organization buys goods with donation money. Minimal on purpose — just category, quantity, cost.
 
-### 4. Inventory (Calculated)
+### 6. Inventory (Calculated)
 
-Available goods per category per org:
+Available goods per category:
 
 ```
 Available = SUM(purchases.quantity) - SUM(deployments.quantity WHERE status='received')
@@ -85,13 +105,14 @@ No stored inventory table — it's a query. Keeps things simple and avoids sync 
 Field reporter submits need (with category, beneficiary counts)
   → Coordinator verifies
     → Organization claims (deployment record created, status=pending)
-      → Delivery photo uploaded (submission → completed)
-        → Coordinator resolves (submission → resolved, deployment → received)
+      → Dispatch photo uploaded (optional, submission stays in_transit)
+        → Delivery photo uploaded (submission → completed)
+          → Coordinator resolves (submission → resolved, deployment → received)
 ```
 
 - Resolved submissions leave the needs map
 - Received deployments appear on the deployments page
-- Resolve action requires delivery photo as a gate
+- Delivery photo required as gate before resolved transition
 - Resolve updates both records in one user action (two Supabase calls)
 
 ## Page Designs
@@ -112,9 +133,10 @@ Field reporter submits need (with category, beneficiary counts)
 - Barangays Reached — distinct barangay count from received deployments
 
 **Main section — Barangay distribution map:**
-- Per-barangay aggregated view (not individual pins)
-- Click a barangay to see breakdown by aid category with quantities
-- Example popup: "Urbiztondo — Hot Meals: 150, Drinking Water: 200, Hygiene Kits: 75"
+- Proportional bubble markers centered on each barangay's coordinates
+- Bubble size scales with total goods delivered to that barangay
+- Click a bubble → popup with breakdown by aid category and quantities
+- Future upgrade: choropleth with GeoJSON barangay boundaries
 
 **Bottom section — Recent deployments:**
 - Feed of individual deployments, sortable by date, filterable by barangay or category
@@ -181,9 +203,12 @@ Selection swaps the form below. Default is "Submit a Need" since field reporters
 
 ## Schema Migration Summary
 
-1. Reseed `aid_categories` with 9 unified categories
+1. Reseed `aid_categories` with 9 unified categories (drop old rows)
 2. Add `aid_category_id` FK to `submissions`, migrate existing `gap_category` values
-3. Drop `gap_category` column from `submissions`
+3. Drop `gap_category` and `type` columns from `submissions`
 4. Add `num_adults`, `num_children`, `num_seniors_pwd` to `submissions`
-5. Create `purchases` table
-6. Update seed/demo data to match new schema
+5. Drop `recipient`, `volunteer_count`, `hours`, `lat`, `lng` from `deployments`
+6. Drop `type`, `lat`, `lng` from `organizations`
+7. Create `purchases` table
+8. Update RLS policies for new table
+9. Update seed/demo data to match new schema
