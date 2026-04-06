@@ -48,7 +48,7 @@ export default function NeedsMap({ points, onPinSelect }: Props) {
   }, []);
 
   return (
-    <div className="relative h-[28rem] overflow-hidden rounded-lg">
+    <div className="relative h-full w-full overflow-hidden">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
