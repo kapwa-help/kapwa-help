@@ -54,7 +54,7 @@ const mockPoints = [
 ];
 
 describe("NeedsCoordinationMap", () => {
-  it("renders the map, legend with counts, and needs list", async () => {
+  it("renders the map, status bar with counts, and needs list", async () => {
     const { default: NeedsCoordinationMap } = await import(
       "@/components/NeedsCoordinationMap"
     );
@@ -63,11 +63,25 @@ describe("NeedsCoordinationMap", () => {
     // Map renders
     expect(await screen.findByTestId("needs-map")).toBeInTheDocument();
 
-    // Legend labels present (also appear as sr-only in sidebar items)
-    expect(screen.getByText("Dashboard.needsMap")).toBeInTheDocument();
+    // Status counts present
     expect(screen.getAllByText(/Dashboard.statusPending/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Dashboard.statusVerified/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Dashboard.statusInTransit/).length).toBeGreaterThan(0);
+
+    // Needs list items present
+    expect(screen.getByText("Urbiztondo")).toBeInTheDocument();
+    expect(screen.getByText("Bacnotan")).toBeInTheDocument();
+  });
+
+  it("renders a mobile list toggle button", async () => {
+    const { default: NeedsCoordinationMap } = await import(
+      "@/components/NeedsCoordinationMap"
+    );
+    render(<NeedsCoordinationMap needsPoints={mockPoints} />);
+    await screen.findByTestId("needs-map");
+
+    const listButton = screen.getByLabelText("Dashboard.showNeedsList");
+    expect(listButton).toBeInTheDocument();
   });
 
   it("includes all points on the map", async () => {

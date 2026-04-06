@@ -55,6 +55,7 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
   const { t } = useTranslation();
   const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
   const [selectedPoint, setSelectedPoint] = useState<NeedPoint | null>(null);
+  const [listOpen, setListOpen] = useState(false);
 
   // Apply local status overrides
   const allPoints = useMemo(
@@ -95,13 +96,23 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
-      {/* Header + inline legend */}
-      <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 lg:justify-start">
-        <h3 className="w-full text-center text-lg font-semibold text-neutral-50 lg:w-auto lg:text-left lg:text-xl">
-          {t("Dashboard.needsMap")}
-        </h3>
-        <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+    <div className="relative flex h-full w-full flex-col">
+      {/* Map fills entire container */}
+      {allPoints.length > 0 ? (
+        <Suspense fallback={<MapSkeleton />}>
+          <NeedsMap points={allPoints} onPinSelect={setSelectedPoint} />
+        </Suspense>
+      ) : (
+        <div className="flex h-full items-center justify-center bg-base/30">
+          <p className="text-sm text-neutral-400/60">
+            {t("Dashboard.noNeedsData")}
+          </p>
+        </div>
+      )}
+
+      {/* Status bar overlay — top */}
+      <div className="absolute left-4 right-4 top-4 z-[500] lg:right-[340px]">
+        <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl bg-secondary/85 px-4 py-2 backdrop-blur-sm">
           {STATUS_CONFIG.map((item) => (
             <div key={item.status} className="flex items-center gap-1.5 rounded-full bg-base/30 px-3 py-1">
               <span className={`h-2.5 w-2.5 rounded-full ${item.dot}`} />
@@ -113,59 +124,119 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
         </div>
       </div>
 
-      {/* Map + Sidebar grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Map (2/3 width) */}
-        <div className="lg:col-span-2">
-          {allPoints.length > 0 ? (
-            <Suspense fallback={<MapSkeleton />}>
-              <NeedsMap points={allPoints} onPinSelect={setSelectedPoint} />
-            </Suspense>
-          ) : (
-            <div className="flex h-[28rem] items-center justify-center rounded-lg bg-base/30">
-              <p className="text-sm text-neutral-400/60">
-                {t("Dashboard.noNeedsData")}
-              </p>
-            </div>
-          )}
-        </div>
+      {/* Sidebar overlay — right (desktop only) */}
+      <div className="absolute bottom-4 right-4 top-4 z-[500] hidden w-[320px] flex-col overflow-hidden rounded-xl bg-secondary/90 backdrop-blur-sm lg:flex">
+        {selectedPoint ? (
+          <div className="flex-1 overflow-y-auto p-4">
+            <PinDetailSheet
+              point={selectedPoint}
+              onClose={() => setSelectedPoint(null)}
+              onStatusChange={handleStatusChange}
+              variant="panel"
+            />
+          </div>
+        ) : (
+          <div className="flex-1 divide-y divide-neutral-400/20 overflow-y-auto">
+            {sortedPoints.map((need) => (
+              <button
+                key={need.id}
+                onClick={() => setSelectedPoint(need)}
+                className="flex w-full items-start justify-between px-4 py-3 text-left transition-colors hover:bg-neutral-400/10"
+              >
+                <div className="flex items-start gap-2">
+                  <span
+                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_MAP[need.status]?.dot ?? "bg-neutral-400"}`}
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">{t(STATUS_MAP[need.status]?.label ?? "Dashboard.statusPending")}</span>
+                  <div>
+                    <p className={`text-sm ${need.status === "completed" ? "text-neutral-400" : "text-neutral-50"}`}>
+                      {need.barangayName}
+                    </p>
+                    <p className={`text-xs ${need.status === "completed" ? "text-neutral-400/60" : "text-neutral-400"}`}>
+                      {need.gapCategory ?? t("Dashboard.unset")}
+                      {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
+                    </p>
+                  </div>
+                </div>
+                {need.urgency && need.urgency in URGENCY_STYLES && (
+                  <span className={`rounded px-2 py-0.5 text-xs font-medium ${URGENCY_STYLES[need.urgency] ?? URGENCY_STYLES.low}`}>
+                    {t(`Dashboard.urgency${need.urgency.charAt(0).toUpperCase()}${need.urgency.slice(1)}`)}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
-        {/* Sidebar (1/3 width) */}
-        <div className="space-y-4">
-          {/* Desktop: pin detail replaces sidebar content */}
-          {selectedPoint ? (
-            <div className="hidden lg:block lg:max-h-[28rem] lg:overflow-y-auto">
-              <PinDetailSheet
-                point={selectedPoint}
-                onClose={() => setSelectedPoint(null)}
-                onStatusChange={handleStatusChange}
-                variant="panel"
-              />
-            </div>
-          ) : null}
+      {/* Mobile: list toggle button — bottom left */}
+      <button
+        onClick={() => setListOpen(true)}
+        aria-label={t("Dashboard.showNeedsList")}
+        className="absolute bottom-4 left-4 z-[500] flex h-12 w-12 items-center justify-center rounded-full bg-primary text-neutral-50 shadow-lg lg:hidden"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+        </svg>
+        {allPoints.length > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-neutral-50">
+            {allPoints.length}
+          </span>
+        )}
+      </button>
 
-          {/* Needs list (hidden on desktop when detail panel is open) */}
-          <div className={selectedPoint ? "lg:hidden" : ""}>
-            <div className="divide-y divide-neutral-400/20 overflow-y-auto lg:max-h-[28rem]">
+      {/* Mobile: needs list bottom sheet */}
+      {listOpen && (
+        <div className="lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[999]"
+            onClick={() => setListOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-label={t("Dashboard.needsList")}
+            className="fixed inset-x-0 bottom-0 z-[1000] max-h-[60vh] animate-slide-up rounded-t-2xl border border-neutral-400/20 bg-secondary shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="h-1 w-10 rounded-full bg-neutral-400/40" />
+            </div>
+            {/* Header with close */}
+            <div className="flex items-center justify-between px-5 pb-3">
+              <h3 className="text-sm font-semibold text-neutral-50">{t("Dashboard.needsMap")}</h3>
+              <button
+                onClick={() => setListOpen(false)}
+                aria-label={t("PinDetail.close")}
+                className="rounded-lg p-1 text-neutral-400 hover:text-neutral-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            {/* Scrollable list */}
+            <div className="divide-y divide-neutral-400/20 overflow-y-auto px-5 pb-5" style={{ maxHeight: "calc(60vh - 4rem)" }}>
               {sortedPoints.map((need) => (
                 <button
                   key={need.id}
-                  onClick={() => setSelectedPoint(need)}
-                  className="flex w-full items-start justify-between py-3 text-left transition-colors hover:bg-neutral-400/10 first:pt-0 last:pb-0"
+                  onClick={() => { setListOpen(false); setSelectedPoint(need); }}
+                  className="flex w-full items-start justify-between py-3 text-left transition-colors hover:bg-neutral-400/10"
                 >
                   <div className="flex items-start gap-2">
                     <span
                       className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_MAP[need.status]?.dot ?? "bg-neutral-400"}`}
                       aria-hidden="true"
                     />
-                    <span className="sr-only">{t(STATUS_MAP[need.status]?.label ?? "Dashboard.statusPending")}</span>
                     <div>
                       <p className={`text-sm ${need.status === "completed" ? "text-neutral-400" : "text-neutral-50"}`}>
                         {need.barangayName}
                       </p>
                       <p className={`text-xs ${need.status === "completed" ? "text-neutral-400/60" : "text-neutral-400"}`}>
                         {need.gapCategory ?? t("Dashboard.unset")}
-                        {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` \u00b7 ${t(ACCESS_KEYS[need.accessStatus])}`}
+                        {need.accessStatus && ACCESS_KEYS[need.accessStatus] && ` · ${t(ACCESS_KEYS[need.accessStatus])}`}
                       </p>
                     </div>
                   </div>
@@ -179,9 +250,9 @@ export default function NeedsCoordinationMap({ needsPoints }: Props) {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Mobile: bottom sheet overlay */}
+      {/* Mobile: pin detail bottom sheet (existing behavior) */}
       {selectedPoint && (
         <div className="lg:hidden">
           <PinDetailSheet
