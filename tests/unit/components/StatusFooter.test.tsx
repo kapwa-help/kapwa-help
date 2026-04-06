@@ -22,4 +22,25 @@ describe("StatusFooter", () => {
     render(<StatusFooter />);
     expect(screen.getByText("Dashboard.offline")).toBeInTheDocument();
   });
+
+  it("renders event name when provided", () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+    render(<StatusFooter eventName="Typhoon Emong" />);
+    expect(screen.getByText("Typhoon Emong")).toBeInTheDocument();
+  });
+
+  it("renders updatedAt timestamp when provided", () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+    const date = new Date("2026-04-06T12:51:00Z");
+    render(<StatusFooter updatedAt={date} />);
+    // Should show formatted timestamp instead of current time
+    expect(screen.getByText(/Dashboard\.lastUpdated/)).toBeInTheDocument();
+  });
+
+  it("renders without optional props", () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+    render(<StatusFooter />);
+    expect(screen.getByText("Dashboard.online")).toBeInTheDocument();
+    expect(screen.getByText(/Dashboard\.lastUpdated/)).toBeInTheDocument();
+  });
 });

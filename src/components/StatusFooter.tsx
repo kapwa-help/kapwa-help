@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function StatusFooter() {
+type Props = {
+  eventName?: string;
+  updatedAt?: Date | null;
+};
+
+export default function StatusFooter({ eventName, updatedAt }: Props) {
   const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const now = new Date();
-  const time = now.toLocaleTimeString("en-PH", {
+
+  const displayTime = (updatedAt ?? new Date()).toLocaleTimeString("en-PH", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -23,7 +28,7 @@ export default function StatusFooter() {
   }, []);
 
   return (
-    <footer className="mt-6 flex items-center gap-6 rounded-2xl bg-secondary px-6 py-4 text-sm text-neutral-400 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+    <footer className="flex items-center gap-6 bg-secondary px-6 py-3 text-sm text-neutral-400 shadow-[0_-1px_3px_rgba(0,0,0,0.3)]">
       <span className="flex items-center gap-2">
         <span className="relative flex h-2 w-2">
           {isOnline && (
@@ -33,8 +38,13 @@ export default function StatusFooter() {
         </span>
         {isOnline ? t("Dashboard.online") : t("Dashboard.offline")}
       </span>
+      {eventName && (
+        <span className="flex items-center gap-2">
+          {eventName}
+        </span>
+      )}
       <span className="flex items-center gap-2">
-        {t("Dashboard.lastUpdated")}: {time}
+        {t("Dashboard.lastUpdated")}: {displayTime}
       </span>
     </footer>
   );
