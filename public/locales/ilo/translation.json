@@ -60,7 +60,9 @@
     "accessFootOnly": "Saka Laeng",
     "accessCutOff": "Putden ti Off",
     "accessLabel": "Pannakaserrek",
-    "familyCount": "{{count}} pamilya"
+    "familyCount": "{{count}} pamilya",
+    "showNeedsList": "Ipakita ti listaan dagiti kasapulan",
+    "needsList": "Listaan dagiti kasapulan"
   },
   "PinDetail": {
     "statusPending": "Naisardeng biit",

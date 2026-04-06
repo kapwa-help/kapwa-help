@@ -60,7 +60,9 @@
     "accessFootOnly": "Paa Lamang",
     "accessCutOff": "Putulin",
     "accessLabel": "Access",
-    "familyCount": "{{count}} pamilya"
+    "familyCount": "{{count}} pamilya",
+    "showNeedsList": "Ipakita ang listahan ng pangangailangan",
+    "needsList": "Listahan ng pangangailangan"
   },
   "PinDetail": {
     "statusPending": "Nakabinbin",

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import type { NeedPoint } from "@/lib/queries";
 
@@ -48,13 +48,15 @@ export default function NeedsMap({ points, onPinSelect }: Props) {
   }, []);
 
   return (
-    <div className="relative h-[28rem] overflow-hidden rounded-lg">
+    <div className="relative h-full w-full overflow-hidden">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
         scrollWheelZoom={false}
+        zoomControl={false}
         style={{ height: "100%", width: "100%" }}
       >
+        <ZoomControl position="bottomleft" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

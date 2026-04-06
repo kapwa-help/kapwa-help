@@ -19,8 +19,8 @@ for (const locale of LOCALES) {
     await expect(select).toBeVisible();
     await expect(select).toHaveValue(locale);
 
-    // Page has an h1
-    await expect(page.locator("h1")).toBeVisible();
+    // Map is visible (full-screen layout)
+    await expect(page.locator(".leaflet-container")).toBeVisible();
 
     // Screenshot for visual verification
     await page.screenshot({

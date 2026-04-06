@@ -61,15 +61,13 @@ describe("NeedsPage", () => {
     expect(screen.getByText("App.loading")).toBeInTheDocument();
   });
 
-  it("renders hero and map after data loads", async () => {
+  it("renders map and footer after data loads", async () => {
     render(<NeedsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
+      expect(screen.getByText("Dashboard.online")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Dashboard.subtitle")).toBeInTheDocument();
-    expect(screen.getByText("Dashboard.needsMap")).toBeInTheDocument();
     expect(screen.getByText("Dashboard.online")).toBeInTheDocument();
   });
 
@@ -77,7 +75,7 @@ describe("NeedsPage", () => {
     render(<NeedsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
+      expect(screen.getByText("Dashboard.online")).toBeInTheDocument();
     });
 
     expect(getNeedsMapPoints).toHaveBeenCalled();
@@ -111,10 +109,8 @@ describe("NeedsPage", () => {
     render(<NeedsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
+      expect(screen.getByText("Dashboard.online")).toBeInTheDocument();
     });
-
-    expect(screen.getAllByText(/Dashboard.lastUpdated/).length).toBeGreaterThan(0);
   });
 
   it("shows cached data when fetch fails but cache exists", async () => {
@@ -141,7 +137,7 @@ describe("NeedsPage", () => {
     render(<NeedsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Dashboard.hero")).toBeInTheDocument();
+      expect(screen.getByText("Dashboard.online")).toBeInTheDocument();
     });
 
     expect(screen.queryByText("App.loadError")).not.toBeInTheDocument();

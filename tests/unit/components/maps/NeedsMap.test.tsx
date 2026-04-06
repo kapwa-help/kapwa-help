@@ -6,6 +6,7 @@ vi.mock("react-leaflet", () => ({
     <div data-testid="map">{children}</div>
   ),
   TileLayer: () => null,
+  ZoomControl: () => null,
   Marker: ({
     children,
     eventHandlers,
