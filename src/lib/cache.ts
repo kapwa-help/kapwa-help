@@ -1,10 +1,12 @@
 const DB_NAME = "luaid";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 const STORE_NAME = "dashboard";
 
 const NEEDS_KEY = "needs";
 const DEPLOYMENTS_KEY = "deployments";
 const OPERATIONS_KEY = "operations";
+const RELIEF_MAP_KEY = "reliefMap";
+const TRANSPARENCY_KEY = "transparency";
 
 export type NeedsData = {
   activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
@@ -91,6 +93,34 @@ export type OperationsData = {
   }[];
 };
 
+export type ReliefMapData = {
+  activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
+  needsPoints: NeedsData["needsPoints"];
+  hubs: {
+    id: string;
+    name: string;
+    municipality: string | null;
+    lat: number;
+    lng: number;
+    inventory: { categoryName: string; categoryIcon: string | null; available: number }[];
+  }[];
+  hazards: {
+    id: string;
+    hazardType: string;
+    description: string | null;
+    photoUrl: string | null;
+    lat: number;
+    lng: number;
+    status: string;
+    reportedBy: string | null;
+    createdAt: string;
+  }[];
+};
+
+export type TransparencyData = OperationsData & {
+  barangayDistribution: BarangayDistributionEntry[];
+};
+
 type CachedEntry<T> = {
   data: T;
   updatedAt: number;
@@ -174,4 +204,24 @@ export function getCachedOperations(): Promise<CachedEntry<OperationsData> | nul
 
 export function setCachedOperations(data: OperationsData): Promise<void> {
   return setCached(OPERATIONS_KEY, data);
+}
+
+// --- Relief Map cache ---
+
+export function getCachedReliefMap(): Promise<CachedEntry<ReliefMapData> | null> {
+  return getCached<ReliefMapData>(RELIEF_MAP_KEY);
+}
+
+export function setCachedReliefMap(data: ReliefMapData): Promise<void> {
+  return setCached(RELIEF_MAP_KEY, data);
+}
+
+// --- Transparency cache ---
+
+export function getCachedTransparency(): Promise<CachedEntry<TransparencyData> | null> {
+  return getCached<TransparencyData>(TRANSPARENCY_KEY);
+}
+
+export function setCachedTransparency(data: TransparencyData): Promise<void> {
+  return setCached(TRANSPARENCY_KEY, data);
 }

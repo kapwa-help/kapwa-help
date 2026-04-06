@@ -7,9 +7,15 @@ import {
   setCachedDeployments,
   getCachedOperations,
   setCachedOperations,
+  getCachedReliefMap,
+  setCachedReliefMap,
+  getCachedTransparency,
+  setCachedTransparency,
   type NeedsData,
   type DeploymentsData,
   type OperationsData,
+  type ReliefMapData,
+  type TransparencyData,
 } from "@/lib/cache";
 
 beforeEach(() => {
@@ -104,6 +110,48 @@ describe("getCachedOperations / setCachedOperations", () => {
     const result = await getCachedOperations();
     expect(result).not.toBeNull();
     expect(result!.data).toEqual(sampleOperations);
+    expect(result!.updatedAt).toBeTypeOf("number");
+  });
+});
+
+const sampleReliefMap: ReliefMapData = {
+  activeEvent: sampleNeeds.activeEvent,
+  needsPoints: sampleNeeds.needsPoints,
+  hubs: [],
+  hazards: [],
+};
+
+const sampleTransparency: TransparencyData = {
+  ...sampleOperations,
+  barangayDistribution: [],
+};
+
+describe("getCachedReliefMap / setCachedReliefMap", () => {
+  it("returns null when no cached data exists", async () => {
+    const result = await getCachedReliefMap();
+    expect(result).toBeNull();
+  });
+
+  it("round-trips relief map data", async () => {
+    await setCachedReliefMap(sampleReliefMap);
+    const result = await getCachedReliefMap();
+    expect(result).not.toBeNull();
+    expect(result!.data).toEqual(sampleReliefMap);
+    expect(result!.updatedAt).toBeTypeOf("number");
+  });
+});
+
+describe("getCachedTransparency / setCachedTransparency", () => {
+  it("returns null when no cached data exists", async () => {
+    const result = await getCachedTransparency();
+    expect(result).toBeNull();
+  });
+
+  it("round-trips transparency data", async () => {
+    await setCachedTransparency(sampleTransparency);
+    const result = await getCachedTransparency();
+    expect(result).not.toBeNull();
+    expect(result!.data).toEqual(sampleTransparency);
     expect(result!.updatedAt).toBeTypeOf("number");
   });
 });
