@@ -88,7 +88,7 @@ export default function ReliefMapLeaflet({
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         zoomControl={false}
         style={{ height: "100%", width: "100%" }}
       >
