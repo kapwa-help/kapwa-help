@@ -42,17 +42,11 @@ import {
   removeFromOutbox,
 } from "@/lib/form-cache";
 
-let mockGetCurrentPosition: ReturnType<typeof vi.fn>;
-
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubGlobal("crypto", { randomUUID: () => "test-uuid-123" });
-  mockGetCurrentPosition = vi.fn();
   vi.stubGlobal("navigator", {
     ...navigator,
-    geolocation: {
-      getCurrentPosition: mockGetCurrentPosition,
-    },
     onLine: true,
   });
   vi.mocked(getCachedOptions).mockResolvedValue(null);
@@ -75,7 +69,7 @@ beforeEach(() => {
 
 describe("SubmitForm", () => {
   it("renders needs fields directly (no type toggle)", async () => {
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     await waitFor(() => {
       expect(screen.getByText("SubmitForm.gapCategory")).toBeInTheDocument();
@@ -86,7 +80,7 @@ describe("SubmitForm", () => {
   });
 
   it("loads barangay options from queries on mount", async () => {
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     await waitFor(() => {
       expect(getBarangays).toHaveBeenCalledOnce();
@@ -103,7 +97,7 @@ describe("SubmitForm", () => {
   });
 
   it("submits need form with correct payload", async () => {
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "SubmitForm.barangay" })).toBeInTheDocument();
@@ -146,7 +140,7 @@ describe("SubmitForm", () => {
   });
 
   it("shows success state after successful submission", async () => {
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "SubmitForm.barangay" })).toBeInTheDocument();
@@ -181,7 +175,7 @@ describe("SubmitForm", () => {
   it("saves to outbox and shows offline success when submission fails", async () => {
     vi.mocked(insertSubmission).mockRejectedValue(new Error("Network error"));
 
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "SubmitForm.barangay" })).toBeInTheDocument();
@@ -227,7 +221,7 @@ describe("SubmitForm", () => {
   it("shows error when dropdown data fails to load", async () => {
     vi.mocked(getBarangays).mockRejectedValue(new Error("Network error"));
 
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     await waitFor(() => {
       expect(screen.getByText("SubmitForm.loadError")).toBeInTheDocument();
@@ -246,7 +240,7 @@ describe("SubmitForm", () => {
     });
     vi.mocked(getBarangays).mockRejectedValue(new Error("offline"));
 
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     // Form should render with cached data (no loadError)
     await waitFor(() => {
@@ -307,7 +301,7 @@ describe("SubmitForm", () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce(outboxEntries);
 
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     // Wait for initial mount flush to complete
     await waitFor(() => {
@@ -352,7 +346,7 @@ describe("SubmitForm", () => {
     // Throw a Postgres unique violation error
     vi.mocked(insertSubmission).mockRejectedValue({ code: "23505" });
 
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     // flushOutbox is called on mount (navigator.onLine is true in jsdom)
     await waitFor(() => {
@@ -366,7 +360,7 @@ describe("SubmitForm", () => {
   });
 
   it("resets to form view when 'submit another' is clicked", async () => {
-    render(<SubmitForm />);
+    render(<SubmitForm coords={null} />);
 
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "SubmitForm.barangay" })).toBeInTheDocument();
@@ -404,87 +398,13 @@ describe("SubmitForm", () => {
     expect(screen.getByText("SubmitForm.gapCategory")).toBeInTheDocument();
   });
 
-  it("auto-requests geolocation on mount", async () => {
-    mockGetCurrentPosition.mockImplementation((success) => {
-      success({
-        coords: { latitude: 16.6159, longitude: 120.3209 },
-      });
-    });
-
-    render(<SubmitForm />);
-
-    await waitFor(() => {
-      expect(mockGetCurrentPosition).toHaveBeenCalledOnce();
-    });
-  });
-
-  it("displays formatted coordinates when location is captured", async () => {
-    mockGetCurrentPosition.mockImplementation((success) => {
-      success({
-        coords: { latitude: 16.6159, longitude: 120.3209 },
-      });
-    });
-
-    render(<SubmitForm />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/16\.62.*120\.32/)).toBeInTheDocument();
-    });
-  });
-
-  it("shows denied warning and retry button when geolocation fails", async () => {
-    mockGetCurrentPosition.mockImplementation((_success, error) => {
-      error({ code: 1, message: "User denied" });
-    });
-
-    render(<SubmitForm />);
-
-    await waitFor(() => {
-      expect(screen.getByText("SubmitForm.locationDenied")).toBeInTheDocument();
-      expect(screen.getByText("SubmitForm.locationRetry")).toBeInTheDocument();
-    });
-  });
-
-  it("retry button re-requests geolocation", async () => {
-    // First call: denied
-    mockGetCurrentPosition.mockImplementationOnce((_success, error) => {
-      error({ code: 1, message: "User denied" });
-    });
-    // Second call: success
-    mockGetCurrentPosition.mockImplementationOnce((success) => {
-      success({
-        coords: { latitude: 16.6159, longitude: 120.3209 },
-      });
-    });
-
-    render(<SubmitForm />);
-
-    await waitFor(() => {
-      expect(screen.getByText("SubmitForm.locationRetry")).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText("SubmitForm.locationRetry"));
-
-    await waitFor(() => {
-      expect(mockGetCurrentPosition).toHaveBeenCalledTimes(2);
-      expect(screen.getByText(/16\.62.*120\.32/)).toBeInTheDocument();
-    });
-  });
-
-  it("includes auto-captured coordinates in submission payload", async () => {
-    mockGetCurrentPosition.mockImplementation((success) => {
-      success({
-        coords: { latitude: 16.6159, longitude: 120.3209 },
-      });
-    });
-
-    render(<SubmitForm />);
+  it("includes coordinates in submission payload when provided", async () => {
+    render(<SubmitForm coords={{ lat: 16.6159, lng: 120.3209 }} />);
 
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "SubmitForm.barangay" })).toBeInTheDocument();
     });
 
-    // Fill required fields
     fireEvent.change(
       screen.getByPlaceholderText("SubmitForm.contactNamePlaceholder"),
       { target: { value: "Juan" } }

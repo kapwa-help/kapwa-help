@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getActiveEvent, insertHazard } from "@/lib/queries";
 
@@ -11,7 +11,11 @@ const HAZARD_TYPES = [
   "other",
 ] as const;
 
-export default function HazardForm() {
+interface HazardFormProps {
+  coords: { lat: number; lng: number } | null;
+}
+
+export default function HazardForm({ coords }: HazardFormProps) {
   const { t } = useTranslation();
   const [hazardType, setHazardType] = useState<string>(HAZARD_TYPES[0]);
   const [description, setDescription] = useState("");
@@ -19,26 +23,6 @@ export default function HazardForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<"acquiring" | "captured" | "denied" | "idle">("idle");
-
-  const requestLocation = useCallback(() => {
-    if (!("geolocation" in navigator)) return;
-    setLocationStatus("acquiring");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocationStatus("captured");
-      },
-      () => {
-        setLocationStatus("denied");
-      }
-    );
-  }, []);
-
-  useEffect(() => {
-    requestLocation();
-  }, [requestLocation]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -119,43 +103,6 @@ export default function HazardForm() {
           rows={3}
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-secondary px-4 py-3 text-neutral-50 placeholder-neutral-400/60 focus:outline-none focus:ring-1 focus:ring-primary"
         />
-      </div>
-
-      {/* Location status */}
-      <div className="rounded-lg bg-base/30 px-4 py-3">
-        {locationStatus === "idle" && (
-          <button
-            type="button"
-            onClick={requestLocation}
-            className="text-sm text-primary hover:underline"
-          >
-            {t("SubmitForm.shareLocation")}
-          </button>
-        )}
-        {locationStatus === "acquiring" && (
-          <p className="text-sm text-neutral-400">
-            {t("SubmitForm.locationAcquiring")}
-          </p>
-        )}
-        {locationStatus === "captured" && coords && (
-          <p className="text-sm text-success">
-            {t("SubmitForm.locationCaptured", { lat: coords.lat.toFixed(4), lng: coords.lng.toFixed(4) })}
-          </p>
-        )}
-        {locationStatus === "denied" && (
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-warning">
-              {t("SubmitForm.locationDenied")}
-            </p>
-            <button
-              type="button"
-              onClick={requestLocation}
-              className="text-sm text-primary hover:underline"
-            >
-              {t("SubmitForm.locationRetry")}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Reported by */}

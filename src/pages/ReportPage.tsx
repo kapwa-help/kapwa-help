@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import SubmitForm from "@/components/SubmitForm";
@@ -9,11 +9,71 @@ import HazardForm from "@/components/HazardForm";
 export function ReportPage() {
   const { t } = useTranslation();
   const [formType, setFormType] = useState<"need" | "donation" | "purchase" | "hazard">("need");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<"acquiring" | "captured" | "denied" | "idle">("idle");
+
+  const requestLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) return;
+    setLocationStatus("acquiring");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationStatus("captured");
+      },
+      () => {
+        setLocationStatus("denied");
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
 
   return (
     <div className="min-h-dvh bg-base">
       <Header />
       <main className="mx-auto max-w-xl px-4 py-8">
+        {/* Location — shared across all form types */}
+        <div className="mb-4">
+          {locationStatus === "acquiring" && (
+            <p className="text-sm text-neutral-400">
+              {t("SubmitForm.locationAcquiring")}
+            </p>
+          )}
+          {locationStatus === "captured" && coords && (
+            <p className="text-sm text-success">
+              {t("SubmitForm.locationCaptured", {
+                lat: coords.lat.toFixed(2),
+                lng: coords.lng.toFixed(2),
+              })}
+            </p>
+          )}
+          {locationStatus === "denied" && (
+            <div className="space-y-2">
+              <p className="text-sm text-warning">
+                {t("SubmitForm.locationDenied")}
+              </p>
+              <button
+                type="button"
+                onClick={requestLocation}
+                className="text-sm text-primary hover:underline"
+              >
+                {t("SubmitForm.locationRetry")}
+              </button>
+            </div>
+          )}
+          {locationStatus === "idle" && (
+            <button
+              type="button"
+              onClick={requestLocation}
+              className="text-sm text-primary hover:underline"
+            >
+              {t("SubmitForm.shareLocation")}
+            </button>
+          )}
+        </div>
+
         <h1 className="mb-6 text-2xl font-bold text-neutral-50">{t("ReportForm.title")}</h1>
 
         {/* Form type selector */}
@@ -35,10 +95,10 @@ export function ReportPage() {
         </div>
 
         {/* Form content */}
-        {formType === "need" && <SubmitForm />}
+        {formType === "need" && <SubmitForm coords={coords} />}
         {formType === "donation" && <DonationForm />}
         {formType === "purchase" && <PurchaseForm />}
-        {formType === "hazard" && <HazardForm />}
+        {formType === "hazard" && <HazardForm coords={coords} />}
       </main>
     </div>
   );

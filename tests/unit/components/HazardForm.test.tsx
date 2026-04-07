@@ -19,18 +19,18 @@ vi.mock("@/lib/queries", () => ({
 
 describe("HazardForm", () => {
   it("renders hazard type dropdown and description field", () => {
-    render(<HazardForm />);
+    render(<HazardForm coords={{ lat: 16.6159, lng: 120.3209 }} />);
     expect(screen.getByLabelText("HazardForm.hazardType")).toBeInTheDocument();
     expect(screen.getByLabelText("HazardForm.description")).toBeInTheDocument();
   });
 
   it("renders reported by field", () => {
-    render(<HazardForm />);
+    render(<HazardForm coords={{ lat: 16.6159, lng: 120.3209 }} />);
     expect(screen.getByLabelText("HazardForm.reportedBy")).toBeInTheDocument();
   });
 
   it("renders submit button", () => {
-    render(<HazardForm />);
+    render(<HazardForm coords={{ lat: 16.6159, lng: 120.3209 }} />);
     expect(screen.getByRole("button", { name: "HazardForm.submit" })).toBeInTheDocument();
   });
 });
