@@ -80,12 +80,12 @@ BEGIN
   SELECT id INTO v_emerging FROM organizations WHERE name = 'Emerging Islands';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'CURMA', 'San Juan', 16.6650, 120.3260
+    SELECT 'CURMA', 'San Fernando', 16.6190, 120.3560
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'CURMA');
   SELECT id INTO v_curma FROM organizations WHERE name = 'CURMA';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'Waves4Water', 'San Juan', 16.6670, 120.3240
+    SELECT 'Waves4Water', 'Agoo', 16.3240, 120.3660
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Waves4Water');
   SELECT id INTO v_waves4water FROM organizations WHERE name = 'Waves4Water';
 
@@ -105,8 +105,20 @@ BEGIN
   SELECT id INTO v_event FROM events WHERE slug = 'typhoon-emong';
 
   -- ============================================================
-  -- 2. Look up aid categories (unified 9-category list)
+  -- 2. Ensure aid categories exist, then look them up
   -- ============================================================
+  INSERT INTO aid_categories (name, icon) VALUES
+    ('Hot Meals', '🍲'),
+    ('Drinking Water', '💧'),
+    ('Water Filtration', '🚰'),
+    ('Temporary Shelter', '🏕️'),
+    ('Clothing', '👕'),
+    ('Construction Materials', '🔨'),
+    ('Medical Supplies', '🏥'),
+    ('Hygiene Kits', '🧼'),
+    ('Canned Food', '🥫')
+  ON CONFLICT (name) DO NOTHING;
+
   SELECT id INTO v_hot_meals      FROM aid_categories WHERE name = 'Hot Meals';
   SELECT id INTO v_drinking_water FROM aid_categories WHERE name = 'Drinking Water';
   SELECT id INTO v_water_filt     FROM aid_categories WHERE name = 'Water Filtration';
@@ -137,7 +149,7 @@ BEGIN
   SELECT id INTO v_feed_inc FROM organizations WHERE name = 'FEED Inc';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'Starlight Raniag Tin San Juan', 'San Juan', 16.6645, 120.3295
+    SELECT 'Starlight Raniag Tin San Juan', 'Balaoan', 16.7920, 120.3720
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Starlight Raniag Tin San Juan');
   SELECT id INTO v_starlight FROM organizations WHERE name = 'Starlight Raniag Tin San Juan';
 
@@ -147,27 +159,27 @@ BEGIN
   SELECT id INTO v_greenpeace FROM organizations WHERE name = 'Greenpeace Philippines';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'Art Relief Mobile Kitchen', 'Bacnotan', 16.7340, 120.3500
+    SELECT 'Art Relief Mobile Kitchen', 'Bacnotan', 16.7360, 120.3580
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'Art Relief Mobile Kitchen');
   SELECT id INTO v_art_relief FROM organizations WHERE name = 'Art Relief Mobile Kitchen';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'EcoNest Sustainable Food Packaging', 'Bauang', 16.5380, 120.3400
+    SELECT 'EcoNest Sustainable Food Packaging', 'Bauang', 16.5370, 120.3500
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'EcoNest Sustainable Food Packaging');
   SELECT id INTO v_econest FROM organizations WHERE name = 'EcoNest Sustainable Food Packaging';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'DOERS', 'Luna', 16.8070, 120.3700
+    SELECT 'DOERS', 'Luna', 16.8090, 120.3770
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'DOERS');
   SELECT id INTO v_doers FROM organizations WHERE name = 'DOERS';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'LU Citizen Volunteers', 'San Juan', 16.6660, 120.3270
+    SELECT 'LU Citizen Volunteers', 'San Juan', 16.6710, 120.3440
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'LU Citizen Volunteers');
   SELECT id INTO v_lu_volunteers FROM organizations WHERE name = 'LU Citizen Volunteers';
 
   INSERT INTO organizations (name, municipality, lat, lng)
-    SELECT 'La Union Surf Club', 'Bauang', 16.5450, 120.3320
+    SELECT 'La Union Surf Club', 'Aringay', 16.3980, 120.3600
     WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE name = 'La Union Surf Club');
   SELECT id INTO v_lu_surf FROM organizations WHERE name = 'La Union Surf Club';
 
@@ -175,54 +187,71 @@ BEGIN
   -- 5. Insert barangays (idempotent via WHERE NOT EXISTS)
   -- ============================================================
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Urbiztondo', 'San Juan', 16.6681, 120.3225, 4200
+    SELECT 'Urbiztondo', 'San Juan', 16.6750, 120.3430, 4200
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Urbiztondo' AND municipality = 'San Juan');
   SELECT id INTO v_brgy_urbiztondo FROM barangays WHERE name = 'Urbiztondo' AND municipality = 'San Juan';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Poblacion', 'San Juan', 16.6636, 120.3287, 3800
+    SELECT 'Poblacion', 'San Juan', 16.6680, 120.3450, 3800
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Poblacion' AND municipality = 'San Juan');
   SELECT id INTO v_brgy_poblacion_sj FROM barangays WHERE name = 'Poblacion' AND municipality = 'San Juan';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Bacnotan Proper', 'Bacnotan', 16.7332, 120.3489, 5100
+    SELECT 'Bacnotan Proper', 'Bacnotan', 16.7370, 120.3570, 5100
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Bacnotan Proper' AND municipality = 'Bacnotan');
   SELECT id INTO v_brgy_bacnotan FROM barangays WHERE name = 'Bacnotan Proper' AND municipality = 'Bacnotan';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Dili', 'Bacnotan', 16.7412, 120.3520, 2900
+    SELECT 'Dili', 'Bacnotan', 16.7430, 120.3600, 2900
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Dili' AND municipality = 'Bacnotan');
   SELECT id INTO v_brgy_dili FROM barangays WHERE name = 'Dili' AND municipality = 'Bacnotan';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Central East', 'Bauang', 16.5370, 120.3395, 3400
+    SELECT 'Central East', 'Bauang', 16.5380, 120.3510, 3400
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Central East' AND municipality = 'Bauang');
   SELECT id INTO v_brgy_central_east FROM barangays WHERE name = 'Central East' AND municipality = 'Bauang';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Paringao', 'Bauang', 16.5140, 120.3280, 2800
+    SELECT 'Paringao', 'Bauang', 16.5200, 120.3460, 2800
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Paringao' AND municipality = 'Bauang');
   SELECT id INTO v_brgy_paringao FROM barangays WHERE name = 'Paringao' AND municipality = 'Bauang';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Nalvo Norte', 'Luna', 16.8080, 120.3680, 2100
+    SELECT 'Nalvo Norte', 'Luna', 16.8120, 120.3780, 2100
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Nalvo Norte' AND municipality = 'Luna');
   SELECT id INTO v_brgy_nalvo FROM barangays WHERE name = 'Nalvo Norte' AND municipality = 'Luna';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Poblacion', 'Luna', 16.8008, 120.3729, 3200
+    SELECT 'Poblacion', 'Luna', 16.8050, 120.3760, 3200
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Poblacion' AND municipality = 'Luna');
   SELECT id INTO v_brgy_poblacion_lu FROM barangays WHERE name = 'Poblacion' AND municipality = 'Luna';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Guerrero', 'Bacnotan', 16.7250, 120.3540, 2400
+    SELECT 'Guerrero', 'Bacnotan', 16.7280, 120.3590, 2400
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Guerrero' AND municipality = 'Bacnotan');
   SELECT id INTO v_brgy_guerrero FROM barangays WHERE name = 'Guerrero' AND municipality = 'Bacnotan';
 
   INSERT INTO barangays (name, municipality, lat, lng, population)
-    SELECT 'Baccuit Norte', 'Bauang', 16.5460, 120.3310, 3100
+    SELECT 'Baccuit Norte', 'Bauang', 16.5480, 120.3490, 3100
     WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Baccuit Norte' AND municipality = 'Bauang');
   SELECT id INTO v_brgy_baccuit FROM barangays WHERE name = 'Baccuit Norte' AND municipality = 'Bauang';
+
+  -- New barangays for relocated hubs
+  INSERT INTO barangays (name, municipality, lat, lng, population)
+    SELECT 'Poblacion', 'San Fernando', 16.6180, 120.3550, 5500
+    WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Poblacion' AND municipality = 'San Fernando');
+
+  INSERT INTO barangays (name, municipality, lat, lng, population)
+    SELECT 'San Marcos', 'Agoo', 16.3250, 120.3680, 3600
+    WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'San Marcos' AND municipality = 'Agoo');
+
+  INSERT INTO barangays (name, municipality, lat, lng, population)
+    SELECT 'Poblacion', 'Balaoan', 16.7910, 120.3730, 4100
+    WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Poblacion' AND municipality = 'Balaoan');
+
+  INSERT INTO barangays (name, municipality, lat, lng, population)
+    SELECT 'Poblacion', 'Aringay', 16.3990, 120.3610, 3200
+    WHERE NOT EXISTS (SELECT 1 FROM barangays WHERE name = 'Poblacion' AND municipality = 'Aringay');
 
   -- ============================================================
   -- 6. Cash donations (guarded — skip if already seeded)
@@ -250,9 +279,11 @@ BEGIN
     --     10 entries with aid_category_id, quantity, unit
     -- ============================================================
     INSERT INTO donations (organization_id, type, aid_category_id, quantity, unit, date, notes) VALUES
-      (v_art_relief,    'in_kind', v_hot_meals,       800, 'meals',   '2026-03-25', 'demo-seed'),
+      (v_art_relief,    'in_kind', v_hot_meals,      1700, 'meals',   '2026-03-25', 'demo-seed'),
+      (v_art_relief,    'in_kind', v_canned_food,     900, 'packs',   '2026-03-26', 'demo-seed'),
       (v_econest,       'in_kind', v_canned_food,     600, 'packs',   '2026-03-26', 'demo-seed'),
       (v_waves4water,   'in_kind', v_water_filt,       80, 'filters', '2026-03-27', 'demo-seed'),
+      (v_waves4water,   'in_kind', v_drinking_water,  500, 'cases',   '2026-03-28', 'demo-seed'),
       (v_lu_volunteers, 'in_kind', v_hygiene,         200, 'kits',    '2026-03-28', 'demo-seed'),
       (v_doers,         'in_kind', v_temp_shelter,    100, 'tarps',   '2026-03-29', 'demo-seed'),
       (v_curma,         'in_kind', v_clothing,        200, 'sets',    '2026-03-30', 'demo-seed'),
@@ -260,7 +291,11 @@ BEGIN
       (v_starlight,     'in_kind', v_drinking_water,  500, 'bottles', '2026-04-01', 'demo-seed'),
       (v_feed_inc,      'in_kind', v_construction,    200, 'bundles', '2026-04-02', 'demo-seed'),
       (v_surftown,      'in_kind', v_hot_meals,       500, 'meals',   '2026-04-03', 'demo-seed'),
-      (v_doers,         'in_kind', v_construction,    150, 'bundles', '2026-04-04', 'demo-seed');
+      (v_doers,         'in_kind', v_construction,    500, 'bundles', '2026-04-04', 'demo-seed'),
+      (v_lu_surf,       'in_kind', v_hot_meals,       400, 'meals',   '2026-03-26', 'demo-seed'),
+      (v_lu_surf,       'in_kind', v_canned_food,     500, 'packs',   '2026-03-27', 'demo-seed'),
+      (v_lu_surf,       'in_kind', v_construction,    250, 'bundles', '2026-03-28', 'demo-seed'),
+      (v_lu_surf,       'in_kind', v_medical,         300, 'kits',    '2026-03-29', 'demo-seed');
   END IF;
 
   -- ============================================================
@@ -348,21 +383,21 @@ BEGIN
 
     -- ── Thread 1: Nalvo Flood (Luna, temporary shelter) ──────────────────
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, completed_at, created_at)
-      VALUES (v_event, 'resolved', 'Kap. Dante Soriano', v_brgy_nalvo, v_temp_shelter, 16.8088, 120.3688, 'foot_only', 30, 'critical',
+      VALUES (v_event, 'resolved', 'Kap. Dante Soriano', v_brgy_nalvo, v_temp_shelter, 16.8128, 120.3785, 'foot_only', 30, 'critical',
               45, 30, 10,
               '30 homes destroyed by flash flood — tarps and lumber delivered by DOERS, families rebuilt',
               '2026-03-26 10:00:00+08', '2026-03-30 14:00:00+08', '2026-03-25 06:30:00+08')
       RETURNING id INTO v_sub_nalvo_resolved;
 
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, completed_at, created_at)
-      VALUES (v_event, 'completed', 'Ldr. Carmen Valdez', v_brgy_nalvo, v_temp_shelter, 16.8075, 120.3695, 'foot_only', 20, 'high',
+      VALUES (v_event, 'completed', 'Ldr. Carmen Valdez', v_brgy_nalvo, v_temp_shelter, 16.8115, 120.3790, 'foot_only', 20, 'high',
               30, 18, 6,
               'Second wave — 20 families displaced upstream, DOERS delivered tarps and building materials',
               '2026-03-27 09:00:00+08', '2026-04-01 11:00:00+08', '2026-03-26 07:00:00+08')
       RETURNING id INTO v_sub_nalvo_completed;
 
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, created_at)
-      VALUES (v_event, 'in_transit', 'Vol. Rico Agustin', v_brgy_poblacion_lu, v_temp_shelter, 16.8012, 120.3728, 'cut_off', 15, 'high',
+      VALUES (v_event, 'in_transit', 'Vol. Rico Agustin', v_brgy_poblacion_lu, v_temp_shelter, 16.8055, 120.3765, 'cut_off', 15, 'high',
               22, 12, 4,
               'Additional families found further upstream — Art Relief sending construction materials',
               '2026-03-28 11:00:00+08', '2026-03-27 08:00:00+08')
@@ -370,21 +405,21 @@ BEGIN
 
     -- ── Thread 2: Bauang Medical Emergency ─────────────────────────
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, completed_at, created_at)
-      VALUES (v_event, 'resolved', 'Kap. Elena Ramos', v_brgy_baccuit, v_medical, 16.5465, 120.3315, 'truck', 35, 'high',
+      VALUES (v_event, 'resolved', 'Kap. Elena Ramos', v_brgy_baccuit, v_medical, 16.5485, 120.3495, 'truck', 35, 'high',
               50, 20, 8,
               'Debris injuries across Baccuit Norte — La Union Surf Club delivered 120 medical kits, all treated',
               '2026-03-26 09:00:00+08', '2026-03-30 16:00:00+08', '2026-03-25 07:00:00+08')
       RETURNING id INTO v_sub_bauang_resolved;
 
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, completed_at, created_at)
-      VALUES (v_event, 'completed', 'Ldr. Paolo Cruz', v_brgy_central_east, v_medical, 16.5375, 120.3398, 'truck', 25, 'medium',
+      VALUES (v_event, 'completed', 'Ldr. Paolo Cruz', v_brgy_central_east, v_medical, 16.5385, 120.3515, 'truck', 25, 'medium',
               35, 10, 5,
               'Minor injuries and infections in Central East — EcoNest delivered medical supplies',
               '2026-03-27 10:00:00+08', '2026-04-01 13:00:00+08', '2026-03-26 08:30:00+08')
       RETURNING id INTO v_sub_bauang_completed;
 
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, created_at)
-      VALUES (v_event, 'in_transit', 'Vol. Lisa Fernandez', v_brgy_paringao, v_medical, 16.5148, 120.3285, 'boat', 40, 'critical',
+      VALUES (v_event, 'in_transit', 'Vol. Lisa Fernandez', v_brgy_paringao, v_medical, 16.5205, 120.3465, 'boat', 40, 'critical',
               60, 25, 12,
               'Flooding cut road to Paringao — boat-access only, LU Citizen Volunteers en route with medical kits',
               '2026-03-28 08:00:00+08', '2026-03-27 06:00:00+08')
@@ -392,14 +427,14 @@ BEGIN
 
     -- ── Thread 3: San Juan Food Shortage ───────────────────────────
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, completed_at, created_at)
-      VALUES (v_event, 'completed', 'Kap. Maria Santos', v_brgy_poblacion_sj, v_hot_meals, 16.6638, 120.3292, 'truck', 70, 'high',
+      VALUES (v_event, 'completed', 'Kap. Maria Santos', v_brgy_poblacion_sj, v_hot_meals, 16.6685, 120.3455, 'truck', 70, 'high',
               100, 45, 15,
               'Poblacion families running out of food — LU Citizen Volunteers delivered 480 meals',
               '2026-03-26 08:00:00+08', '2026-03-30 10:00:00+08', '2026-03-25 06:00:00+08')
       RETURNING id INTO v_sub_sanjuan_completed;
 
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, created_at)
-      VALUES (v_event, 'in_transit', 'Ldr. Jose Reyes', v_brgy_urbiztondo, v_hot_meals, 16.6685, 120.3228, 'truck', 50, 'high',
+      VALUES (v_event, 'in_transit', 'Ldr. Jose Reyes', v_brgy_urbiztondo, v_hot_meals, 16.6755, 120.3435, 'truck', 50, 'high',
               70, 30, 10,
               'Urbiztondo supplies critical — LU Citizen Volunteers sending relief goods',
               '2026-03-27 10:00:00+08', '2026-03-26 07:30:00+08')
@@ -407,34 +442,34 @@ BEGIN
 
     -- ── Verified needs awaiting donor response ──────────────────
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, verified_at, created_at) VALUES
-      (v_event, 'verified', 'Vol. Rica Tan', v_brgy_urbiztondo, v_hot_meals, 16.6692, 120.3222, 'truck', 30, 'medium',
+      (v_event, 'verified', 'Vol. Rica Tan', v_brgy_urbiztondo, v_hot_meals, 16.6745, 120.3425, 'truck', 30, 'medium',
        40, 20, 5,
        'Second neighborhood in Urbiztondo reporting food shortage — families sharing remaining supplies',
        '2026-03-30 09:00:00+08', '2026-03-29 07:00:00+08'),
-      (v_event, 'verified', 'Ldr. Teresa Aquino', v_brgy_poblacion_sj, v_canned_food, 16.6632, 120.3298, 'truck', 20, 'medium',
+      (v_event, 'verified', 'Ldr. Teresa Aquino', v_brgy_poblacion_sj, v_canned_food, 16.6675, 120.3445, 'truck', 20, 'medium',
        25, 5, 12,
        'Elderly residents in Poblacion need special dietary provisions — regular relief goods insufficient',
        '2026-03-31 11:00:00+08', '2026-03-30 08:00:00+08'),
-      (v_event, 'verified', 'Vol. Marco Diaz', v_brgy_paringao, v_medical, 16.5155, 120.3278, 'boat', 15, 'high',
+      (v_event, 'verified', 'Vol. Marco Diaz', v_brgy_paringao, v_medical, 16.5210, 120.3470, 'boat', 15, 'high',
        20, 8, 3,
        'Additional injuries discovered in Paringao — need more first aid supplies beyond initial delivery',
        '2026-04-01 10:00:00+08', '2026-03-31 08:00:00+08'),
-      (v_event, 'verified', 'Kap. Luis Aquino', v_brgy_bacnotan, v_temp_shelter, 16.7340, 120.3480, '4x4', 25, 'high',
+      (v_event, 'verified', 'Kap. Luis Aquino', v_brgy_bacnotan, v_temp_shelter, 16.7375, 120.3575, '4x4', 25, 'high',
        35, 20, 8,
        'Road partially blocked by landslide — 25 families need roofing materials, 4x4 can reach',
        '2026-04-02 14:00:00+08', '2026-04-01 11:00:00+08');
 
     -- ── Pending (unverified reports awaiting triage) ────────────
     INSERT INTO submissions (event_id, status, contact_name, barangay_id, aid_category_id, lat, lng, access_status, quantity_needed, urgency, num_adults, num_children, num_seniors_pwd, notes, created_at) VALUES
-      (v_event, 'pending', 'Caller: unknown', v_brgy_dili, v_canned_food, 16.7418, 120.3518, '4x4', 45, 'critical',
+      (v_event, 'pending', 'Caller: unknown', v_brgy_dili, v_canned_food, 16.7435, 120.3605, '4x4', 45, 'critical',
        0, 0, 0,
        'Unverified phone report — community behind collapsed bridge, food running out',
        '2026-04-04 06:00:00+08'),
-      (v_event, 'pending', 'Caller: Juan dela Cruz', v_brgy_guerrero, v_medical, 16.7255, 120.3545, 'truck', 20, 'medium',
+      (v_event, 'pending', 'Caller: Juan dela Cruz', v_brgy_guerrero, v_medical, 16.7285, 120.3595, 'truck', 20, 'medium',
        0, 0, 0,
        'Walk-in report at relief center — says neighbors have untreated cuts, needs verification',
        '2026-04-05 09:00:00+08'),
-      (v_event, 'pending', 'SMS: +63 9XX XXX XXXX', v_brgy_poblacion_lu, v_temp_shelter, 16.8008, 120.3732, 'cut_off', NULL, 'critical',
+      (v_event, 'pending', 'SMS: +63 9XX XXX XXXX', v_brgy_poblacion_lu, v_temp_shelter, 16.8045, 120.3755, 'cut_off', NULL, 'critical',
        0, 0, 0,
        'SMS received — sender says multiple houses collapsed, area cut off, quantity unknown',
        '2026-04-06 11:00:00+08');
@@ -495,9 +530,16 @@ BEGIN
       (v_event, v_curma,        v_clothing,         300, 'sets',     96000.00, '2026-04-01', 'demo-seed'),
       (v_event, v_waves4water,  v_water_filt,       170, 'units',   425000.00, '2026-03-30', 'demo-seed'),
       (v_event, v_econest,      v_hygiene,          500, 'kits',    100000.00, '2026-04-02', 'demo-seed'),
+      (v_event, v_econest,      v_hot_meals,        500, 'meals',    25000.00, '2026-04-02', 'demo-seed'),
+      (v_event, v_econest,      v_construction,     200, 'bundles', 100000.00, '2026-04-03', 'demo-seed'),
+      (v_event, v_econest,      v_medical,          250, 'kits',    125000.00, '2026-04-03', 'demo-seed'),
       (v_event, v_sjrrhass,     v_temp_shelter,     300, 'tarps',    60000.00, '2026-04-01', 'demo-seed'),
-      (v_event, v_lu_volunteers, v_hot_meals,       400, 'meals',    20000.00, '2026-04-03', 'demo-seed'),
-      (v_event, v_doers,        v_canned_food,      500, 'packs',    30000.00, '2026-04-03', 'demo-seed'),
+      (v_event, v_lu_volunteers, v_hot_meals,      1700, 'meals',    85000.00, '2026-04-03', 'demo-seed'),
+      (v_event, v_lu_volunteers, v_canned_food,    500, 'packs',    30000.00, '2026-04-03', 'demo-seed'),
+      (v_event, v_lu_volunteers, v_temp_shelter,   120, 'tarps',    24000.00, '2026-04-04', 'demo-seed'),
+      (v_event, v_doers,        v_canned_food,      800, 'packs',    48000.00, '2026-04-03', 'demo-seed'),
+      (v_event, v_doers,        v_hot_meals,       1100, 'meals',    55000.00, '2026-04-03', 'demo-seed'),
+      (v_event, v_doers,        v_hygiene,          200, 'kits',     40000.00, '2026-04-04', 'demo-seed'),
       (v_event, v_art_relief,   v_medical,          200, 'kits',    100000.00, '2026-04-04', 'demo-seed'),
       (v_event, v_surftown,     v_hygiene,          200, 'kits',     40000.00, '2026-04-05', 'demo-seed');
   END IF;
@@ -509,17 +551,17 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM hazards WHERE reported_by = 'demo-seed' LIMIT 1) THEN
     INSERT INTO hazards (event_id, hazard_type, description, latitude, longitude, status, reported_by, created_at) VALUES
       (v_event, 'flood',             'Flash flooding along Nalvo Norte river — water level 1.5m above normal, multiple homes submerged',
-       16.8085, 120.3692, 'active',   'demo-seed', '2026-03-25 07:00:00+08'),
+       16.8130, 120.3790, 'active',   'demo-seed', '2026-03-25 07:00:00+08'),
       (v_event, 'landslide',         'Hillside collapse partially blocking Bacnotan–Luna road, single lane passable by 4x4',
-       16.7380, 120.3510, 'resolved', 'demo-seed', '2026-03-26 06:30:00+08'),
+       16.7400, 120.3610, 'resolved', 'demo-seed', '2026-03-26 06:30:00+08'),
       (v_event, 'bridge_out',        'Concrete bridge to Dili barangay collapsed — foot crossing only via temporary bamboo walkway',
-       16.7420, 120.3525, 'active',   'demo-seed', '2026-03-25 09:00:00+08'),
+       16.7440, 120.3610, 'active',   'demo-seed', '2026-03-25 09:00:00+08'),
       (v_event, 'road_blocked',      'Fallen trees and debris blocking coastal road to Paringao — boat access recommended',
-       16.5145, 120.3275, 'active',   'demo-seed', '2026-03-26 08:00:00+08'),
+       16.5190, 120.3450, 'active',   'demo-seed', '2026-03-26 08:00:00+08'),
       (v_event, 'electrical_hazard', 'Downed power lines near Central East evacuation center — LUECO notified, area cordoned off',
-       16.5372, 120.3390, 'resolved', 'demo-seed', '2026-03-27 11:00:00+08'),
+       16.5390, 120.3520, 'resolved', 'demo-seed', '2026-03-27 11:00:00+08'),
       (v_event, 'flood',             'Rising water in Poblacion Luna from upstream runoff — families in low-lying areas evacuating',
-       16.8010, 120.3735, 'active',   'demo-seed', '2026-03-28 06:00:00+08');
+       16.8060, 120.3770, 'active',   'demo-seed', '2026-03-28 06:00:00+08');
   END IF;
 
   -- Link existing deployments to the event
