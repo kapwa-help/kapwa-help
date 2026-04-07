@@ -2,7 +2,7 @@
 
 ## System Overview
 
-Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the entire app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with room to grow into real-time updates and CMS integration.
+Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the entire app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with room to grow into real-time updates and auth.
 
 ```
 ┌─────────────────────┐   client fetch    ┌──────────────┐
@@ -19,27 +19,42 @@ Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) clie
 └─────────────────────┘
 ```
 
-**Data flow:** React components call query functions in `src/lib/queries.ts` → Supabase client (`src/lib/supabase.ts`) fetches from Postgres using the anon key → the entire app shell is precached by the Workbox service worker → Supabase API calls use NetworkFirst caching strategy.
+**Data flow:** React components call query functions in `src/lib/queries.ts` → Supabase client (`src/lib/supabase.ts`) fetches from Postgres using the anon key → the app shell is precached by the Workbox service worker → Supabase API calls use NetworkFirst caching → OSM map tiles use CacheFirst (200 tiles, 30-day expiry).
 
-The Supabase anon key is safe for browser use — it relies on Row Level Security (RLS) policies to control access.
+The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access.
 
 ### Code Splitting
 
-Both map components (DeploymentMap and NeedsMap) are lazy-loaded via `React.lazy` to keep the main bundle under 600 KB. A `MapSkeleton` loading state displays while the map chunk downloads. The PWA service worker precaches all chunks, so this primarily improves first-visit performance.
+The map component (`ReliefMapLeaflet`) is lazy-loaded via `React.lazy` to keep the main bundle small. A `MapSkeleton` loading state displays while the chunk downloads. The PWA service worker precaches all chunks, so this primarily improves first-visit performance.
+
+## Routes
+
+Three pages, all under locale-prefixed routes (`/:locale`):
+
+| Route | Page | Purpose |
+|-------|------|---------|
+| `/:locale` | Relief Map | Full-screen map with need pins, hazard markers, hub markers, legend, and summary bar |
+| `/:locale/transparency` | Transparency | Donation summaries, inventory levels, barangay equity, recent purchases |
+| `/:locale/report` | Report | Multi-form reporter — submit needs, donations, purchases, or hazards |
+
+Supported locales: `en` (English), `fil` (Filipino), `ilo` (Ilocano). Root `/` redirects to `/en`.
 
 ## Database Schema
 
-Seven tables. The `events` table scopes all data to a disaster operation. `submissions` is the core needs entity with pin lifecycle status. `deployments` represent relief actions that can optionally fulfill a specific need.
+Nine tables, event-scoped. All primary keys are UUIDs — designed for offline sync with collision-free IDs. Full SQL: `supabase/schema.sql`.
 
 ```
 events ──┬──→ submissions (needs) ←── aid_categories
-         │         ↑                       ↑
-         │         │ submission_id          │
-         └──→ deployments ←── organizations
-                   │
-                   └──→ barangays
-
-organizations ──→ donations
+         │         ↑                       ↑   ↑
+         │         │ submission_id          │   │
+         ├──→ deployments ←── organizations │   │
+         │                        │         │   │
+         │                        └──→ donations (cash or in-kind)
+         │                        │         │
+         │                        └──→ purchases
+         ├──→ hazards                       │
+         │                                  │
+         └───────────────────── barangays ←─┘
 ```
 
 ### Tables
@@ -47,97 +62,98 @@ organizations ──→ donations
 | Table | Purpose | Key Fields |
 |-------|---------|------------|
 | `events` | Disaster operations that scope all data | name, slug, region, started_at, is_active |
-| `organizations` | Donors and deployment hubs | name, type (donor/hub/both), municipality, lat/lng |
-| `aid_categories` | Lookup table for aid types | name, icon (7 dashboard + 3 gap categories) |
+| `organizations` | Donors and deployment hubs (no type column — role derived from usage) | name, municipality, lat/lng (optional, for hub map markers) |
+| `aid_categories` | 9 unified categories | name, icon |
 | `barangays` | Geographic aggregation | name, municipality, lat/lng, population |
-| `donations` | Monetary contributions | organization_id, amount, date |
-| `submissions` | Needs from the field | event_id, type (need), status (pending→verified→in_transit→completed→resolved), gap_category (lunas/sustenance/shelter), access_status, urgency, contact info |
-| `deployments` | Relief actions (aid delivery events) | event_id, organization_id, submission_id (optional), aid_category_id, quantity, lat/lng, date |
+| `donations` | Monetary or in-kind contributions | type (`cash`/`in_kind`), organization_id, amount (cash) or aid_category_id + quantity + unit (in-kind), date, notes |
+| `purchases` | Goods bought with donation money | event_id, organization_id, aid_category_id, quantity, unit, cost, date |
+| `submissions` | Needs from the field — pin lifecycle | event_id, status (`pending→verified→in_transit→completed→resolved`), aid_category_id, access_status, urgency, num_adults/children/seniors_pwd, lat/lng, photo URLs |
+| `deployments` | Aid delivery events — optionally fulfills a specific need | event_id, organization_id, submission_id (optional), aid_category_id, quantity, status (`pending`/`received`) |
+| `hazards` | Field-reported hazard conditions | event_id, hazard_type (`flood`/`landslide`/`road_blocked`/`bridge_out`/`electrical_hazard`/`other`), status (`active`/`resolved`), lat/lng |
 
-All primary keys are UUIDs — designed for future offline sync where multiple devices need collision-free IDs.
+**Aid categories** (Hannah's unified 9-category list): Hot Meals, Drinking Water, Water Filtration, Temporary Shelter, Clothing, Construction Materials, Medical Supplies, Hygiene Kits, Canned Food.
 
-Full SQL schema: `supabase/schema.sql`
+**Inventory formula:** Available inventory = (in-kind donations + purchases) − deployments.
+
+### RLS Policies
+
+Defined in `supabase/rls-policies.sql`:
+- **Anon read:** SELECT on all tables
+- **Anon insert:** INSERT on submissions, deployments, donations, purchases, hazards
+- **Anon update:** UPDATE on submissions and deployments
+
+Demo phase — write policies will be tightened when auth is implemented.
 
 ### Query Functions
 
-`src/lib/queries.ts` provides 14 typed functions — 8 deployment dashboard, 3 needs coordination, and 3 for the submit form:
+`src/lib/queries.ts` provides 25 typed functions organized by domain:
 
-| Function | Returns |
-|----------|---------|
-| `getTotalDonations()` | Sum of all donation amounts |
-| `getTotalBeneficiaries()` | Sum of deployment quantities |
-| `getVolunteerCount()` | Sum of volunteer counts |
-| `getDonationsByOrganization()` | Donations grouped by org, sorted by amount |
-| `getDeploymentHubs()` | Deployment count per org + municipality |
-| `getGoodsByCategory()` | Quantities grouped by aid category |
-| `getDeploymentMapPoints()` | Lat/lng points with metadata for deployment map pins |
-| `getBeneficiariesByBarangay()` | Beneficiary totals grouped by barangay |
-| `getNeedsMapPoints()` | Needs pins (verified/in_transit/completed) with lat/lng, status, gap category, access |
-| `getNeedsSummary()` | Aggregated counts by status, gap category, access, and critical urgency |
-| `getActiveEvent()` | Current active disaster event (single) |
-| `getBarangays()` | All barangays ordered by name (for form dropdowns) |
-| `getAidCategories()` | All aid categories ordered by name (used by deployment queries, not the submit form) |
-| `insertSubmission(data)` | Inserts a need submission |
+**Relief Map:**
+- `getNeedsMapPoints()` — need pins with lat/lng, status, category, access, urgency
+- `getDeploymentHubs()` — hub markers with org info and deployment counts
+- `getHazards()` — hazard markers with type and status
+
+**Transparency Dashboard:**
+- `getTotalDonations()` — sum of cash donations
+- `getTotalSpent()` — sum of purchase costs
+- `getTotalBeneficiaries()` / `getPeopleServed()` — beneficiary counts
+- `getDonationsByOrganization()` — donations grouped by org
+- `getGoodsByCategory()` — quantities by aid category
+- `getBarangayDistribution()` — distribution equity across barangays
+- `getAvailableInventory()` — current inventory levels (donations + purchases − deployments)
+- `getRecentDeployments()` / `getRecentPurchases()` — recent activity feeds
+
+**Form Support:**
+- `getActiveEvent()` — current active disaster event
+- `getBarangays()` — all barangays (form dropdowns)
+- `getAidCategories()` — all aid categories
+- `getOrganizations()` — all organizations
+
+**Writes:**
+- `insertSubmission()` — field need report
+- `insertDonation()` — cash or in-kind donation
+- `insertPurchase()` — purchase record
+- `insertHazard()` — hazard report
+- `createDeploymentForNeed()` — link a deployment to a need (claim flow)
+- `updateSubmissionStatus()` / `updateDeploymentStatus()` — lifecycle transitions
 
 ## Seed Data
 
-Real deployment data from Typhoon Emong relief operations is stored in `data/Emong_relief_operations.kml` — 55 deployment points across 6 organizations. The seed script (`supabase/seed-kml.ts`) parses the KML and inserts organizations + deployments into Supabase.
+Demo data: `supabase/seed-demo.sql` (self-contained, idempotent). Deploy path: drop all tables → run `schema.sql` → run `seed-demo.sql`.
+
+Historical KML data from Typhoon Emong relief operations is in `data/Emong_relief_operations.kml` (55 deployment points across 6 organizations).
 
 ## Key Decisions
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Framework | Vite + React SPA | Client-side routing works offline natively; no server required. Next.js RSC payload fetches on every navigation conflict with offline-first. |
-| Backend | Supabase (free tier) | Postgres + Auth + Realtime at zero cost. Google Sheets had 60 req/min limits, no relational queries, no auth |
-| Data fetching | Client-side (anon key + RLS) | Entire app shell precacheable; API calls cached via Workbox NetworkFirst |
-| Routing | react-router v7 | Client-side routing, locale via URL params (`/:locale`), works offline |
-| PWA | vite-plugin-pwa (Workbox GenerateSW) | Precaches entire shell, navigateFallback to index.html, runtime caching for API |
-| Primary keys | UUIDs | Collision-free IDs for future offline sync from multiple devices |
-| Schema design | Needs-first, event-scoped | Events scope all data to a disaster. Submissions (needs) are the primary entity with pin lifecycle. Deployments are relief actions that fulfill needs |
-| Data entry | Submit form + Supabase table editor | Field-facing needs submission form with offline outbox; table editor for admin bulk entry |
+| Framework | Vite + React SPA | Client-side routing works offline natively; no server required |
+| Backend | Supabase (free tier) | Postgres + Auth + Realtime at zero cost |
+| Data fetching | Client-side (anon key + RLS) | Entire app shell precacheable; API calls cached via Workbox |
+| Routing | react-router v7 | Client-side routing, locale via URL params, works offline |
+| PWA | vite-plugin-pwa (Workbox GenerateSW) | Precaches shell, navigateFallback to index.html, runtime caching |
+| Primary keys | UUIDs | Collision-free IDs for offline sync from multiple devices |
+| Schema | Needs-first, event-scoped | Events scope all data. Submissions (needs) are primary with pin lifecycle. Deployments fulfill needs |
+| Data entry | Report form + Supabase table editor | Field-facing multi-form with offline outbox; table editor for admin bulk entry |
+| Categories | 9 unified list | Hannah's consolidated list replaces separate dashboard/gap categories |
+| Donations model | Cash + in-kind | Single `donations` table with type discriminator and CHECK constraints |
+
+## Offline Strategy
+
+- **App shell:** Workbox precaches all JS/CSS/HTML chunks. NavigateFallback to `index.html`.
+- **Dashboard data:** Stale-while-revalidate via IndexedDB (`src/lib/cache.ts`). Cached data renders immediately; fresh data fetched in background.
+- **Map tiles:** CacheFirst for OSM tiles (200 tiles, 30-day expiry). Fallback overlay after 3 consecutive tile errors.
+- **Submit form:** Dropdown options cached in IndexedDB. Submissions queued in IndexedDB outbox with client-generated UUIDs. `OutboxProvider` context auto-syncs on `online` event.
+- **Offline indicator:** Shows "Offline" when `navigator.onLine` is false. Auto-refreshes on reconnect.
 
 ## Internationalization
 
-Locale-based routing via react-router URL params: `/:locale` (en, fil, ilo). Translation files in `public/locales/`. Client-side language detection via `i18next-browser-languagedetector` with path-based lookup. `RootLayout` component syncs the i18n language with the URL param. A language switcher dropdown in the Header lets users switch between English, Filipino, and Ilocano — navigating to the corresponding `/:locale` route.
+Locale-based routing via react-router: `/:locale` (`en`, `fil`, `ilo`). Translation files in `public/locales/`. `RootLayout` syncs i18n language with URL param. Language switcher in Header navigates between locale routes.
 
-## Offline Caching
-
-The dashboard uses a stale-while-revalidate pattern backed by IndexedDB:
-
-- **Cache utility** (`src/lib/cache.ts`): Two functions — `getCachedDashboard()` and `setCachedDashboard(data)`. Stores the entire `DashboardData` blob + timestamp in a single IndexedDB object store.
-- **Data flow**: On page load, cached data renders immediately. Fresh data is fetched in the background and replaces the cache on success.
-- **Offline indicator**: The hero section shows "Last Updated: [timestamp]" and appends "· Offline" when `navigator.onLine` is false.
-- **Auto-refresh**: When the browser regains connectivity (`online` event), the dashboard automatically re-fetches.
-- **Map tiles** (`vite.config.ts` runtimeCaching): OSM tiles use CacheFirst strategy (cache name: `map-tiles`, max 200 tiles, 30-day expiry). When tiles fail to load, `DeploymentMap` shows a fallback overlay after 3 consecutive `tileerror` events; the overlay clears automatically when tiles load again.
-- **Offline submit form** (`src/lib/form-cache.ts` + `src/lib/outbox-context.tsx`): Form dropdown options (barangays) are cached in IndexedDB so the submit form works fully offline. Submissions go into an IndexedDB outbox queue with client-generated UUIDs for idempotent sync. A React context (`OutboxProvider`) manages the queue and auto-syncs pending submissions when the browser fires an `online` event.
-- **Future**: Per-query caching can be added when additional pages (barangay triage board) need to share cached query results.
-
-## What's Built vs Planned
-
-**Built:**
-- Vite + React SPA with vite-plugin-pwa service worker
-- Client-side locale routing (en, fil, ilo) via react-router v7
-- Supabase schema, client, query functions, and RLS policies (anon read access)
-- KML seed script with real Typhoon Emong data
-- Vitest testing framework
-- Dashboard page with needs-first layout (NeedsSummaryCards → NeedsCoordinationMap → relief operations)
-- 10 dashboard components: Header, NeedsSummaryCards, NeedsCoordinationMap, NeedsMap, SummaryCards, DonationsByOrg, DeploymentHubs, GoodsByCategory, AidDistributionMap, StatusFooter — all with tests
-- Needs coordination map with status-colored pins (red/amber/green), access filter, and status legend
-- i18n wired into all components — all user-facing strings use `t()` translation keys (en, fil, ilo)
-- Language switcher in Header (English / Filipino / Ilocano dropdown)
-- Interactive Leaflet maps (NeedsMap for needs pins, DeploymentMap for deployment markers)
-- Offline dashboard caching (#10) — IndexedDB stale-while-revalidate with auto-refresh
-- Offline map tile caching (#37) — Workbox CacheFirst for OSM tiles with fallback overlay
-- Submit form page — single-purpose "Report a Need" with gap category, access status, and urgency
-- Offline submit form (#10) — IndexedDB outbox queue, dropdown caching, auto-sync on reconnect
-- Events table for disaster operation scoping
-- Submissions table (needs-only) with lifecycle (pending→verified→in_transit→completed→resolved) and anon INSERT + SELECT RLS policies
-
-**Planned (see GitHub Issues):**
-- Barangay triage (#15) — status board reading from submissions table
-- CMS integration (#13) — WordPress content via REST API
+Machine translation: `npm run translate` uses `google-translate-api-x` (free, no API key) to incrementally translate new keys. Human review via Crowdin.
 
 ## Further Reading
 
 - `docs/plans/` — Design documents for each implementation phase
 - `docs/project-history.md` — Origin story and project direction
+- `docs/scope.md` — KapwaRelief charter and product scope
