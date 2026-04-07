@@ -24,20 +24,23 @@ function makeNeedIcon(status: string) {
 function makeHubIcon() {
   return L.divIcon({
     className: "",
-    html: `<div style="width:20px;height:20px;background:var(--color-primary);border:2px solid var(--color-neutral-50);border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center">
-      <span style="color:white;font-size:12px;font-weight:bold">H</span>
-    </div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">
+      <path d="M12 3L2 12h3v8h14v-8h3L12 3z" fill="var(--color-primary)" stroke="var(--color-neutral-50)" stroke-width="1.5"/>
+    </svg>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
   });
 }
 
 function makeHazardIcon() {
   return L.divIcon({
     className: "",
-    html: `<div style="width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:18px solid var(--color-warning);filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))"></div>`,
-    iconSize: [20, 18],
-    iconAnchor: [10, 18],
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="20" viewBox="0 0 24 22" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">
+      <path d="M12 2L1 21h22L12 2z" fill="var(--color-warning)" stroke="var(--color-neutral-50)" stroke-width="1"/>
+      <text x="12" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--color-base)">!</text>
+    </svg>`,
+    iconSize: [22, 20],
+    iconAnchor: [11, 20],
   });
 }
 
