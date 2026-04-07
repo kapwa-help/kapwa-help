@@ -20,7 +20,7 @@ export default function AvailableInventory({ inventory }: Props) {
       <h3 className="mb-4 text-sm font-semibold text-neutral-50">
         {t("ReliefOps.availableInventory")}
       </h3>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {inventory.map((item) => (
           <div
             key={item.name}
