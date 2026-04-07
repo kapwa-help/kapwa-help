@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getActiveEvent, insertHazard } from "@/lib/queries";
 
@@ -20,9 +20,26 @@ export default function HazardForm({ coords }: HazardFormProps) {
   const [hazardType, setHazardType] = useState<string>(HAZARD_TYPES[0]);
   const [description, setDescription] = useState("");
   const [reportedBy, setReportedBy] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setPhoto(file);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(file ? URL.createObjectURL(file) : null);
+  }
+
+  function removePhoto() {
+    setPhoto(null);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,6 +77,7 @@ export default function HazardForm({ coords }: HazardFormProps) {
             setDescription("");
             setReportedBy("");
             setHazardType(HAZARD_TYPES[0]);
+            removePhoto();
           }}
           className="rounded-lg bg-primary px-4 py-2 text-sm text-neutral-50 hover:bg-primary/80"
         >
@@ -102,6 +120,52 @@ export default function HazardForm({ coords }: HazardFormProps) {
           placeholder={t("HazardForm.descriptionPlaceholder")}
           rows={3}
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-secondary px-4 py-3 text-neutral-50 placeholder-neutral-400/60 focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+
+      {/* Photo */}
+      <div>
+        <label htmlFor="hazard-photo" className="block text-sm text-neutral-400">
+          {t("HazardForm.photo")}
+        </label>
+        {photoPreview ? (
+          <div className="relative mt-1">
+            <img
+              src={photoPreview}
+              alt=""
+              className="h-40 w-full rounded-xl border border-neutral-400/20 object-cover"
+            />
+            <button
+              type="button"
+              onClick={removePhoto}
+              className="absolute right-2 top-2 rounded-full bg-base/80 p-1 text-neutral-50 hover:bg-base"
+              aria-label="Remove photo"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-400/40 bg-secondary px-4 py-6 text-sm text-neutral-400 hover:border-primary hover:text-neutral-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            </svg>
+            {t("HazardForm.photo")}
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          id="hazard-photo"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handlePhotoChange}
+          className="hidden"
         />
       </div>
 
