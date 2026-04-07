@@ -26,6 +26,9 @@ CREATE POLICY "anon_read_barangays" ON barangays
 ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "anon_read_donations" ON donations
   FOR SELECT USING (true);
+-- Demo phase: open anon write access — tighten when auth is implemented
+CREATE POLICY "anon_insert_donations" ON donations
+  FOR INSERT WITH CHECK (true);
 
 -- Deployments
 ALTER TABLE deployments ENABLE ROW LEVEL SECURITY;

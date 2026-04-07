@@ -60,6 +60,9 @@ export default function MapLegend({ layers, onToggle }: Props) {
           aria-label={t("ReliefMap.layerHubs")}
           className="accent-primary"
         />
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
+          <path d="M12 3L2 12h3v8h14v-8h3L12 3z" fill="var(--color-primary)" stroke="var(--color-neutral-50)" strokeWidth="1.5"/>
+        </svg>
         <span className="text-sm text-neutral-50">{t("ReliefMap.layerHubs")}</span>
       </label>
 
@@ -72,6 +75,10 @@ export default function MapLegend({ layers, onToggle }: Props) {
           aria-label={t("ReliefMap.layerHazards")}
           className="accent-primary"
         />
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 24 22" className="shrink-0">
+          <path d="M12 2L1 21h22L12 2z" fill="var(--color-warning)" stroke="var(--color-neutral-50)" strokeWidth="1"/>
+          <text x="12" y="18" textAnchor="middle" fontSize="14" fontWeight="bold" fill="var(--color-base)">!</text>
+        </svg>
         <span className="text-sm text-neutral-50">{t("ReliefMap.layerHazards")}</span>
       </label>
     </div>

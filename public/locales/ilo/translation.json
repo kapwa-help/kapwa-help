@@ -137,7 +137,7 @@
     "recentPurchases": "Dagiti Kabarbaro a Gatang",
     "noPurchases": "Awan pay ti nairekord a ginatang",
     "availableInventory": "Magun-od nga Imbentaryo",
-    "purchased": "nagatang",
+    "received": "naawat",
     "deployed": "naipakat"
   },
   "ReliefMap": {
@@ -208,8 +208,14 @@
     "reportHazard": "Ireport ti Peligro"
   },
   "DonationForm": {
+    "type": "Kita ti Donasion",
+    "typeCash": "Kuarta",
+    "typeInKind": "In-Kind (Pisikal a Saniweng) .",
     "organization": "Organisasion",
     "amount": "Kantidad (₱) .",
+    "category": "Kategoria ti Tulong",
+    "quantity": "Kaadu",
+    "unit": "Yunit (opsional) .",
     "date": "Petsa",
     "notes": "Dagiti Pakaammo (opsional) .",
     "submit": "Ireport ti Donasion",

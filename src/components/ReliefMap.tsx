@@ -77,11 +77,29 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
       </Suspense>
 
       {/* Summary bar — top center */}
-      <div className="absolute left-2 right-2 top-3 z-[500] flex items-center justify-center gap-1.5 lg:top-4 lg:gap-2">
-        <div className="flex items-center gap-1 rounded-full bg-secondary/85 px-2 py-0.5 backdrop-blur-sm lg:px-3 lg:py-1">
-          <span className="text-xs text-neutral-400 lg:text-sm">
-            {activeNeedsCount} {t("ReliefMap.activeNeeds")} · {hubs.length}{" "}
-            {t("ReliefMap.hubs")} · {hazards.length} {t("ReliefMap.hazards")}
+      <div className="absolute left-2 right-2 top-3 z-[500] flex items-center justify-center lg:top-4">
+        <div className="flex items-center gap-3 rounded-full border border-neutral-400/20 bg-secondary/90 px-3 py-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.3)] backdrop-blur-sm lg:gap-4 lg:px-4 lg:py-2">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-error" />
+            <span className="text-xs font-semibold text-neutral-50 lg:text-sm">{activeNeedsCount}</span>
+            <span className="text-xs text-neutral-400 lg:text-sm">{t("ReliefMap.activeNeeds")}</span>
+          </span>
+          <span className="text-neutral-400/40">·</span>
+          <span className="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" className="shrink-0">
+              <path d="M12 3L2 12h3v8h14v-8h3L12 3z" fill="var(--color-primary)" stroke="var(--color-neutral-50)" strokeWidth="1.5"/>
+            </svg>
+            <span className="text-xs font-semibold text-neutral-50 lg:text-sm">{hubs.length}</span>
+            <span className="text-xs text-neutral-400 lg:text-sm">{t("ReliefMap.hubs")}</span>
+          </span>
+          <span className="text-neutral-400/40">·</span>
+          <span className="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="11" viewBox="0 0 24 22" className="shrink-0">
+              <path d="M12 2L1 21h22L12 2z" fill="var(--color-warning)" stroke="var(--color-neutral-50)" strokeWidth="1"/>
+              <text x="12" y="18" textAnchor="middle" fontSize="14" fontWeight="bold" fill="var(--color-base)">!</text>
+            </svg>
+            <span className="text-xs font-semibold text-neutral-50 lg:text-sm">{hazards.length}</span>
+            <span className="text-xs text-neutral-400 lg:text-sm">{t("ReliefMap.hazards")}</span>
           </span>
         </div>
       </div>

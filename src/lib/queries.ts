@@ -3,7 +3,8 @@ import { supabase } from "./supabase";
 export async function getTotalDonations() {
   const { data, error } = await supabase
     .from("donations")
-    .select("amount");
+    .select("amount")
+    .eq("type", "cash");
 
   if (error) throw error;
   return data.reduce((sum, row) => sum + Number(row.amount), 0);
@@ -22,7 +23,8 @@ export async function getTotalBeneficiaries() {
 export async function getDonationsByOrganization() {
   const { data, error } = await supabase
     .from("donations")
-    .select("amount, organizations(name)");
+    .select("amount, organizations(name)")
+    .eq("type", "cash");
 
   if (error) throw error;
 
@@ -259,7 +261,11 @@ export async function insertPurchase(purchase: PurchaseInsert) {
 
 export interface DonationInsert {
   organization_id: string;
-  amount: number;
+  type: "cash" | "in_kind";
+  amount: number | null;
+  aid_category_id: string | null;
+  quantity: number | null;
+  unit: string | null;
   date: string;
   notes: string | null;
 }
@@ -295,6 +301,13 @@ export async function getDeploymentHubs(eventId: string): Promise<HubPoint[]> {
     .eq("event_id", eventId);
   if (purchaseError) throw purchaseError;
 
+  // In-kind donated goods per org
+  const { data: inKindDonations, error: inKindError } = await supabase
+    .from("donations")
+    .select("organization_id, quantity, aid_categories(name, icon)")
+    .eq("type", "in_kind");
+  if (inKindError) throw inKindError;
+
   const { data: deployments, error: deployError } = await supabase
     .from("deployments")
     .select("organization_id, quantity, aid_categories(name, icon)")
@@ -302,24 +315,31 @@ export async function getDeploymentHubs(eventId: string): Promise<HubPoint[]> {
     .eq("status", "received");
   if (deployError) throw deployError;
 
-  const orgInventory = new Map<string, Map<string, { name: string; icon: string | null; purchased: number; deployed: number }>>();
+  const orgInventory = new Map<string, Map<string, { name: string; icon: string | null; received: number; deployed: number }>>();
+
+  const upsertOrg = (orgId: string, catName: string, catIcon: string | null) => {
+    if (!orgInventory.has(orgId)) orgInventory.set(orgId, new Map());
+    const inv = orgInventory.get(orgId)!;
+    if (!inv.has(catName)) inv.set(catName, { name: catName, icon: catIcon, received: 0, deployed: 0 });
+    return inv.get(catName)!;
+  };
 
   for (const row of purchases ?? []) {
     const cat = row.aid_categories as unknown as { name: string; icon: string | null };
     if (!cat) continue;
-    if (!orgInventory.has(row.organization_id)) orgInventory.set(row.organization_id, new Map());
-    const inv = orgInventory.get(row.organization_id)!;
-    if (!inv.has(cat.name)) inv.set(cat.name, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
-    inv.get(cat.name)!.purchased += row.quantity ?? 0;
+    upsertOrg(row.organization_id, cat.name, cat.icon).received += row.quantity ?? 0;
+  }
+
+  for (const row of inKindDonations ?? []) {
+    const cat = row.aid_categories as unknown as { name: string; icon: string | null };
+    if (!cat) continue;
+    upsertOrg(row.organization_id, cat.name, cat.icon).received += row.quantity ?? 0;
   }
 
   for (const row of deployments ?? []) {
     const cat = row.aid_categories as unknown as { name: string; icon: string | null };
     if (!cat) continue;
-    if (!orgInventory.has(row.organization_id)) orgInventory.set(row.organization_id, new Map());
-    const inv = orgInventory.get(row.organization_id)!;
-    if (!inv.has(cat.name)) inv.set(cat.name, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
-    inv.get(cat.name)!.deployed += row.quantity ?? 0;
+    upsertOrg(row.organization_id, cat.name, cat.icon).deployed += row.quantity ?? 0;
   }
 
   return orgs.map((org) => ({
@@ -331,7 +351,7 @@ export async function getDeploymentHubs(eventId: string): Promise<HubPoint[]> {
     inventory: Array.from(orgInventory.get(org.id)?.values() ?? []).map((item) => ({
       categoryName: item.name,
       categoryIcon: item.icon,
-      available: item.purchased - item.deployed,
+      available: item.received - item.deployed,
     })),
   }));
 }
@@ -524,12 +544,21 @@ export async function getRecentPurchases(eventId: string) {
 }
 
 export async function getAvailableInventory(eventId: string) {
+  // Purchased goods
   const { data: purchaseData, error: purchaseError } = await supabase
     .from("purchases")
     .select("quantity, aid_categories(id, name, icon)")
     .eq("event_id", eventId);
   if (purchaseError) throw purchaseError;
 
+  // In-kind donated goods
+  const { data: inKindData, error: inKindError } = await supabase
+    .from("donations")
+    .select("quantity, aid_categories(id, name, icon)")
+    .eq("type", "in_kind");
+  if (inKindError) throw inKindError;
+
+  // Deployed goods
   const { data: deployData, error: deployError } = await supabase
     .from("deployments")
     .select("quantity, aid_categories(id, name, icon)")
@@ -537,28 +566,35 @@ export async function getAvailableInventory(eventId: string) {
     .eq("status", "received");
   if (deployError) throw deployError;
 
-  const inventory = new Map<string, { name: string; icon: string | null; purchased: number; deployed: number }>();
+  const inventory = new Map<string, { name: string; icon: string | null; received: number; deployed: number }>();
+
+  const upsert = (catId: string, name: string, icon: string | null) => {
+    if (!inventory.has(catId)) {
+      inventory.set(catId, { name, icon, received: 0, deployed: 0 });
+    }
+    return inventory.get(catId)!;
+  };
 
   for (const row of purchaseData ?? []) {
     const cat = row.aid_categories as unknown as { id: string; name: string; icon: string | null };
     if (!cat) continue;
-    if (!inventory.has(cat.id)) {
-      inventory.set(cat.id, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
-    }
-    inventory.get(cat.id)!.purchased += row.quantity ?? 0;
+    upsert(cat.id, cat.name, cat.icon).received += row.quantity ?? 0;
+  }
+
+  for (const row of inKindData ?? []) {
+    const cat = row.aid_categories as unknown as { id: string; name: string; icon: string | null };
+    if (!cat) continue;
+    upsert(cat.id, cat.name, cat.icon).received += row.quantity ?? 0;
   }
 
   for (const row of deployData ?? []) {
     const cat = row.aid_categories as unknown as { id: string; name: string; icon: string | null };
     if (!cat) continue;
-    if (!inventory.has(cat.id)) {
-      inventory.set(cat.id, { name: cat.name, icon: cat.icon, purchased: 0, deployed: 0 });
-    }
-    inventory.get(cat.id)!.deployed += row.quantity ?? 0;
+    upsert(cat.id, cat.name, cat.icon).deployed += row.quantity ?? 0;
   }
 
   return Array.from(inventory.values()).map((item) => ({
     ...item,
-    available: item.purchased - item.deployed,
+    available: item.received - item.deployed,
   }));
 }

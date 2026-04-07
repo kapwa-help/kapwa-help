@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 type InventoryItem = {
   name: string;
   icon: string | null;
-  purchased: number;
+  received: number;
   deployed: number;
   available: number;
 };
@@ -30,7 +30,7 @@ export default function AvailableInventory({ inventory }: Props) {
             <p className="mt-1 text-sm font-medium text-neutral-50">{item.name}</p>
             <p className="text-xl font-bold text-neutral-50">{item.available}</p>
             <p className="text-xs text-neutral-400">
-              {item.purchased} {t("ReliefOps.purchased")} · {item.deployed} {t("ReliefOps.deployed")}
+              {item.received} {t("ReliefOps.received")} · {item.deployed} {t("ReliefOps.deployed")}
             </p>
           </div>
         ))}

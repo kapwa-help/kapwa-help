@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 import { supabase } from "@/lib/supabase";
-import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations, getTotalBeneficiaries, getGoodsByCategory, insertPurchase, insertDonation, getDeploymentHubs, getHazards, insertHazard } from "@/lib/queries";
+import { getBarangays, insertSubmission, getNeedsMapPoints, updateSubmissionStatus, createDeploymentForNeed, getOrganizations, getTotalBeneficiaries, getGoodsByCategory, insertPurchase, insertDonation, getDeploymentHubs, getHazards, insertHazard, getTotalDonations, getDonationsByOrganization } from "@/lib/queries";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -262,6 +262,46 @@ describe("insertPurchase", () => {
   });
 });
 
+describe("getTotalDonations", () => {
+  it("sums only cash donations, excluding in-kind", async () => {
+    const mockEq = vi.fn().mockResolvedValue({
+      data: [{ amount: 100 }, { amount: 200 }],
+      error: null,
+    });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: mockEq,
+      }),
+    } as never);
+
+    const total = await getTotalDonations();
+    expect(total).toBe(300);
+    expect(supabase.from).toHaveBeenCalledWith("donations");
+    expect(mockEq).toHaveBeenCalledWith("type", "cash");
+  });
+});
+
+describe("getDonationsByOrganization", () => {
+  it("groups only cash donations by org", async () => {
+    const mockEq = vi.fn().mockResolvedValue({
+      data: [
+        { amount: 500, organizations: { name: "Org A" } },
+        { amount: 300, organizations: { name: "Org A" } },
+      ],
+      error: null,
+    });
+    vi.mocked(supabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: mockEq,
+      }),
+    } as never);
+
+    const result = await getDonationsByOrganization();
+    expect(result).toEqual([{ name: "Org A", amount: 800 }]);
+    expect(mockEq).toHaveBeenCalledWith("type", "cash");
+  });
+});
+
 describe("insertDonation", () => {
   it("inserts a donation", async () => {
     vi.mocked(supabase.from).mockReturnValue({
@@ -270,7 +310,11 @@ describe("insertDonation", () => {
 
     await expect(insertDonation({
       organization_id: "org-1",
+      type: "cash",
       amount: 50000,
+      aid_category_id: null,
+      quantity: null,
+      unit: null,
       date: "2024-01-01",
       notes: null,
     })).resolves.toBeUndefined();
@@ -304,6 +348,13 @@ describe("getDeploymentHubs", () => {
         return {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockResolvedValue({ data: mockPurchases, error: null }),
+          }),
+        } as never;
+      }
+      if (table === "donations") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: [], error: null }),
           }),
         } as never;
       }

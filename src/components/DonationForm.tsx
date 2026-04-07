@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getOrganizations,
+  getAidCategories,
   insertDonation,
 } from "@/lib/queries";
 
@@ -11,9 +12,17 @@ interface Organization {
   municipality: string;
 }
 
+interface AidCategory {
+  id: string;
+  name: string;
+  icon: string | null;
+}
+
 export default function DonationForm() {
   const { t } = useTranslation();
   const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [categories, setCategories] = useState<AidCategory[]>([]);
+  const [donationType, setDonationType] = useState<"cash" | "in_kind">("cash");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +31,9 @@ export default function DonationForm() {
   useEffect(() => {
     getOrganizations()
       .then(setOrgs)
+      .catch(() => {});
+    getAidCategories()
+      .then(setCategories)
       .catch(() => {});
   }, []);
 
@@ -33,12 +45,29 @@ export default function DonationForm() {
     const formData = new FormData(e.currentTarget);
 
     try {
-      await insertDonation({
-        organization_id: formData.get("organization_id") as string,
-        amount: Number(formData.get("amount")),
-        date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],
-        notes: (formData.get("notes") as string) || null,
-      });
+      if (donationType === "cash") {
+        await insertDonation({
+          organization_id: formData.get("organization_id") as string,
+          type: "cash",
+          amount: Number(formData.get("amount")),
+          aid_category_id: null,
+          quantity: null,
+          unit: null,
+          date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],
+          notes: (formData.get("notes") as string) || null,
+        });
+      } else {
+        await insertDonation({
+          organization_id: formData.get("organization_id") as string,
+          type: "in_kind",
+          amount: null,
+          aid_category_id: formData.get("aid_category_id") as string,
+          quantity: Number(formData.get("quantity")),
+          unit: (formData.get("unit") as string) || null,
+          date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],
+          notes: (formData.get("notes") as string) || null,
+        });
+      }
       setSubmitted(true);
     } catch {
       setError(t("DonationForm.error"));
@@ -54,6 +83,7 @@ export default function DonationForm() {
         <button
           onClick={() => {
             setSubmitted(false);
+            setDonationType("cash");
             setFormKey((k) => k + 1);
           }}
           className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
@@ -66,6 +96,21 @@ export default function DonationForm() {
 
   return (
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <label htmlFor="donation_type" className="block text-sm text-neutral-400">
+          {t("DonationForm.type")}
+        </label>
+        <select
+          id="donation_type"
+          value={donationType}
+          onChange={(e) => setDonationType(e.target.value as "cash" | "in_kind")}
+          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value="cash">{t("DonationForm.typeCash")}</option>
+          <option value="in_kind">{t("DonationForm.typeInKind")}</option>
+        </select>
+      </div>
+
       <div>
         <label htmlFor="organization_id" className="block text-sm text-neutral-400">
           {t("DonationForm.organization")}
@@ -85,21 +130,71 @@ export default function DonationForm() {
         </select>
       </div>
 
-      <div>
-        <label htmlFor="amount" className="block text-sm text-neutral-400">
-          {t("DonationForm.amount")}
-        </label>
-        <input
-          id="amount"
-          name="amount"
-          type="number"
-          min="1"
-          step="0.01"
-          required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder="0.00"
-        />
-      </div>
+      {donationType === "cash" ? (
+        <div>
+          <label htmlFor="amount" className="block text-sm text-neutral-400">
+            {t("DonationForm.amount")}
+          </label>
+          <input
+            id="amount"
+            name="amount"
+            type="number"
+            min="1"
+            step="0.01"
+            required
+            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="0.00"
+          />
+        </div>
+      ) : (
+        <>
+          <div>
+            <label htmlFor="aid_category_id" className="block text-sm text-neutral-400">
+              {t("DonationForm.category")}
+            </label>
+            <select
+              id="aid_category_id"
+              name="aid_category_id"
+              required
+              className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="">{t("SubmitForm.gapPlaceholder")}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.icon ? `${c.icon} ` : ""}{c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="quantity" className="block text-sm text-neutral-400">
+              {t("DonationForm.quantity")}
+            </label>
+            <input
+              id="quantity"
+              name="quantity"
+              type="number"
+              min="1"
+              required
+              className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="unit" className="block text-sm text-neutral-400">
+              {t("DonationForm.unit")}
+            </label>
+            <input
+              id="unit"
+              name="unit"
+              type="text"
+              className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="e.g. packs, kits"
+            />
+          </div>
+        </>
+      )}
 
       <div>
         <label htmlFor="date" className="block text-sm text-neutral-400">

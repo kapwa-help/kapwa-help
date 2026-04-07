@@ -137,7 +137,7 @@
     "recentPurchases": "Mga Kamakailang Pagbili",
     "noPurchases": "Wala pang naitalang mga pagbili",
     "availableInventory": "Magagamit na Imbentaryo",
-    "purchased": "binili",
+    "received": "natanggap",
     "deployed": "ipinakalat"
   },
   "ReliefMap": {
@@ -208,8 +208,14 @@
     "reportHazard": "Mag-ulat ng isang Hazard"
   },
   "DonationForm": {
+    "type": "Uri ng Donasyon",
+    "typeCash": "Cash",
+    "typeInKind": "In-Kind (Mga Pisikal na Kalakal)",
     "organization": "Organisasyon",
     "amount": "Halaga (₱)",
+    "category": "Kategorya ng Tulong",
+    "quantity": "Dami",
+    "unit": "Yunit (opsyonal)",
     "date": "Petsa",
     "notes": "Mga Tala (opsyonal)",
     "submit": "Iulat ang Donasyon",
