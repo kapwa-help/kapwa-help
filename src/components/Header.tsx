@@ -56,7 +56,8 @@ export default function Header() {
   return (
     <header className="bg-secondary shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link to={`/${locale}`} className="font-logo text-xl font-bold text-white hover:text-neutral-100">
+        <Link to={`/${locale}`} className="flex items-center gap-2 font-logo text-xl font-bold text-white hover:text-neutral-100">
+          <img src="/icons/kapwahelp_v1.svg" alt="" aria-hidden="true" className="h-8 w-8" />
           Kapwa Help
         </Link>
         <nav className="hidden items-center gap-1 sm:flex">
