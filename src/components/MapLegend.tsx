@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export type LayerVisibility = {
@@ -20,9 +21,10 @@ const NEED_STATUSES = [
 
 export default function MapLegend({ layers, onToggle }: Props) {
   const { t } = useTranslation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  return (
-    <div className="rounded-xl border border-neutral-400/20 bg-secondary/90 p-3 backdrop-blur-sm">
+  const legendContent = (
+    <>
       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
         {t("ReliefMap.legend")}
       </p>
@@ -81,6 +83,37 @@ export default function MapLegend({ layers, onToggle }: Props) {
         </svg>
         <span className="text-sm text-neutral-50">{t("ReliefMap.layerHazards")}</span>
       </label>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop: always-visible polished legend */}
+      <div className="hidden rounded-xl border border-neutral-400/20 bg-secondary/90 p-3 shadow-[0_2px_8px_rgba(0,0,0,0.3)] backdrop-blur-sm lg:block">
+        {legendContent}
+      </div>
+
+      {/* Mobile: collapsible with toggle button */}
+      <div className="lg:hidden">
+        {mobileOpen && (
+          <div className="mb-2 rounded-xl border border-neutral-400/20 bg-secondary/90 p-3 shadow-[0_2px_8px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+            {legendContent}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setMobileOpen((o) => !o)}
+          aria-label={t("ReliefMap.legend")}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-400/20 bg-secondary/90 shadow-[0_2px_8px_rgba(0,0,0,0.3)] backdrop-blur-sm"
+        >
+          {/* Layers stack icon */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-50)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+        </button>
+      </div>
+    </>
   );
 }
