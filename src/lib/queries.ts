@@ -527,7 +527,8 @@ export async function getRecentPurchases(eventId: string) {
     .from("purchases")
     .select("id, quantity, unit, cost, date, notes, created_at, organizations(name), aid_categories(name, icon)")
     .eq("event_id", eventId)
-    .order("date", { ascending: false });
+    .order("date", { ascending: false })
+    .limit(10);
   if (error) throw error;
 
   return (data ?? []).map((row) => ({
