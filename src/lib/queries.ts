@@ -276,20 +276,22 @@ export async function getOrganizations(eventId: string) {
 
 // --- Donation queries ---
 
-export async function getTotalDonations() {
+export async function getTotalDonations(eventId: string) {
   const { data, error } = await supabase
     .from("donations")
     .select("amount")
+    .eq("event_id", eventId)
     .eq("type", "cash");
 
   if (error) throw error;
   return data.reduce((sum, row) => sum + Number(row.amount), 0);
 }
 
-export async function getDonationsByOrganization() {
+export async function getDonationsByOrganization(eventId: string) {
   const { data, error } = await supabase
     .from("donations")
     .select("amount, organizations(name)")
+    .eq("event_id", eventId)
     .eq("type", "cash");
 
   if (error) throw error;
@@ -329,10 +331,11 @@ export async function insertDonation(donation: DonationInsert) {
 
 // --- Purchase queries ---
 
-export async function getTotalSpent() {
+export async function getTotalSpent(eventId: string) {
   const { data, error } = await supabase
     .from("purchases")
-    .select("cost");
+    .select("cost")
+    .eq("event_id", eventId);
   if (error) throw error;
   return (data ?? []).reduce((sum, row) => sum + Number(row.cost ?? 0), 0);
 }

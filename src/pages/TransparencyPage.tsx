@@ -33,10 +33,10 @@ export function TransparencyPage() {
 
       const [totalDonations, totalSpent, totalBeneficiaries, donationsByOrg, recentPurchases] =
         await Promise.all([
-          getTotalDonations(),
-          getTotalSpent(),
+          event ? getTotalDonations(event.id) : Promise.resolve(0),
+          event ? getTotalSpent(event.id) : Promise.resolve(0),
           event ? getTotalBeneficiaries(event.id) : Promise.resolve(0),
-          getDonationsByOrganization(),
+          event ? getDonationsByOrganization(event.id) : Promise.resolve([]),
           event ? getRecentPurchases(event.id) : Promise.resolve([]),
         ]);
 
