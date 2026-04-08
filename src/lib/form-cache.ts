@@ -1,7 +1,7 @@
-import type { SubmissionInsert } from "@/lib/queries";
+import type { NeedInsert } from "@/lib/queries";
 
 const DB_NAME = "luaid-forms";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const OPTIONS_STORE = "options";
 const OUTBOX_STORE = "outbox";
 
@@ -11,7 +11,7 @@ type CachedOptions<T> = {
 };
 
 type OutboxEntry = {
-  payload: SubmissionInsert;
+  payload: NeedInsert;
   createdAt: number;
 };
 
@@ -23,9 +23,11 @@ function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(OPTIONS_STORE)) {
         db.createObjectStore(OPTIONS_STORE);
       }
-      if (!db.objectStoreNames.contains(OUTBOX_STORE)) {
-        db.createObjectStore(OUTBOX_STORE, { autoIncrement: true });
+      // Recreate outbox on version bump to clear stale payload shapes
+      if (db.objectStoreNames.contains(OUTBOX_STORE)) {
+        db.deleteObjectStore(OUTBOX_STORE);
       }
+      db.createObjectStore(OUTBOX_STORE, { autoIncrement: true });
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
@@ -76,7 +78,7 @@ export async function setCachedOptions<T>(
 
 // --- Outbox ---
 
-export async function addToOutbox(payload: SubmissionInsert): Promise<void> {
+export async function addToOutbox(payload: NeedInsert): Promise<void> {
   let db: IDBDatabase | null = null;
   try {
     db = await openDB();
@@ -89,17 +91,17 @@ export async function addToOutbox(payload: SubmissionInsert): Promise<void> {
 }
 
 export async function getOutboxEntries(): Promise<
-  { key: IDBValidKey; payload: SubmissionInsert }[]
+  { key: IDBValidKey; payload: NeedInsert }[]
 > {
   let db: IDBDatabase | null = null;
   try {
     db = await openDB();
-    return await new Promise<{ key: IDBValidKey; payload: SubmissionInsert }[]>(
+    return await new Promise<{ key: IDBValidKey; payload: NeedInsert }[]>(
       (resolve) => {
         const tx = db!.transaction(OUTBOX_STORE, "readonly");
         const store = tx.objectStore(OUTBOX_STORE);
         const request = store.openCursor();
-        const entries: { key: IDBValidKey; payload: SubmissionInsert }[] = [];
+        const entries: { key: IDBValidKey; payload: NeedInsert }[] = [];
 
         request.onsuccess = () => {
           const cursor = request.result;
