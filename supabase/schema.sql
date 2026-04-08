@@ -1,154 +1,158 @@
--- LUaid.org — Supabase Schema
--- Run this in the Supabase SQL Editor to create all tables.
--- Safe to run multiple times: uses IF NOT EXISTS throughout.
+-- ============================================================
+-- Kapwa Help — V1 Data Model
+-- ============================================================
 
--- Events: disaster operations that scope all data
-CREATE TABLE IF NOT EXISTS events (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        text NOT NULL,
-  slug        text NOT NULL UNIQUE,
+-- Enums
+CREATE TYPE access_status AS ENUM ('truck', '4x4', 'boat', 'foot_only', 'cut_off');
+CREATE TYPE urgency_level AS ENUM ('low', 'medium', 'high', 'critical');
+CREATE TYPE need_status AS ENUM ('pending', 'verified', 'in_transit', 'confirmed');
+CREATE TYPE donation_type AS ENUM ('cash', 'in_kind');
+CREATE TYPE donor_type AS ENUM ('individual', 'organization');
+CREATE TYPE hazard_status AS ENUM ('active', 'resolved');
+
+-- Events (scopes everything)
+CREATE TABLE events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  slug text NOT NULL UNIQUE,
   description text,
-  region      text NOT NULL,
-  started_at  date NOT NULL,
-  ended_at    date,
-  is_active   boolean NOT NULL DEFAULT true,
-  created_at  timestamptz DEFAULT now()
+  region text,
+  started_at date,
+  ended_at date,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Organizations: donors, deployment hubs, or both
-CREATE TABLE IF NOT EXISTS organizations (
-  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name         text NOT NULL,
-  municipality text,
-  lat          decimal(9,6),
-  lng          decimal(9,6),
-  created_at   timestamptz DEFAULT now()
+-- Organizations (financial/accountability layer)
+CREATE TABLE organizations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL REFERENCES events(id),
+  name text NOT NULL,
+  description text,
+  contact_info text,
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Aid categories: broad groupings for dashboard rollups
-CREATE TABLE IF NOT EXISTS aid_categories (
-  id   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+-- Deployment Hubs (operational/map layer — independent from orgs)
+CREATE TABLE deployment_hubs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL REFERENCES events(id),
+  name text NOT NULL,
+  lat decimal(9,6) NOT NULL,
+  lng decimal(9,6) NOT NULL,
+  description text,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Aid Categories (shared vocabulary)
+CREATE TABLE aid_categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
-  icon text
+  icon text NOT NULL
 );
 
--- Barangays: geographic aggregation layer
-CREATE TABLE IF NOT EXISTS barangays (
-  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name         text NOT NULL,
-  municipality text NOT NULL,
-  lat          decimal(9,6),
-  lng          decimal(9,6),
-  population   integer,
-  created_at   timestamptz DEFAULT now()
-);
-
--- Donations: monetary or in-kind contributions
-CREATE TABLE IF NOT EXISTS donations (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  organization_id uuid NOT NULL REFERENCES organizations(id),
-  type            text NOT NULL DEFAULT 'cash' CHECK (type IN ('cash', 'in_kind')),
-  -- Cash donations
-  amount          decimal(12,2),
-  -- In-kind donations
-  aid_category_id uuid REFERENCES aid_categories(id),
-  quantity        integer,
-  unit            text,
-  -- Ensure cash has amount, in-kind has category+quantity
-  CHECK (
-    (type = 'cash' AND amount IS NOT NULL) OR
-    (type = 'in_kind' AND aid_category_id IS NOT NULL AND quantity IS NOT NULL)
-  ),
-  -- Common fields
-  date            date NOT NULL,
-  notes           text,
-  created_at      timestamptz DEFAULT now()
-);
-
--- Purchases: goods bought with donation money
-CREATE TABLE IF NOT EXISTS purchases (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id        uuid REFERENCES events(id),
-  organization_id uuid NOT NULL REFERENCES organizations(id),
+-- Hub Inventory (junction — which categories a hub currently has)
+CREATE TABLE hub_inventory (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  hub_id uuid NOT NULL REFERENCES deployment_hubs(id) ON DELETE CASCADE,
   aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
-  quantity        integer NOT NULL,
-  unit            text,
-  cost            decimal(12,2),
-  date            date DEFAULT CURRENT_DATE,
-  notes           text,
-  created_at      timestamptz DEFAULT now()
+  UNIQUE(hub_id, aid_category_id)
 );
 
--- Submissions: needs from the field
--- "Needs" follow the KapwaRelief pin lifecycle (docs/scope §5.B)
-CREATE TABLE IF NOT EXISTS submissions (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id        uuid REFERENCES events(id),
-  status          text NOT NULL DEFAULT 'pending'
-                    CHECK (status IN ('pending', 'verified', 'in_transit', 'completed', 'resolved')),
-  -- Contact
-  contact_name    text NOT NULL,
-  contact_phone   text,
-  -- Location
-  barangay_id     uuid NOT NULL REFERENCES barangays(id),
+-- Needs (demand side — community or hub needs)
+CREATE TABLE needs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL REFERENCES events(id),
+  hub_id uuid REFERENCES deployment_hubs(id),
+  lat decimal(9,6) NOT NULL,
+  lng decimal(9,6) NOT NULL,
+  access_status access_status NOT NULL,
+  urgency urgency_level NOT NULL,
+  status need_status NOT NULL DEFAULT 'pending',
+  num_people integer NOT NULL,
+  contact_name text NOT NULL,
+  contact_phone text,
+  notes text,
+  delivery_photo_url text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Need Categories (junction — multi-select aid types per need)
+CREATE TABLE need_categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  need_id uuid NOT NULL REFERENCES needs(id) ON DELETE CASCADE,
   aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
-  lat             decimal(9,6),
-  lng             decimal(9,6),
-  geohash         text,
-  -- Access / passability (scope §5.A)
-  access_status   text NOT NULL CHECK (access_status IN ('truck', '4x4', 'boat', 'foot_only', 'cut_off')),
-  -- Need details
-  quantity_needed integer,
-  urgency         text NOT NULL CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
-  num_adults      integer DEFAULT 0,
-  num_children    integer DEFAULT 0,
-  num_seniors_pwd integer DEFAULT 0,
-  notes           text,
-  submission_photo_url text,
-  dispatch_photo_url   text,
-  delivery_photo_url   text,
-  -- Timestamps
-  verified_at     timestamptz,
-  completed_at    timestamptz,
-  created_at      timestamptz DEFAULT now()
+  UNIQUE(need_id, aid_category_id)
 );
 
--- Deployments (Relief Actions): every aid delivery event
--- Can optionally fulfill a specific need (submission_id)
-CREATE TABLE IF NOT EXISTS deployments (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id        uuid REFERENCES events(id),
+-- Donations (financial ledger)
+CREATE TABLE donations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL REFERENCES events(id),
   organization_id uuid NOT NULL REFERENCES organizations(id),
-  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
-  barangay_id     uuid REFERENCES barangays(id),
-  submission_id   uuid UNIQUE REFERENCES submissions(id),
-  quantity        integer,
-  unit            text,
-  date            date,
-  notes           text,
-  status          text NOT NULL DEFAULT 'pending'
-                    CHECK (status IN ('pending', 'received')),
-  created_at      timestamptz DEFAULT now()
+  donor_name text,
+  donor_type donor_type,
+  type donation_type NOT NULL,
+  amount decimal(12,2),
+  date date NOT NULL,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CHECK ((type = 'cash' AND amount IS NOT NULL) OR type = 'in_kind')
 );
 
--- Hazards: field-reported hazard conditions
-CREATE TABLE IF NOT EXISTS hazards (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id    uuid NOT NULL REFERENCES events(id),
-  hazard_type text NOT NULL CHECK (hazard_type IN (
-                'flood', 'landslide', 'road_blocked',
-                'bridge_out', 'electrical_hazard', 'other'
-              )),
-  description text,
-  photo_url   text,
-  latitude    double precision NOT NULL,
-  longitude   double precision NOT NULL,
-  status      text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'resolved')),
+-- Donation Categories (junction — multi-select for in-kind)
+CREATE TABLE donation_categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  donation_id uuid NOT NULL REFERENCES donations(id) ON DELETE CASCADE,
+  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
+  UNIQUE(donation_id, aid_category_id)
+);
+
+-- Purchases (org spending record)
+CREATE TABLE purchases (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL REFERENCES events(id),
+  organization_id uuid NOT NULL REFERENCES organizations(id),
+  cost decimal(12,2) NOT NULL,
+  date date NOT NULL,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Purchase Categories (junction — multi-select)
+CREATE TABLE purchase_categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  purchase_id uuid NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
+  aid_category_id uuid NOT NULL REFERENCES aid_categories(id),
+  UNIQUE(purchase_id, aid_category_id)
+);
+
+-- Hazards (map layer)
+CREATE TABLE hazards (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL REFERENCES events(id),
+  description text NOT NULL,
+  photo_url text,
+  latitude double precision NOT NULL,
+  longitude double precision NOT NULL,
+  status hazard_status NOT NULL DEFAULT 'active',
   reported_by text,
-  created_at  timestamptz DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Seed aid categories (Hannah's unified 9-category list)
+-- Deployments (fulfillment record — created when need is confirmed)
+CREATE TABLE deployments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL REFERENCES events(id),
+  hub_id uuid NOT NULL REFERENCES deployment_hubs(id),
+  need_id uuid NOT NULL UNIQUE REFERENCES needs(id),
+  date date NOT NULL,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Seed aid categories
 INSERT INTO aid_categories (name, icon) VALUES
   ('Hot Meals', '🍲'),
   ('Drinking Water', '💧'),

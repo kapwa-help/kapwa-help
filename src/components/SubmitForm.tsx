@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  getBarangays,
   getAidCategories,
-  insertSubmission,
-  type SubmissionInsert,
+  getActiveEvent,
+  insertNeed,
+  type NeedInsert,
 } from "@/lib/queries";
 import {
   getCachedOptions,
@@ -13,14 +13,7 @@ import {
   getOutboxEntries,
   removeFromOutbox,
 } from "@/lib/form-cache";
-import { encodeGeohash } from "@/lib/geohash";
 import { useOutbox } from "@/lib/outbox-context";
-
-interface Barangay {
-  id: string;
-  name: string;
-  municipality: string;
-}
 
 interface AidCategory {
   id: string;
@@ -35,60 +28,47 @@ interface SubmitFormProps {
 export default function SubmitForm({ coords }: SubmitFormProps) {
   const { t } = useTranslation();
   const { refreshCount } = useOutbox();
-  const [barangays, setBarangays] = useState<Barangay[]>([]);
   const [categories, setCategories] = useState<AidCategory[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [savedOffline, setSavedOffline] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
-    let hadCache = false;
     let cancelled = false;
 
-    // Step 1: Try loading from IndexedDB cache first
-    getCachedOptions<Barangay>("barangays").then((cachedB) => {
-      if (cancelled) return;
-      if (cachedB?.data.length) {
-        hadCache = true;
-        setBarangays(cachedB.data);
-        setLoading(false);
-      }
+    // Load active event
+    getActiveEvent()
+      .then((event) => {
+        if (!cancelled && event) setEventId(event.id);
+      })
+      .catch(() => {});
 
-      // Step 2: Fetch fresh data from Supabase
-      getBarangays()
-        .then((freshB) => {
-          if (cancelled) return;
-          setBarangays(freshB);
-          setLoading(false);
-          setCachedOptions("barangays", freshB);
-        })
-        .catch(() => {
-          if (cancelled) return;
-          if (!hadCache) {
-            setError(t("SubmitForm.loadError"));
-            setLoading(false);
-          }
-        });
-    });
-
-    // Load aid categories (same cache-first pattern)
+    // Load aid categories (cache-first)
     getCachedOptions<AidCategory>("aidCategories").then((cachedC) => {
       if (cancelled) return;
       if (cachedC?.data.length) {
         setCategories(cachedC.data);
+        setLoading(false);
       }
 
       getAidCategories()
         .then((freshC) => {
           if (cancelled) return;
           setCategories(freshC);
+          setLoading(false);
           setCachedOptions("aidCategories", freshC);
         })
         .catch(() => {
-          // Non-critical — cached or empty list is acceptable
+          if (cancelled) return;
+          if (!cachedC?.data.length) {
+            setError(t("SubmitForm.loadError"));
+            setLoading(false);
+          }
         });
     });
 
@@ -106,7 +86,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       const entries = await getOutboxEntries();
       for (const entry of entries) {
         try {
-          await insertSubmission(entry.payload);
+          await insertNeed(entry.payload);
           await removeFromOutbox(entry.key);
         } catch (err: unknown) {
           const isUniqueViolation =
@@ -140,52 +120,59 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
     };
   }, [flushOutbox]);
 
+  function toggleCategory(id: string) {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (selectedCategories.size === 0) return;
     setSubmitting(true);
     setError(null);
 
     const formData = new FormData(e.currentTarget);
     const id = crypto.randomUUID();
 
-    const payload: SubmissionInsert = {
-      id,
-      contact_name: formData.get("contact_name") as string,
-      contact_phone: (formData.get("contact_phone") as string) || null,
-      barangay_id: formData.get("barangay_id") as string,
-      aid_category_id: formData.get("aid_category_id") as string,
-      access_status: formData.get("access_status") as string,
-      urgency: formData.get("urgency") as string,
-      quantity_needed: formData.get("quantity_needed")
-        ? Number(formData.get("quantity_needed"))
-        : null,
-      num_adults: formData.get("num_adults")
-        ? Number(formData.get("num_adults"))
-        : null,
-      num_children: formData.get("num_children")
-        ? Number(formData.get("num_children"))
-        : null,
-      num_seniors_pwd: formData.get("num_seniors_pwd")
-        ? Number(formData.get("num_seniors_pwd"))
-        : null,
-      notes: (formData.get("notes") as string) || null,
-      lat: coords?.lat ?? null,
-      lng: coords?.lng ?? null,
-      geohash: coords ? encodeGeohash(coords.lat, coords.lng) : null,
-    };
-
     try {
-      await insertSubmission(payload);
-      setSubmitted(true);
-    } catch {
+      if (!eventId) {
+        setError(t("SubmitForm.errorMessage"));
+        setSubmitting(false);
+        return;
+      }
+      const payload: NeedInsert = {
+        id,
+        event_id: eventId,
+        contact_name: formData.get("contact_name") as string,
+        contact_phone: (formData.get("contact_phone") as string) || undefined,
+        access_status: formData.get("access_status") as string,
+        urgency: formData.get("urgency") as string,
+        num_people: Number(formData.get("num_people")) || 1,
+        notes: (formData.get("notes") as string) || undefined,
+        lat: coords?.lat ?? 0,
+        lng: coords?.lng ?? 0,
+        category_ids: Array.from(selectedCategories),
+      };
+
       try {
-        await addToOutbox(payload);
-        refreshCount();
-        setSavedOffline(true);
+        await insertNeed(payload);
         setSubmitted(true);
       } catch {
-        setError(t("SubmitForm.errorMessage"));
+        try {
+          await addToOutbox(payload);
+          refreshCount();
+          setSavedOffline(true);
+          setSubmitted(true);
+        } catch {
+          setError(t("SubmitForm.errorMessage"));
+        }
       }
+    } catch {
+      setError(t("SubmitForm.errorMessage"));
     } finally {
       setSubmitting(false);
     }
@@ -210,6 +197,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
           onClick={() => {
             setSubmitted(false);
             setSavedOffline(false);
+            setSelectedCategories(new Set());
             setFormKey((k) => k + 1);
           }}
           className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
@@ -251,53 +239,37 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
         />
       </div>
 
-      {/* Barangay */}
-      <div>
-        <label htmlFor="barangay_id" className="block text-sm text-neutral-400">
-          {t("SubmitForm.barangay")}
-        </label>
-        <select
-          id="barangay_id"
-          name="barangay_id"
-          required
-          disabled={loading}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-        >
-          <option value="">
-            {loading ? t("SubmitForm.loadingOptions") : t("SubmitForm.barangayPlaceholder")}
-          </option>
-          {barangays.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.name} — {b.municipality}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Aid category */}
-      <div>
-        <label htmlFor="aid_category_id" className="block text-sm text-neutral-400">
-          {t("SubmitForm.gapCategory")}
-        </label>
-        <select
-          id="aid_category_id"
-          name="aid_category_id"
-          required
-          disabled={!categories.length}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-        >
-          <option value="">
-            {categories.length
-              ? t("SubmitForm.gapPlaceholder")
-              : t("SubmitForm.loadingOptions")}
-          </option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.icon ? `${c.icon} ` : ""}{c.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Aid categories — multi-select checkboxes */}
+      <fieldset>
+        <legend className="text-sm text-neutral-400">
+          {t("SubmitForm.selectCategories")}
+        </legend>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {loading ? (
+            <p className="col-span-full text-sm text-neutral-400">{t("SubmitForm.loadingOptions")}</p>
+          ) : (
+            categories.map((c) => (
+              <label
+                key={c.id}
+                className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition-colors ${
+                  selectedCategories.has(c.id)
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-neutral-400/20 bg-base text-neutral-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.has(c.id)}
+                  onChange={() => toggleCategory(c.id)}
+                  className="sr-only"
+                />
+                {c.icon && <span>{c.icon}</span>}
+                <span>{c.name}</span>
+              </label>
+            ))
+          )}
+        </div>
+      </fieldset>
 
       {/* Access status */}
       <div>
@@ -342,62 +314,20 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
         </div>
       </fieldset>
 
-      {/* Quantity */}
+      {/* Number of people */}
       <div>
-        <label htmlFor="quantity_needed" className="block text-sm text-neutral-400">
-          {t("SubmitForm.quantityNeeded")}
+        <label htmlFor="num_people" className="block text-sm text-neutral-400">
+          {t("SubmitForm.numPeople")}
         </label>
         <input
-          id="quantity_needed"
-          name="quantity_needed"
+          id="num_people"
+          name="num_people"
           type="number"
           min="1"
+          required
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder={t("SubmitForm.quantityPlaceholder")}
+          placeholder={t("SubmitForm.numPeoplePlaceholder")}
         />
-      </div>
-
-      {/* Beneficiary counts */}
-      <div className="grid grid-cols-3 gap-3">
-        <div>
-          <label htmlFor="num_adults" className="block text-sm text-neutral-400">
-            {t("SubmitForm.numAdults")}
-          </label>
-          <input
-            id="num_adults"
-            name="num_adults"
-            type="number"
-            min="0"
-            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="0"
-          />
-        </div>
-        <div>
-          <label htmlFor="num_children" className="block text-sm text-neutral-400">
-            {t("SubmitForm.numChildren")}
-          </label>
-          <input
-            id="num_children"
-            name="num_children"
-            type="number"
-            min="0"
-            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="0"
-          />
-        </div>
-        <div>
-          <label htmlFor="num_seniors_pwd" className="block text-sm text-neutral-400">
-            {t("SubmitForm.numSeniorsPwd")}
-          </label>
-          <input
-            id="num_seniors_pwd"
-            name="num_seniors_pwd"
-            type="number"
-            min="0"
-            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="0"
-          />
-        </div>
       </div>
 
       {/* Notes */}
@@ -420,7 +350,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       {/* Submit button */}
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || selectedCategories.size === 0}
         className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-neutral-50 shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200 disabled:opacity-50"
       >
         {submitting ? t("SubmitForm.submitting") : t("SubmitForm.submit")}

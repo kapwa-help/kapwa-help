@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  getOrganizations,
-  getAidCategories,
-  createDeploymentForNeed,
+  getHubs,
+  createDeployment,
   getActiveEvent,
 } from "@/lib/queries";
 import type { NeedPoint } from "@/lib/queries";
@@ -21,15 +20,8 @@ export default function ClaimForm({ point, onClaimed }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dropdown data
-  const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-
-  // Form state
-  const [orgId, setOrgId] = useState("");
-  const [catId, setCatId] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [unit, setUnit] = useState("");
+  const [hubs, setHubs] = useState<{ id: string; name: string }[]>([]);
+  const [hubId, setHubId] = useState("");
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -49,12 +41,11 @@ export default function ClaimForm({ point, onClaimed }: Props) {
       formRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
     });
     try {
-      const [orgData, catData] = await Promise.all([
-        getOrganizations(),
-        getAidCategories(),
-      ]);
-      setOrgs(orgData);
-      setCategories(catData);
+      const event = await getActiveEvent();
+      if (event) {
+        const hubData = await getHubs(event.id);
+        setHubs(hubData);
+      }
     } catch {
       setError(t("ClaimForm.error"));
     }
@@ -62,24 +53,22 @@ export default function ClaimForm({ point, onClaimed }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!orgId || !catId || !isOnline) return;
+    if (!hubId || !isOnline) return;
 
     setSubmitting(true);
     setError(null);
 
     try {
       const event = await getActiveEvent();
-      await createDeploymentForNeed({
-        event_id: event?.id ?? null,
-        organization_id: orgId,
-        aid_category_id: catId,
-        submission_id: point.id,
-        barangay_id: null,
-        quantity: quantity ? parseInt(quantity, 10) : null,
-        unit: unit || null,
-        notes: notes || null,
+      await createDeployment({
+        event_id: event?.id ?? "",
+        hub_id: hubId,
+        need_id: point.id,
+        date: new Date().toISOString().split("T")[0],
+        notes: notes || undefined,
       });
       onClaimed();
+      setIsOpen(false);
     } catch {
       setError(t("ClaimForm.error"));
     } finally {
@@ -105,71 +94,23 @@ export default function ClaimForm({ point, onClaimed }: Props) {
         {t("ClaimForm.title")}
       </h4>
 
-      {/* Organization */}
+      {/* Hub */}
       <div>
         <label className="mb-1 block text-xs text-neutral-400">
-          {t("ClaimForm.organization")}
+          {t("ClaimForm.hub")}
         </label>
         <select
-          aria-label={t("ClaimForm.organization")}
-          value={orgId}
-          onChange={(e) => setOrgId(e.target.value)}
+          aria-label={t("ClaimForm.hub")}
+          value={hubId}
+          onChange={(e) => setHubId(e.target.value)}
           required
           className="w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-sm text-neutral-50"
         >
-          <option value="">{t("ClaimForm.organizationPlaceholder")}</option>
-          {orgs.map((o) => (
-            <option key={o.id} value={o.id}>{o.name}</option>
+          <option value="">{t("ClaimForm.hubPlaceholder")}</option>
+          {hubs.map((h) => (
+            <option key={h.id} value={h.id}>{h.name}</option>
           ))}
         </select>
-      </div>
-
-      {/* Aid Category */}
-      <div>
-        <label className="mb-1 block text-xs text-neutral-400">
-          {t("ClaimForm.aidCategory")}
-        </label>
-        <select
-          aria-label={t("ClaimForm.aidCategory")}
-          value={catId}
-          onChange={(e) => setCatId(e.target.value)}
-          required
-          className="w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-sm text-neutral-50"
-        >
-          <option value="">{t("ClaimForm.aidCategoryPlaceholder")}</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Quantity + Unit row */}
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <label className="mb-1 block text-xs text-neutral-400">
-            {t("ClaimForm.quantity")}
-          </label>
-          <input
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder={t("ClaimForm.quantityPlaceholder")}
-            className="w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-sm text-neutral-50 placeholder:text-neutral-400/40"
-          />
-        </div>
-        <div className="flex-1">
-          <label className="mb-1 block text-xs text-neutral-400">
-            {t("ClaimForm.unit")}
-          </label>
-          <input
-            type="text"
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-            placeholder={t("ClaimForm.unitPlaceholder")}
-            className="w-full rounded-lg border border-neutral-400/20 bg-base px-3 py-2 text-sm text-neutral-50 placeholder:text-neutral-400/40"
-          />
-        </div>
       </div>
 
       {/* Notes */}
@@ -189,7 +130,7 @@ export default function ClaimForm({ point, onClaimed }: Props) {
       {/* Submit */}
       <button
         type="submit"
-        disabled={!orgId || !catId || !isOnline || submitting}
+        disabled={!hubId || !isOnline || submitting}
         className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80 disabled:opacity-40"
       >
         {submitting ? t("ClaimForm.submitting") : t("ClaimForm.submit")}

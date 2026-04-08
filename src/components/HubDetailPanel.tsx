@@ -35,11 +35,13 @@ export default function HubDetailPanel({ hub, onClose, variant = "sheet" }: Prop
 
       {/* Hub name */}
       <h3 className="mb-1 text-lg font-semibold text-neutral-50">{hub.name}</h3>
-      {hub.municipality && (
-        <p className="mb-4 text-sm text-neutral-400">{hub.municipality}</p>
+
+      {/* Notes */}
+      {hub.notes && (
+        <p className="mb-4 text-sm text-neutral-400">{hub.notes}</p>
       )}
 
-      {/* Inventory */}
+      {/* Inventory — category checklist */}
       <div>
         <p className="mb-2 text-sm font-medium text-neutral-400">
           {t("HubDetail.inventory")}
@@ -51,15 +53,10 @@ export default function HubDetailPanel({ hub, onClose, variant = "sheet" }: Prop
             {hub.inventory.map((item) => (
               <div
                 key={item.categoryName}
-                className="flex items-center justify-between rounded-lg bg-base/30 px-3 py-2"
+                className="flex items-center gap-2 rounded-lg bg-base/30 px-3 py-2"
               >
-                <span className="text-sm text-neutral-50">
-                  {item.categoryIcon && `${item.categoryIcon} `}
-                  {item.categoryName}
-                </span>
-                <span className="text-sm font-medium text-neutral-50">
-                  {item.available}
-                </span>
+                <span className="text-sm">{item.categoryIcon}</span>
+                <span className="text-sm text-neutral-50">{item.categoryName}</span>
               </div>
             ))}
           </div>

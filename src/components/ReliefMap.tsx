@@ -56,7 +56,7 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
     setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
     setSelected((prev) =>
       prev?.type === "need" && prev.data.id === id
-        ? { type: "need", data: { ...prev.data, status: newStatus } }
+        ? { type: "need" as const, data: { ...prev.data, status: newStatus as NeedPoint["status"] } }
         : prev
     );
   }

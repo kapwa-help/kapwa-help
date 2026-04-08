@@ -2,11 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import StatusFooter from "@/components/StatusFooter";
-import OperationsSummaryCards from "@/components/OperationsSummaryCards";
 import DonationsByOrg from "@/components/DonationsByOrg";
 import RecentPurchases from "@/components/RecentPurchases";
-import AvailableInventory from "@/components/AvailableInventory";
-import BarangayEquity from "@/components/BarangayEquity";
 import {
   getCachedTransparency,
   setCachedTransparency,
@@ -16,10 +13,9 @@ import {
   getActiveEvent,
   getTotalDonations,
   getTotalSpent,
+  getTotalBeneficiaries,
   getDonationsByOrganization,
   getRecentPurchases,
-  getAvailableInventory,
-  getBarangayDistribution,
 } from "@/lib/queries";
 
 export function TransparencyPage() {
@@ -35,23 +31,21 @@ export function TransparencyPage() {
       const event = await getActiveEvent();
       setEventName(event?.name ?? undefined);
 
-      const [totalDonations, totalSpent, donationsByOrg, recentPurchases, availableInventory, barangayDistribution] =
+      const [totalDonations, totalSpent, totalBeneficiaries, donationsByOrg, recentPurchases] =
         await Promise.all([
-          getTotalDonations(),
-          getTotalSpent(),
-          getDonationsByOrganization(),
+          event ? getTotalDonations(event.id) : Promise.resolve(0),
+          event ? getTotalSpent(event.id) : Promise.resolve(0),
+          event ? getTotalBeneficiaries(event.id) : Promise.resolve(0),
+          event ? getDonationsByOrganization(event.id) : Promise.resolve([]),
           event ? getRecentPurchases(event.id) : Promise.resolve([]),
-          event ? getAvailableInventory(event.id) : Promise.resolve([]),
-          event ? getBarangayDistribution(event.id) : Promise.resolve([]),
         ]);
 
       const fresh: TransparencyData = {
         totalDonations,
         totalSpent,
+        totalBeneficiaries,
         donationsByOrg,
         recentPurchases,
-        availableInventory,
-        barangayDistribution,
       };
 
       setData(fresh);
@@ -106,11 +100,6 @@ export function TransparencyPage() {
     );
   }
 
-  const totalAvailable = data.availableInventory.reduce(
-    (sum, i) => sum + Math.max(0, i.available),
-    0
-  );
-
   return (
     <div className="flex min-h-dvh flex-col bg-base">
       <Header />
@@ -119,15 +108,21 @@ export function TransparencyPage() {
           {t("Transparency.title")}
         </h1>
 
-        <OperationsSummaryCards
-          totalDonations={data.totalDonations}
-          totalSpent={data.totalSpent}
-          goodsAvailable={totalAvailable}
-        />
-
-        <AvailableInventory inventory={data.availableInventory} />
-
-        <BarangayEquity distribution={data.barangayDistribution} />
+        {/* Summary cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+            <p className="text-sm text-neutral-400">{t("ReliefOps.totalDonations")}</p>
+            <p className="mt-1 text-2xl font-bold text-success">₱{data.totalDonations.toLocaleString()}</p>
+          </div>
+          <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+            <p className="text-sm text-neutral-400">{t("ReliefOps.totalSpent")}</p>
+            <p className="mt-1 text-2xl font-bold text-success">₱{data.totalSpent.toLocaleString()}</p>
+          </div>
+          <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.15)]">
+            <p className="text-sm text-neutral-400">{t("Transparency.totalBeneficiaries")}</p>
+            <p className="mt-1 text-2xl font-bold text-success">{data.totalBeneficiaries.toLocaleString()}</p>
+          </div>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <DonationsByOrg donations={data.donationsByOrg} />

@@ -1,113 +1,40 @@
 const DB_NAME = "luaid";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 const STORE_NAME = "dashboard";
 
-const NEEDS_KEY = "needs";
-const DEPLOYMENTS_KEY = "deployments";
-const OPERATIONS_KEY = "operations";
 const RELIEF_MAP_KEY = "reliefMap";
 const TRANSPARENCY_KEY = "transparency";
 
-export type NeedsData = {
+export type ReliefMapData = {
   activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
   needsPoints: {
     id: string;
     lat: number;
     lng: number;
-    status: string;
-    aidCategoryId: string | null;
-    aidCategoryName: string | null;
-    aidCategoryIcon: string | null;
-    accessStatus: string | null;
-    urgency: string | null;
-    quantityNeeded: number | null;
-    numAdults: number;
-    numChildren: number;
-    numSeniorsPwd: number;
-    notes: string | null;
+    status: "pending" | "verified" | "in_transit" | "confirmed";
+    categories: { id: string; name: string; icon: string }[];
+    accessStatus: string;
+    urgency: string;
+    numPeople: number;
     contactName: string;
-    barangayName: string;
-    municipality: string;
+    contactPhone: string | null;
+    notes: string | null;
+    hubId: string | null;
+    deliveryPhotoUrl: string | null;
     createdAt: string;
   }[];
-};
-
-export type BarangayDeployment = {
-  orgName: string;
-  categoryName: string;
-  categoryIcon: string | null;
-  quantity: number | null;
-  unit: string | null;
-  date: string | null;
-};
-
-export type BarangayDistributionEntry = {
-  id: string;
-  name: string;
-  municipality: string;
-  lat: number;
-  lng: number;
-  categories: { name: string; icon: string | null; total: number }[];
-  totalQuantity: number;
-  deployments: BarangayDeployment[];
-};
-
-export type RecentDeploymentEntry = {
-  id: string;
-  quantity: number | null;
-  unit: string | null;
-  date: string | null;
-  orgName: string;
-  categoryName: string;
-  categoryIcon: string | null;
-  barangayName: string;
-  municipality: string;
-};
-
-export type DeploymentsData = {
-  peopleServed: { adults: number; children: number; seniorsPwd: number };
-  barangayDistribution: BarangayDistributionEntry[];
-  recentDeployments: RecentDeploymentEntry[];
-};
-
-export type OperationsData = {
-  totalDonations: number;
-  totalSpent: number;
-  donationsByOrg: { name: string; amount: number }[];
-  recentPurchases: {
-    id: string;
-    quantity: number;
-    unit: string | null;
-    cost: number | null;
-    date: string | null;
-    orgName: string;
-    categoryName: string;
-    categoryIcon: string | null;
-  }[];
-  availableInventory: {
-    name: string;
-    icon: string | null;
-    received: number;
-    deployed: number;
-    available: number;
-  }[];
-};
-
-export type ReliefMapData = {
-  activeEvent: { id: string; name: string; slug: string; description: string | null; region: string; started_at: string } | null;
-  needsPoints: NeedsData["needsPoints"];
   hubs: {
     id: string;
     name: string;
-    municipality: string | null;
     lat: number;
     lng: number;
-    inventory: { categoryName: string; categoryIcon: string | null; available: number }[];
+    description: string | null;
+    notes: string | null;
+    inventory: { categoryName: string; categoryIcon: string }[];
   }[];
   hazards: {
     id: string;
-    hazardType: string;
-    description: string | null;
+    description: string;
     photoUrl: string | null;
     lat: number;
     lng: number;
@@ -117,8 +44,18 @@ export type ReliefMapData = {
   }[];
 };
 
-export type TransparencyData = OperationsData & {
-  barangayDistribution: BarangayDistributionEntry[];
+export type TransparencyData = {
+  totalDonations: number;
+  totalSpent: number;
+  totalBeneficiaries: number;
+  donationsByOrg: { name: string; amount: number }[];
+  recentPurchases: {
+    id: string;
+    cost: number | null;
+    date: string | null;
+    orgName: string;
+    categories: { name: string; icon: string }[];
+  }[];
 };
 
 type CachedEntry<T> = {
@@ -174,36 +111,6 @@ async function setCached<T>(key: string, data: T): Promise<void> {
   } finally {
     db?.close();
   }
-}
-
-// --- Needs cache ---
-
-export function getCachedNeeds(): Promise<CachedEntry<NeedsData> | null> {
-  return getCached<NeedsData>(NEEDS_KEY);
-}
-
-export function setCachedNeeds(data: NeedsData): Promise<void> {
-  return setCached(NEEDS_KEY, data);
-}
-
-// --- Deployments cache ---
-
-export function getCachedDeployments(): Promise<CachedEntry<DeploymentsData> | null> {
-  return getCached<DeploymentsData>(DEPLOYMENTS_KEY);
-}
-
-export function setCachedDeployments(data: DeploymentsData): Promise<void> {
-  return setCached(DEPLOYMENTS_KEY, data);
-}
-
-// --- Operations cache ---
-
-export function getCachedOperations(): Promise<CachedEntry<OperationsData> | null> {
-  return getCached<OperationsData>(OPERATIONS_KEY);
-}
-
-export function setCachedOperations(data: OperationsData): Promise<void> {
-  return setCached(OPERATIONS_KEY, data);
 }
 
 // --- Relief Map cache ---
