@@ -2,7 +2,7 @@
   "App": {
     "title": "Kapwa Tulong",
     "description": "Kinalawag ti Panangsaranay iti Kalamidad",
-    "loading": "Agkarkarga\u2026",
+    "loading": "Agkarkarga…",
     "loadError": "Napaay a mangikarga ti datos",
     "retry": "Padasem manen"
   },
@@ -89,7 +89,9 @@
     "updating": "Updating...",
     "updateError": "Napaay nga i-update ti kasasaad. Padasem manen.",
     "addDeliveryPhoto": "Add Delivery Photo",
-    "photoAdded": "Naikapet ti ladawan"
+    "photoAdded": "Naikapet ti ladawan",
+    "confirmDelivery": "Pasingkedan ti Panagted",
+    "removePhoto": "Ikkaten ti retrato"
   },
   "ClaimForm": {
     "respondButton": "Sungbatan daytoy a Kasapulan",
@@ -101,7 +103,7 @@
     "notesPlaceholder": "Aniaman a detalye ti koordinasion...",
     "submit": "I-claim ken Kumpirmaen",
     "submitting": "Claiming...",
-    "success": "Need claimed \u2014 adda iti dalan ti tulong",
+    "success": "Need claimed — adda iti dalan ti tulong",
     "error": "Saan a mabalin nga ag-claim. Kitaem ti koneksionmo ket padasem manen."
   },
   "Deployments": {
@@ -153,7 +155,7 @@
     "descriptionPlaceholder": "Iladawan ti peggad...",
     "photo": "Ladawan (opsional)",
     "reportedBy": "Ti Naganmo (opsional)",
-    "reportedByPlaceholder": "Opsional \u2014 para iti panangsurot",
+    "reportedByPlaceholder": "Opsional — para iti panangsurot",
     "submit": "Ireport ti Peligro",
     "submitting": "Submitting...",
     "success": "Naballigi ti impadamag ti Hazard!",
@@ -179,7 +181,7 @@
     "typeCash": "Kuarta",
     "typeInKind": "In-Kind (Pisikal a Saniweng)",
     "organization": "Organisasion",
-    "amount": "Kantidad (\u20b1)",
+    "amount": "Kantidad (₱)",
     "category": "Dagiti Kategoria ti Tulong",
     "date": "Petsa",
     "notes": "Dagiti Pakaammo (opsional)",
@@ -187,7 +189,7 @@
     "success": "Naballigi ti naipadamag a donasion!",
     "error": "Napaay a nangipadamag iti donasion",
     "donorName": "Nagan ti Donor",
-    "donorNamePlaceholder": "Opsional \u2014 nagan ti donor",
+    "donorNamePlaceholder": "Opsional — nagan ti donor",
     "donorType": "Kita ti Donor",
     "donorTypePlaceholder": "Pilien ti kita",
     "individual": "Indibidwal",
@@ -196,7 +198,7 @@
   "PurchaseForm": {
     "organization": "Organisasion",
     "category": "Dagiti Kategoria ti Tulong",
-    "cost": "Gastos (\u20b1)",
+    "cost": "Gastos (₱)",
     "date": "Petsa",
     "notes": "Dagiti Pakaammo (opsional)",
     "submit": "Report ti Panaggatang",
@@ -204,14 +206,14 @@
     "error": "Napaay a nangipadamag iti panaggatang"
   },
   "Stories": {
-    "comingSoon": "Coming soon \u2014 estoria ti komunidad, nasursuro, ken journal."
+    "comingSoon": "Coming soon — estoria ti komunidad, nasursuro, ken journal."
   },
   "SubmitForm": {
     "title": "Ireport ti Kasapulan",
     "contactName": "Ti Naganmo",
     "contactNamePlaceholder": "Buo a nagan",
     "contactPhone": "Numero ti Telepono",
-    "contactPhonePlaceholder": "Opsional \u2014 para iti panangsurot",
+    "contactPhonePlaceholder": "Opsional — para iti panangsurot",
     "selectCategories": "Dagiti Kita ti Kasapulan",
     "notes": "Dagiti Kanayonan a Nota",
     "notesPlaceholder": "Aniaman a detalye a makatulong...",
@@ -232,7 +234,7 @@
     "shareLocation": "Ibinglayko ti lokasionko tapno makatulong a mangipangpangruna iti tulong",
     "locationAcquiring": "Panaggun-od ti lokasionmo...",
     "locationCaptured": "Lokasion ti naala",
-    "locationDenied": "Saan a magun-od ti lokasion \u2014 saan nga agparang ti report iti mapa",
+    "locationDenied": "Saan a magun-od ti lokasion — saan nga agparang ti report iti mapa",
     "locationRetry": "Padasem manen",
     "loadingOptions": "Karga ti...",
     "savedTitle": "Naisalakan ti report!",

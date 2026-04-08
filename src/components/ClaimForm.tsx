@@ -68,6 +68,7 @@ export default function ClaimForm({ point, onClaimed }: Props) {
         notes: notes || undefined,
       });
       onClaimed();
+      setIsOpen(false);
     } catch {
       setError(t("ClaimForm.error"));
     } finally {

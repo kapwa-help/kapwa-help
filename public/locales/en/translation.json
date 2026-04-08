@@ -89,7 +89,9 @@
     "updating": "Updating...",
     "updateError": "Failed to update status. Try again.",
     "addDeliveryPhoto": "Add Delivery Photo",
-    "photoAdded": "Photo attached"
+    "photoAdded": "Photo attached",
+    "confirmDelivery": "Confirm Delivery",
+    "removePhoto": "Remove photo"
   },
   "ClaimForm": {
     "respondButton": "Respond to this Need",

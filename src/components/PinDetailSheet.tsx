@@ -175,7 +175,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
                 <div className="flex flex-col items-center">
                   <button
                     onClick={() => handleTransition(s)}
-                    disabled={isCurrent || !isOnline || updating !== null}
+                    disabled={isCurrent || !isOnline || updating !== null || (s === "confirmed" && point.status === "in_transit")}
                     aria-label={t(STATUS_KEYS[s])}
                     aria-current={isCurrent ? "step" : undefined}
                     className={`h-7 w-7 rounded-full transition-all ${
@@ -217,27 +217,55 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         <div className="mt-4">
           <ClaimForm
             point={point}
-            onClaimed={() => onStatusChange(point.id, "confirmed")}
+            onClaimed={() => onStatusChange(point.id, "in_transit")}
           />
         </div>
       )}
 
-      {/* Delivery photo — in_transit pins: upload on transition to confirmed */}
+      {/* Confirm delivery — in_transit pins: photo required to confirm */}
       {point.status === "in_transit" && (
-        <div className="mt-4">
-          <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-400/20 bg-base/30 py-2.5 text-sm text-neutral-400 hover:text-neutral-50 hover:border-neutral-400/40">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-            </svg>
-            {photoFile ? t("PinDetail.photoAdded") : t("PinDetail.addDeliveryPhoto")}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handlePhotoSelect}
-              className="hidden"
-            />
-          </label>
+        <div className="mt-4 space-y-2">
+          {!photoFile ? (
+            <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-400/20 bg-base/30 py-2.5 text-sm text-neutral-400 hover:text-neutral-50 hover:border-neutral-400/40">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+              </svg>
+              {t("PinDetail.addDeliveryPhoto")}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handlePhotoSelect}
+                className="hidden"
+              />
+            </label>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <span className="flex-1 truncate">{photoFile.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setPhotoFile(null)}
+                  className="text-neutral-400 hover:text-neutral-50"
+                  aria-label={t("PinDetail.removePhoto")}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <button
+                onClick={() => handleTransition("confirmed")}
+                disabled={!isOnline || updating !== null}
+                className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80 disabled:opacity-40"
+              >
+                {updating === "confirmed" ? t("PinDetail.updating") : t("PinDetail.confirmDelivery")}
+              </button>
+            </>
+          )}
         </div>
       )}
     </>

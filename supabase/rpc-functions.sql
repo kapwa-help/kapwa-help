@@ -94,7 +94,7 @@ CREATE OR REPLACE FUNCTION create_deployment(
   p_need_id uuid,
   p_date date,
   p_notes text DEFAULT NULL,
-  p_status need_status DEFAULT 'confirmed'
+  p_status need_status DEFAULT 'in_transit'
 ) RETURNS uuid LANGUAGE plpgsql AS $$
 DECLARE
   v_deployment_id uuid;

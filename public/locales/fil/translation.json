@@ -2,7 +2,7 @@
   "App": {
     "title": "Kapwa Tulong",
     "description": "Transparency sa Pagtulong sa Sakuna",
-    "loading": "Naglo-load\u2026",
+    "loading": "Naglo-load…",
     "loadError": "Nabigong i-load ang data",
     "retry": "Subukan muli"
   },
@@ -37,7 +37,7 @@
     "beneficiaries": "mga benepisyaryo",
     "online": "Online",
     "lastUpdated": "Huling Na-update",
-    "loading": "Nilo-load ang dashboard\u2026",
+    "loading": "Nilo-load ang dashboard…",
     "loadError": "Nabigong i-load ang data ng dashboard",
     "offline": "Offline",
     "retry": "Subukan muli",
@@ -89,7 +89,9 @@
     "updating": "Updating...",
     "updateError": "Nabigong i-update ang status. Subukan muli.",
     "addDeliveryPhoto": "Magdagdag ng Delivery Photo",
-    "photoAdded": "Naka-attach na larawan"
+    "photoAdded": "Naka-attach na larawan",
+    "confirmDelivery": "Kumpirmahin ang Paghahatid",
+    "removePhoto": "Alisin ang larawan"
   },
   "ClaimForm": {
     "respondButton": "Tumugon sa Pangangailangan na ito",
@@ -101,7 +103,7 @@
     "notesPlaceholder": "Anumang mga detalye ng koordinasyon...",
     "submit": "Claim at Kumpirmahin",
     "submitting": "Claiming...",
-    "success": "Kailangang i-claim \u2014 parating na ang tulong",
+    "success": "Kailangang i-claim — parating na ang tulong",
     "error": "Hindi ma-claim. Suriin ang iyong koneksyon at subukang muli."
   },
   "Deployments": {
@@ -153,7 +155,7 @@
     "descriptionPlaceholder": "Ilarawan ang panganib...",
     "photo": "Larawan (opsyonal)",
     "reportedBy": "Iyong Pangalan (opsyonal)",
-    "reportedByPlaceholder": "Opsyonal \u2014 para sa follow-up",
+    "reportedByPlaceholder": "Opsyonal — para sa follow-up",
     "submit": "Iulat ang Hazard",
     "submitting": "Submitting...",
     "success": "Matagumpay na naiulat ang Hazard!",
@@ -179,7 +181,7 @@
     "typeCash": "Cash",
     "typeInKind": "In-Kind (Mga Pisikal na Kalakal)",
     "organization": "Organisasyon",
-    "amount": "Halaga (\u20b1)",
+    "amount": "Halaga (₱)",
     "category": "Mga Kategorya ng Tulong",
     "date": "Petsa",
     "notes": "Mga Tala (opsyonal)",
@@ -187,7 +189,7 @@
     "success": "Matagumpay na naiulat ang donasyon!",
     "error": "Nabigong mag-ulat ng donasyon",
     "donorName": "Pangalan ng Donor",
-    "donorNamePlaceholder": "Opsyonal \u2014 pangalan ng donor",
+    "donorNamePlaceholder": "Opsyonal — pangalan ng donor",
     "donorType": "Uri ng Donor",
     "donorTypePlaceholder": "Pumili ng uri",
     "individual": "Indibidwal",
@@ -196,7 +198,7 @@
   "PurchaseForm": {
     "organization": "Organisasyon",
     "category": "Mga Kategorya ng Tulong",
-    "cost": "Gastos (\u20b1)",
+    "cost": "Gastos (₱)",
     "date": "Petsa",
     "notes": "Mga Tala (opsyonal)",
     "submit": "Iulat ang Pagbili",
@@ -204,14 +206,14 @@
     "error": "Nabigong iulat ang pagbili"
   },
   "Stories": {
-    "comingSoon": "Paparating na \u2014 mga kuwento ng komunidad, mga natutunan, at mga journal."
+    "comingSoon": "Paparating na — mga kuwento ng komunidad, mga natutunan, at mga journal."
   },
   "SubmitForm": {
     "title": "Mag-ulat ng Pangangailangan",
     "contactName": "Pangalan mo",
     "contactNamePlaceholder": "Buong pangalan",
     "contactPhone": "Numero ng Telepono",
-    "contactPhonePlaceholder": "Opsyonal \u2014 para sa follow-up",
+    "contactPhonePlaceholder": "Opsyonal — para sa follow-up",
     "selectCategories": "Mga Uri ng Pangangailangan",
     "notes": "Karagdagang Tala",
     "notesPlaceholder": "Anumang mga detalye na makakatulong...",
@@ -232,9 +234,9 @@
     "shareLocation": "Ibahagi ang aking lokasyon upang makatulong na bigyang-priyoridad ang tulong",
     "locationAcquiring": "Pagkuha ng iyong lokasyon...",
     "locationCaptured": "Nakunan ang lokasyon",
-    "locationDenied": "Hindi available ang lokasyon \u2014 hindi lalabas ang ulat sa mapa",
+    "locationDenied": "Hindi available ang lokasyon — hindi lalabas ang ulat sa mapa",
     "locationRetry": "Subukan muli",
-    "loadingOptions": "Naglo-load\u2026",
+    "loadingOptions": "Naglo-load…",
     "savedTitle": "Na-save ang ulat!",
     "savedMessage": "Ipapadala kapag online ka na ulit.",
     "gapCategory": "Uri ng Pangangailangan",
