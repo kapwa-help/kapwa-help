@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getActiveEvent, insertHazard } from "@/lib/queries";
 
@@ -16,6 +16,13 @@ export default function HazardForm({ coords }: HazardFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [eventId, setEventId] = useState<string | null>(null);
+
+  useEffect(() => {
+    getActiveEvent()
+      .then((event) => { if (event) setEventId(event.id); })
+      .catch(() => {});
+  }, []);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -38,9 +45,13 @@ export default function HazardForm({ coords }: HazardFormProps) {
     setError(null);
 
     try {
-      const event = await getActiveEvent();
+      if (!eventId) {
+        setError(t("HazardForm.error"));
+        setSubmitting(false);
+        return;
+      }
       await insertHazard({
-        event_id: event?.id ?? "",
+        event_id: eventId,
         description,
         latitude: coords.lat,
         longitude: coords.lng,

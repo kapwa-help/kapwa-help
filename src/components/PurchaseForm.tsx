@@ -27,10 +27,12 @@ export default function PurchaseForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
     getActiveEvent().then((event) => {
       if (event) {
+        setEventId(event.id);
         getOrganizations(event.id).then(setOrgs).catch(() => {});
       }
     });
@@ -55,9 +57,13 @@ export default function PurchaseForm() {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const event = await getActiveEvent();
+      if (!eventId) {
+        setError(t("PurchaseForm.error"));
+        setSubmitting(false);
+        return;
+      }
       await insertPurchase({
-        event_id: event?.id ?? "",
+        event_id: eventId,
         organization_id: formData.get("organization_id") as string,
         cost: Number(formData.get("cost")),
         date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],

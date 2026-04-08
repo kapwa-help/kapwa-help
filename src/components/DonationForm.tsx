@@ -28,10 +28,12 @@ export default function DonationForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
     getActiveEvent().then((event) => {
       if (event) {
+        setEventId(event.id);
         getOrganizations(event.id).then(setOrgs).catch(() => {});
       }
     });
@@ -57,9 +59,13 @@ export default function DonationForm() {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const event = await getActiveEvent();
+      if (!eventId) {
+        setError(t("DonationForm.error"));
+        setSubmitting(false);
+        return;
+      }
       await insertDonation({
-        event_id: event?.id ?? "",
+        event_id: eventId,
         organization_id: formData.get("organization_id") as string,
         donor_name: (formData.get("donor_name") as string) || undefined,
         donor_type: (formData.get("donor_type") as "individual" | "organization") || undefined,

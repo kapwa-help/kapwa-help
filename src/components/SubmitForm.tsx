@@ -36,9 +36,17 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Load active event
+    getActiveEvent()
+      .then((event) => {
+        if (!cancelled && event) setEventId(event.id);
+      })
+      .catch(() => {});
 
     // Load aid categories (cache-first)
     getCachedOptions<AidCategory>("aidCategories").then((cachedC) => {
@@ -131,10 +139,14 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
     const id = crypto.randomUUID();
 
     try {
-      const event = await getActiveEvent();
+      if (!eventId) {
+        setError(t("SubmitForm.errorMessage"));
+        setSubmitting(false);
+        return;
+      }
       const payload: NeedInsert = {
         id,
-        event_id: event?.id ?? "",
+        event_id: eventId,
         contact_name: formData.get("contact_name") as string,
         contact_phone: (formData.get("contact_phone") as string) || undefined,
         access_status: formData.get("access_status") as string,
