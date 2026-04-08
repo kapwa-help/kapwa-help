@@ -97,7 +97,8 @@ CREATE TABLE donations (
   amount decimal(12,2),
   date date NOT NULL,
   notes text,
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CHECK ((type = 'cash' AND amount IS NOT NULL) OR type = 'in_kind')
 );
 
 -- Donation Categories (junction — multi-select for in-kind)
