@@ -23,26 +23,30 @@ row.organizations as unknown as { name: string }
 ## RLS Policies
 
 Defined in `supabase/rls-policies.sql`:
-- **Anon read**: SELECT on all tables
-- **Anon insert**: INSERT on `submissions`, `deployments`, `purchases`, and `hazards`
-- **Anon update**: UPDATE on `submissions` and `deployments` (demo phase — tighten when auth is implemented)
+- **Anon read**: SELECT on all 12 tables
+- **Anon insert**: INSERT on `needs`, `need_categories`, `donations`, `donation_categories`, `purchases`, `purchase_categories`, `deployments`, `hazards`, `hub_inventory`
+- **Anon update**: UPDATE on `needs` (demo phase — tighten when auth is implemented)
 
 ## Schema
 
-Nine tables, event-scoped. Full SQL in `supabase/schema.sql`.
+Twelve tables, event-scoped. Full SQL in `supabase/schema.sql`.
 All primary keys are UUIDs — designed for future offline sync with collision-free IDs.
 
 - `events` — disaster operations that scope all data (e.g., "Typhoon Emong Relief")
-- `organizations` — donors and deployment hubs (no type column — role derived from usage). Has optional `lat`/`lng` for hub map markers
+- `organizations` — financial/accountability layer (no lat/lng — hubs are separate). Scoped by `event_id`
+- `deployment_hubs` — operational/map layer with lat/lng. Independent from orgs. Scoped by `event_id`
 - `aid_categories` — 9 unified categories (Hot Meals, Drinking Water, Water Filtration, Temporary Shelter, Clothing, Construction Materials, Medical Supplies, Hygiene Kits, Canned Food)
-- `barangays` — geographic aggregation (lat/lng for map display)
-- `donations` — monetary or in-kind contributions. `type` is `cash` or `in_kind`. Cash: `amount` (pesos). In-kind: `aid_category_id` + `quantity` + `unit`. Both: `organization_id`, `date`, `notes`
-- `purchases` — goods bought with donation money, linked to org + aid category
-- `submissions` — needs from the field. Follow pin lifecycle: `pending→verified→in_transit→completed→resolved`. Uses `aid_category_id` FK (not text). Includes `num_adults`, `num_children`, `num_seniors_pwd` for beneficiary counts. Required fields: `access_status` NOT NULL (truck/4x4/boat/foot_only/cut_off), `urgency` NOT NULL (low/medium/high/critical)
-- `deployments` — aid delivery events, optionally linked to a specific need via `submission_id`
-- `hazards` — field-reported hazard conditions (flood, landslide, road_blocked, bridge_out, electrical_hazard, other). Status: `active`/`resolved`. Has lat/lng for map display
+- `hub_inventory` — junction: which categories a hub currently has (no quantities)
+- `needs` — demand side. Lifecycle: `pending→verified→in_transit→confirmed`. Multi-select categories via `need_categories` junction. Uses `num_people` for beneficiary count
+- `need_categories` — junction: multi-select aid types per need
+- `donations` — cash or in-kind. Cash: `amount`. In-kind: categories via `donation_categories` junction. Has `donor_name`, `donor_type`
+- `donation_categories` — junction: multi-select for in-kind donations
+- `purchases` — org spending. Categories via `purchase_categories` junction. No quantities — just `cost`
+- `purchase_categories` — junction: multi-select per purchase
+- `hazards` — freeform `description` (no type enum). Status: `active`/`resolved`. Has lat/lng
+- `deployments` — fulfillment record. Links a hub to a confirmed need via `hub_id` + `need_id`
 
-Key relationships: `deployments` and `submissions` both reference `events` for disaster scoping. `deployments.submission_id` links a relief action to the specific need it fulfills. Inventory = (in-kind donations + purchases) - deployments.
+Key relationships: Everything scoped by `events`. `deployments.need_id` (UNIQUE) links fulfillment to the specific need. Hub inventory is a manual category checklist, not calculated.
 
 ## Seed Data
 
