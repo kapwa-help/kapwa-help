@@ -158,7 +158,7 @@ export default function DonationForm() {
         >
           <option value="">{t("DonationForm.donorTypePlaceholder")}</option>
           <option value="individual">{t("DonationForm.individual")}</option>
-          <option value="organization">{t("DonationForm.organization")}</option>
+          <option value="organization">{t("DonationForm.donorOrganization")}</option>
         </select>
       </div>
 
