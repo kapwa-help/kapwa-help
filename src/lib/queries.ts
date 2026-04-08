@@ -147,25 +147,21 @@ export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
 }
 
 export async function insertNeed(need: NeedInsert) {
-  const { category_ids, ...needRow } = need;
-  const { data, error } = await supabase
-    .from("needs")
-    .insert(needRow)
-    .select("id")
-    .single();
+  const { error } = await supabase.rpc("insert_need", {
+    p_event_id: need.event_id,
+    p_lat: need.lat,
+    p_lng: need.lng,
+    p_access_status: need.access_status,
+    p_urgency: need.urgency,
+    p_num_people: need.num_people,
+    p_contact_name: need.contact_name,
+    p_contact_phone: need.contact_phone ?? null,
+    p_notes: need.notes ?? null,
+    p_hub_id: need.hub_id ?? null,
+    p_category_ids: need.category_ids,
+  });
 
   if (error) throw error;
-
-  if (category_ids.length > 0) {
-    const junctionRows = category_ids.map((catId) => ({
-      need_id: data.id,
-      aid_category_id: catId,
-    }));
-    const { error: catError } = await supabase
-      .from("need_categories")
-      .insert(junctionRows);
-    if (catError) throw catError;
-  }
 }
 
 export async function updateNeedStatus(id: string, status: string) {
@@ -308,25 +304,19 @@ export async function getDonationsByOrganization(eventId: string) {
 }
 
 export async function insertDonation(donation: DonationInsert) {
-  const { category_ids, ...donationRow } = donation;
-  const { data, error } = await supabase
-    .from("donations")
-    .insert(donationRow)
-    .select("id")
-    .single();
+  const { error } = await supabase.rpc("insert_donation", {
+    p_event_id: donation.event_id,
+    p_organization_id: donation.organization_id,
+    p_type: donation.type,
+    p_date: donation.date,
+    p_donor_name: donation.donor_name ?? null,
+    p_donor_type: donation.donor_type ?? null,
+    p_amount: donation.amount ?? null,
+    p_notes: donation.notes ?? null,
+    p_category_ids: donation.category_ids ?? [],
+  });
 
   if (error) throw error;
-
-  if (category_ids?.length) {
-    const junctionRows = category_ids.map((catId) => ({
-      donation_id: data.id,
-      aid_category_id: catId,
-    }));
-    const { error: catError } = await supabase
-      .from("donation_categories")
-      .insert(junctionRows);
-    if (catError) throw catError;
-  }
 }
 
 // --- Purchase queries ---
@@ -371,25 +361,16 @@ export async function getRecentPurchases(eventId: string) {
 }
 
 export async function insertPurchase(purchase: PurchaseInsert) {
-  const { category_ids, ...purchaseRow } = purchase;
-  const { data, error } = await supabase
-    .from("purchases")
-    .insert(purchaseRow)
-    .select("id")
-    .single();
+  const { error } = await supabase.rpc("insert_purchase", {
+    p_event_id: purchase.event_id,
+    p_organization_id: purchase.organization_id,
+    p_cost: purchase.cost,
+    p_date: purchase.date,
+    p_notes: purchase.notes ?? null,
+    p_category_ids: purchase.category_ids,
+  });
 
   if (error) throw error;
-
-  if (category_ids.length > 0) {
-    const junctionRows = category_ids.map((catId) => ({
-      purchase_id: data.id,
-      aid_category_id: catId,
-    }));
-    const { error: catError } = await supabase
-      .from("purchase_categories")
-      .insert(junctionRows);
-    if (catError) throw catError;
-  }
 }
 
 // --- Beneficiaries ---
@@ -408,16 +389,13 @@ export async function getTotalBeneficiaries(eventId: string) {
 // --- Deployments ---
 
 export async function createDeployment(deployment: DeploymentInsert) {
-  const { error: deployError } = await supabase
-    .from("deployments")
-    .insert(deployment);
+  const { error } = await supabase.rpc("create_deployment", {
+    p_event_id: deployment.event_id,
+    p_hub_id: deployment.hub_id,
+    p_need_id: deployment.need_id,
+    p_date: deployment.date,
+    p_notes: deployment.notes ?? null,
+  });
 
-  if (deployError) throw deployError;
-
-  const { error: statusError } = await supabase
-    .from("needs")
-    .update({ status: "confirmed" })
-    .eq("id", deployment.need_id);
-
-  if (statusError) throw statusError;
+  if (error) throw error;
 }

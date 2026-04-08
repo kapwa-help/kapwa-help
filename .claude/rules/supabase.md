@@ -48,7 +48,18 @@ All primary keys are UUIDs — designed for future offline sync with collision-f
 
 Key relationships: Everything scoped by `events`. `deployments.need_id` (UNIQUE) links fulfillment to the specific need. Hub inventory is a manual category checklist, not calculated.
 
+## RPC Functions
+
+Defined in `supabase/rpc-functions.sql`. All multi-table inserts use Postgres functions for transaction safety — parent row + junction rows are atomic (all-or-nothing).
+
+- `insert_need` — need + need_categories
+- `insert_donation` — donation + donation_categories
+- `insert_purchase` — purchase + purchase_categories
+- `create_deployment` — deployment + need status update
+
+Client calls via `supabase.rpc("function_name", { params })`. Deploy path: run `rpc-functions.sql` after `schema.sql`.
+
 ## Seed Data
 
 Demo data: `supabase/seed-demo.sql` (self-contained, idempotent).
-Deploy path: drop all tables, run `schema.sql`, then `seed-demo.sql`.
+Deploy path: drop all tables, run `schema.sql`, then `rpc-functions.sql`, then `seed-demo.sql`.
