@@ -1,33 +1,30 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { updateSubmissionStatus, updateDeploymentStatus } from "@/lib/queries";
+import { updateNeedStatus } from "@/lib/queries";
 import type { NeedPoint } from "@/lib/queries";
 import ClaimForm from "@/components/ClaimForm";
 
-const STATUS_ORDER = ["pending", "verified", "in_transit", "completed", "resolved"] as const;
+const STATUS_ORDER = ["pending", "verified", "in_transit", "confirmed"] as const;
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-neutral-400",
   verified: "bg-error",
   in_transit: "bg-warning",
-  completed: "bg-success",
-  resolved: "bg-primary",
+  confirmed: "bg-primary",
 };
 
 const STATUS_RING_COLORS: Record<string, string> = {
   pending: "ring-neutral-400",
   verified: "ring-error",
   in_transit: "ring-warning",
-  completed: "ring-success",
-  resolved: "ring-primary",
+  confirmed: "ring-primary",
 };
 
 const STATUS_KEYS: Record<string, string> = {
   pending: "PinDetail.statusPending",
   verified: "PinDetail.statusVerified",
   in_transit: "PinDetail.statusInTransit",
-  completed: "PinDetail.statusCompleted",
-  resolved: "PinDetail.statusResolved",
+  confirmed: "PinDetail.statusConfirmed",
 };
 
 const ACCESS_KEYS: Record<string, string> = {
@@ -52,7 +49,6 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
   const [error, setError] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
-  // Reset photo state when pin status changes (e.g. dispatch → delivery)
   useEffect(() => {
     setPhotoFile(null);
   }, [point.status]);
@@ -60,7 +56,6 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
   function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setPhotoFile(file);
-    // TODO: Upload to Supabase Storage when bucket is configured
   }
 
   useEffect(() => {
@@ -81,15 +76,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
     setUpdating(newStatus);
     setError(null);
     try {
-      await updateSubmissionStatus(point.id, newStatus);
-      // When resolving, also mark the linked deployment as received
-      if (newStatus === "resolved") {
-        try {
-          await updateDeploymentStatus(point.id, "received");
-        } catch {
-          // Non-fatal — deployment may not exist (manually advanced pins)
-        }
-      }
+      await updateNeedStatus(point.id, newStatus);
       onStatusChange(point.id, newStatus);
     } catch {
       setError(t("PinDetail.updateError"));
@@ -121,20 +108,20 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         </button>
       </div>
 
-      {/* Location */}
-      <h3 className="mb-3 text-lg font-semibold text-neutral-50">
-        {point.barangayName}, {point.municipality}
-      </h3>
+      {/* Categories */}
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        {point.categories.map((cat) => (
+          <span
+            key={cat.id}
+            className="rounded-lg bg-base/30 px-2 py-1 text-xs text-neutral-100"
+          >
+            {cat.icon} {cat.name}
+          </span>
+        ))}
+      </div>
 
       {/* Details grid */}
       <div className="mb-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <div>
-          <span className="text-neutral-400">{t("PinDetail.gapCategory")}</span>
-          <p className="text-neutral-50">
-            {point.aidCategoryIcon && `${point.aidCategoryIcon} `}
-            {point.aidCategoryName ?? t("Dashboard.unset")}
-          </p>
-        </div>
         <div>
           <span className="text-neutral-400">{t("PinDetail.urgency")}</span>
           <p className="text-neutral-50">
@@ -151,7 +138,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         </div>
         <div>
           <span className="text-neutral-400">{t("PinDetail.people")}</span>
-          <p className="text-neutral-50">{point.numAdults + point.numChildren + point.numSeniorsPwd || "—"}</p>
+          <p className="text-neutral-50">{point.numPeople || "—"}</p>
         </div>
         <div>
           <span className="text-neutral-400">{t("PinDetail.contactName")}</span>
@@ -230,32 +217,13 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         <div className="mt-4">
           <ClaimForm
             point={point}
-            onClaimed={() => onStatusChange(point.id, "in_transit")}
+            onClaimed={() => onStatusChange(point.id, "confirmed")}
           />
         </div>
       )}
 
-      {/* Dispatch photo — in_transit pins only */}
+      {/* Delivery photo — in_transit pins: upload on transition to confirmed */}
       {point.status === "in_transit" && (
-        <div className="mt-4">
-          <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-400/20 bg-base/30 py-2.5 text-sm text-neutral-400 hover:text-neutral-50 hover:border-neutral-400/40">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-            </svg>
-            {photoFile ? t("PinDetail.photoAdded") : t("PinDetail.addDispatchPhoto")}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handlePhotoSelect}
-              className="hidden"
-            />
-          </label>
-        </div>
-      )}
-
-      {/* Delivery photo — completed pins only */}
-      {point.status === "completed" && (
         <div className="mt-4">
           <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-400/20 bg-base/30 py-2.5 text-sm text-neutral-400 hover:text-neutral-50 hover:border-neutral-400/40">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -279,7 +247,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
     return (
       <div
         role="region"
-        aria-label={`${point.barangayName}, ${point.municipality}`}
+        aria-label={point.contactName}
         className="rounded-lg bg-base/30 p-4"
       >
         {content}
@@ -297,7 +265,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
       />
       <div
         role="dialog"
-        aria-label={`${point.barangayName}, ${point.municipality}`}
+        aria-label={point.contactName}
         className="fixed inset-x-0 bottom-0 z-[1000] mx-auto max-w-lg animate-slide-up rounded-t-2xl border border-neutral-400/20 bg-secondary shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
       >
         {/* Drag handle */}

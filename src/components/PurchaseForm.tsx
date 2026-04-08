@@ -10,7 +10,6 @@ import {
 interface Organization {
   id: string;
   name: string;
-  municipality: string;
 }
 
 interface AidCategory {
@@ -23,18 +22,33 @@ export default function PurchaseForm() {
   const { t } = useTranslation();
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [categories, setCategories] = useState<AidCategory[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
-    getOrganizations().then(setOrgs).catch(() => {});
+    getActiveEvent().then((event) => {
+      if (event) {
+        getOrganizations(event.id).then(setOrgs).catch(() => {});
+      }
+    });
     getAidCategories().then(setCategories).catch(() => {});
   }, []);
 
+  function toggleCategory(id: string) {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (selectedCategories.size === 0) return;
     setSubmitting(true);
     setError(null);
 
@@ -43,14 +57,12 @@ export default function PurchaseForm() {
     try {
       const event = await getActiveEvent();
       await insertPurchase({
-        event_id: event?.id ?? null,
+        event_id: event?.id ?? "",
         organization_id: formData.get("organization_id") as string,
-        aid_category_id: formData.get("aid_category_id") as string,
-        quantity: Number(formData.get("quantity")),
-        unit: (formData.get("unit") as string) || null,
-        cost: formData.get("cost") ? Number(formData.get("cost")) : null,
+        cost: Number(formData.get("cost")),
         date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],
-        notes: (formData.get("notes") as string) || null,
+        notes: (formData.get("notes") as string) || undefined,
+        category_ids: Array.from(selectedCategories),
       });
       setSubmitted(true);
     } catch {
@@ -67,6 +79,7 @@ export default function PurchaseForm() {
         <button
           onClick={() => {
             setSubmitted(false);
+            setSelectedCategories(new Set());
             setFormKey((k) => k + 1);
           }}
           className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
@@ -92,58 +105,39 @@ export default function PurchaseForm() {
           <option value="">{t("ClaimForm.organizationPlaceholder")}</option>
           {orgs.map((o) => (
             <option key={o.id} value={o.id}>
-              {o.name} — {o.municipality}
+              {o.name}
             </option>
           ))}
         </select>
       </div>
 
-      <div>
-        <label htmlFor="aid_category_id" className="block text-sm text-neutral-400">
+      {/* Aid categories — multi-select checkboxes */}
+      <fieldset>
+        <legend className="text-sm text-neutral-400">
           {t("PurchaseForm.category")}
-        </label>
-        <select
-          id="aid_category_id"
-          name="aid_category_id"
-          required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          <option value="">{t("ClaimForm.aidCategoryPlaceholder")}</option>
+        </legend>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.icon ? `${c.icon} ` : ""}{c.name}
-            </option>
+            <label
+              key={c.id}
+              className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition-colors ${
+                selectedCategories.has(c.id)
+                  ? "border-primary bg-primary/20 text-primary"
+                  : "border-neutral-400/20 bg-base text-neutral-50"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={selectedCategories.has(c.id)}
+                onChange={() => toggleCategory(c.id)}
+                className="sr-only"
+              />
+              {c.icon && <span>{c.icon}</span>}
+              <span>{c.name}</span>
+            </label>
           ))}
-        </select>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="quantity" className="block text-sm text-neutral-400">
-            {t("PurchaseForm.quantity")}
-          </label>
-          <input
-            id="quantity"
-            name="quantity"
-            type="number"
-            min="1"
-            required
-            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-          />
         </div>
-        <div>
-          <label htmlFor="unit" className="block text-sm text-neutral-400">
-            {t("PurchaseForm.unit")}
-          </label>
-          <input
-            id="unit"
-            name="unit"
-            type="text"
-            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder={t("ClaimForm.unitPlaceholder")}
-          />
-        </div>
-      </div>
+      </fieldset>
 
       <div>
         <label htmlFor="cost" className="block text-sm text-neutral-400">
@@ -155,6 +149,7 @@ export default function PurchaseForm() {
           type="number"
           min="0"
           step="0.01"
+          required
           className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder="0.00"
         />
@@ -189,7 +184,7 @@ export default function PurchaseForm() {
 
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || selectedCategories.size === 0}
         className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-neutral-50 shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200 disabled:opacity-50"
       >
         {submitting ? t("SubmitForm.submitting") : t("PurchaseForm.submit")}

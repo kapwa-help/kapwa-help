@@ -2,13 +2,10 @@ import { useTranslation } from "react-i18next";
 
 type Purchase = {
   id: string;
-  quantity: number;
-  unit: string | null;
   cost: number | null;
   date: string | null;
   orgName: string;
-  categoryName: string;
-  categoryIcon: string | null;
+  categories: { name: string; icon: string }[];
 };
 
 type Props = {
@@ -32,15 +29,12 @@ export default function RecentPurchases({ purchases }: Props) {
           <div key={p.id} className="flex items-center justify-between px-6 py-3">
             <div>
               <p className="text-sm text-neutral-50">
-                {p.categoryIcon && `${p.categoryIcon} `}{p.categoryName}
+                {p.categories.map((c) => `${c.icon} ${c.name}`).join(", ")}
               </p>
               <p className="text-xs text-neutral-400">{p.orgName}</p>
             </div>
             <div className="text-right">
-              <p className="text-sm font-medium text-neutral-50">
-                {p.quantity.toLocaleString()} {p.unit ?? ""}
-              </p>
-              <p className="text-xs text-success">
+              <p className="text-sm font-medium text-success">
                 {p.cost != null ? `₱${Number(p.cost).toLocaleString()}` : ""}
               </p>
               <p className="text-xs text-neutral-400">{p.date ?? ""}</p>

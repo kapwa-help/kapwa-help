@@ -47,20 +47,13 @@ export default function HazardDetailPanel({ hazard, onClose, variant = "sheet" }
         </button>
       </div>
 
-      {/* Hazard type */}
+      {/* Description as primary identifier */}
       <h3 className="mb-3 text-lg font-semibold text-neutral-50">
-        {t(`HazardDetail.${hazard.hazardType}`)}
+        {hazard.description}
       </h3>
 
       {/* Details */}
       <div className="mb-4 space-y-3 text-sm">
-        {hazard.description && (
-          <div>
-            <span className="text-neutral-400">{t("HazardDetail.description")}</span>
-            <p className="mt-1 text-neutral-100">{hazard.description}</p>
-          </div>
-        )}
-
         {hazard.reportedBy && (
           <div>
             <span className="text-neutral-400">{t("HazardDetail.reportedBy")}</span>
@@ -78,7 +71,7 @@ export default function HazardDetailPanel({ hazard, onClose, variant = "sheet" }
 
   if (variant === "panel") {
     return (
-      <div role="region" aria-label={t(`HazardDetail.${hazard.hazardType}`)} className="rounded-lg bg-base/30 p-4">
+      <div role="region" aria-label={hazard.description} className="rounded-lg bg-base/30 p-4">
         {content}
       </div>
     );
@@ -89,7 +82,7 @@ export default function HazardDetailPanel({ hazard, onClose, variant = "sheet" }
       <div className="fixed inset-0 z-[999]" onClick={onClose} aria-hidden="true" />
       <div
         role="dialog"
-        aria-label={t(`HazardDetail.${hazard.hazardType}`)}
+        aria-label={hazard.description}
         className="fixed inset-x-0 bottom-0 z-[1000] mx-auto max-w-lg animate-slide-up rounded-t-2xl border border-neutral-400/20 bg-secondary shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
       >
         <div className="flex justify-center pt-3 pb-1">
