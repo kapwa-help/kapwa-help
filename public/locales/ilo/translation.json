@@ -91,7 +91,8 @@
     "addDeliveryPhoto": "Add Delivery Photo",
     "photoAdded": "Naikapet ti ladawan",
     "confirmDelivery": "Pasingkedan ti Panagted",
-    "removePhoto": "Ikkaten ti retrato"
+    "removePhoto": "Ikkaten ti retrato",
+    "deliveryPhoto": "Ladawan ti Panangited"
   },
   "ClaimForm": {
     "respondButton": "Sungbatan daytoy a Kasapulan",

@@ -165,6 +165,19 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         </div>
       )}
 
+      {/* Delivery photo — confirmed pins */}
+      {point.status === "confirmed" && point.deliveryPhotoUrl && (
+        <div className="mb-4">
+          <span className="text-sm text-neutral-400">{t("PinDetail.deliveryPhoto")}</span>
+          <img
+            src={point.deliveryPhotoUrl}
+            alt={t("PinDetail.deliveryPhoto")}
+            loading="lazy"
+            className="mt-1 w-full rounded-xl border border-neutral-400/20 object-cover"
+          />
+        </div>
+      )}
+
       {/* Interactive status stepper */}
       <div className="mb-2">
         {!isOnline && (

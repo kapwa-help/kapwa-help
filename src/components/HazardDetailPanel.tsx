@@ -52,6 +52,18 @@ export default function HazardDetailPanel({ hazard, onClose, variant = "sheet" }
         {hazard.description}
       </h3>
 
+      {/* Photo */}
+      {hazard.photoUrl && (
+        <div className="mb-4">
+          <img
+            src={hazard.photoUrl}
+            alt={hazard.description}
+            loading="lazy"
+            className="w-full rounded-xl border border-neutral-400/20 object-cover"
+          />
+        </div>
+      )}
+
       {/* Details */}
       <div className="mb-4 space-y-3 text-sm">
         {hazard.reportedBy && (
