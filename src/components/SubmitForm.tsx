@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getAidCategories,
@@ -10,8 +10,6 @@ import {
   getCachedOptions,
   setCachedOptions,
   addToOutbox,
-  getOutboxEntries,
-  removeFromOutbox,
 } from "@/lib/form-cache";
 import { roundCoord } from "@/lib/geohash";
 import { useOutbox } from "@/lib/outbox-context";
@@ -77,49 +75,6 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       cancelled = true;
     };
   }, [t]);
-
-  const flushingRef = useRef(false);
-
-  const flushOutbox = useCallback(async () => {
-    if (flushingRef.current) return;
-    flushingRef.current = true;
-    try {
-      const entries = await getOutboxEntries();
-      for (const entry of entries) {
-        try {
-          await insertNeed(entry.payload);
-          await removeFromOutbox(entry.key);
-        } catch (err: unknown) {
-          const isUniqueViolation =
-            err &&
-            typeof err === "object" &&
-            "code" in err &&
-            (err as { code: string }).code === "23505";
-          if (isUniqueViolation) {
-            await removeFromOutbox(entry.key);
-          }
-        }
-      }
-      refreshCount();
-    } finally {
-      flushingRef.current = false;
-    }
-  }, [refreshCount]);
-
-  useEffect(() => {
-    const handleOnline = () => {
-      flushOutbox();
-    };
-    window.addEventListener("online", handleOnline);
-
-    if (navigator.onLine) {
-      flushOutbox();
-    }
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-    };
-  }, [flushOutbox]);
 
   function toggleCategory(id: string) {
     setSelectedCategories((prev) => {
