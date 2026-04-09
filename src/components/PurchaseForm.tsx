@@ -138,6 +138,7 @@ export default function PurchaseForm() {
                 onChange={() => toggleCategory(c.id)}
                 className="sr-only"
               />
+              <span className="opacity-60">{selectedCategories.has(c.id) ? "✓" : "+"}</span>
               {c.icon && <span>{c.icon}</span>}
               <span>{c.name}</span>
             </label>
