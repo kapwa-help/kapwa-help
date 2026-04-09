@@ -175,7 +175,12 @@
     "submitNeed": "Submit a Need",
     "reportDonation": "Report a Donation",
     "reportPurchase": "Report a Purchase",
-    "reportHazard": "Report a Hazard"
+    "reportHazard": "Report a Hazard",
+    "optionNeed": "Need",
+    "optionDonation": "Donation",
+    "optionPurchase": "Purchase",
+    "optionHazard": "Hazard",
+    "change": "Change"
   },
   "DonationForm": {
     "type": "Donation Type",
