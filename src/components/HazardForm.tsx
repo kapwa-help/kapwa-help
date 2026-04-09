@@ -3,6 +3,15 @@ import { useTranslation } from "react-i18next";
 import { getActiveEvent, insertHazard } from "@/lib/queries";
 import { compressPhoto, uploadPhoto } from "@/lib/photo";
 import { roundCoord } from "@/lib/geohash";
+import {
+  FormLabel,
+  FormInput,
+  FormTextarea,
+  FormSubmitButton,
+  FormError,
+  FormSuccess,
+  FormSuccessButton,
+} from "@/components/forms/form-fields";
 
 interface HazardFormProps {
   coords: { lat: number; lng: number } | null;
@@ -78,48 +87,44 @@ export default function HazardForm({ coords }: HazardFormProps) {
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border border-neutral-400/20 bg-secondary p-6 text-center">
-        <p className="mb-4 text-lg font-semibold text-success">
+      <FormSuccess>
+        <h2 className="text-xl font-bold text-success">
           {t("HazardForm.success")}
-        </p>
-        <button
+        </h2>
+        <FormSuccessButton
           onClick={() => {
             setSubmitted(false);
             setDescription("");
             setReportedBy("");
             removePhoto();
           }}
-          className="rounded-lg bg-primary px-4 py-2 text-sm text-neutral-50 hover:bg-primary/80"
         >
           {t("SubmitForm.submitAnother")}
-        </button>
-      </div>
+        </FormSuccessButton>
+      </FormSuccess>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Description */}
       <div>
-        <label htmlFor="hazard-description" className="block text-sm text-neutral-400">
-          {t("HazardForm.description")} <span className="text-error">*</span>
-        </label>
-        <textarea
+        <FormLabel htmlFor="hazard-description" required>
+          {t("HazardForm.description")}
+        </FormLabel>
+        <FormTextarea
           id="hazard-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t("HazardForm.descriptionPlaceholder")}
           required
           rows={3}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-secondary px-4 py-3 text-neutral-50 placeholder-neutral-400/60 focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
       {/* Photo */}
       <div>
-        <label htmlFor="hazard-photo" className="block text-sm text-neutral-400">
-          {t("HazardForm.photo")}
-        </label>
+        <FormLabel htmlFor="hazard-photo">{t("HazardForm.photo")}</FormLabel>
         {photoPreview ? (
           <div className="relative mt-1">
             <img
@@ -142,7 +147,7 @@ export default function HazardForm({ coords }: HazardFormProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-400/40 bg-secondary px-4 py-6 text-sm text-neutral-400 hover:border-primary hover:text-neutral-100"
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-400/40 bg-base px-4 py-6 text-sm text-neutral-400 hover:border-primary hover:text-neutral-100"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
@@ -163,28 +168,23 @@ export default function HazardForm({ coords }: HazardFormProps) {
 
       {/* Reported by */}
       <div>
-        <label htmlFor="hazard-reported-by" className="block text-sm text-neutral-400">
+        <FormLabel htmlFor="hazard-reported-by">
           {t("HazardForm.reportedBy")}
-        </label>
-        <input
+        </FormLabel>
+        <FormInput
           id="hazard-reported-by"
           type="text"
           value={reportedBy}
           onChange={(e) => setReportedBy(e.target.value)}
           placeholder={t("HazardForm.reportedByPlaceholder")}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-secondary px-4 py-3 text-neutral-50 placeholder-neutral-400/60 focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
-      {error && <p className="text-sm text-error">{error}</p>}
+      <FormError message={error} />
 
-      <button
-        type="submit"
-        disabled={submitting || !coords || !description.trim()}
-        className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-neutral-50 hover:bg-primary/80 disabled:opacity-50"
-      >
+      <FormSubmitButton disabled={submitting || !coords || !description.trim()}>
         {submitting ? t("HazardForm.submitting") : t("HazardForm.submit")}
-      </button>
+      </FormSubmitButton>
     </form>
   );
 }

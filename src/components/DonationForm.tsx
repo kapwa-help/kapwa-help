@@ -6,6 +6,17 @@ import {
   getActiveEvent,
   insertDonation,
 } from "@/lib/queries";
+import {
+  FormLabel,
+  FormLegend,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  FormSubmitButton,
+  FormError,
+  FormSuccess,
+  FormSuccessButton,
+} from "@/components/forms/form-fields";
 
 interface Organization {
   id: string;
@@ -85,110 +96,91 @@ export default function DonationForm() {
 
   if (submitted) {
     return (
-      <div className="text-center py-8">
+      <FormSuccess>
         <h2 className="text-xl font-bold text-success">{t("DonationForm.success")}</h2>
-        <button
+        <FormSuccessButton
           onClick={() => {
             setSubmitted(false);
             setDonationType("cash");
             setSelectedCategories(new Set());
             setFormKey((k) => k + 1);
           }}
-          className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
           {t("ReportForm.reportDonation")}
-        </button>
-      </div>
+        </FormSuccessButton>
+      </FormSuccess>
     );
   }
 
   return (
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="donation_type" className="block text-sm text-neutral-400">
-          {t("DonationForm.type")} <span className="text-error">*</span>
-        </label>
-        <select
+        <FormLabel htmlFor="donation_type" required>
+          {t("DonationForm.type")}
+        </FormLabel>
+        <FormSelect
           id="donation_type"
           value={donationType}
           onChange={(e) => setDonationType(e.target.value as "cash" | "in_kind")}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <option value="cash">{t("DonationForm.typeCash")}</option>
           <option value="in_kind">{t("DonationForm.typeInKind")}</option>
-        </select>
+        </FormSelect>
       </div>
 
       <div>
-        <label htmlFor="organization_id" className="block text-sm text-neutral-400">
-          {t("DonationForm.organization")} <span className="text-error">*</span>
-        </label>
-        <select
-          id="organization_id"
-          name="organization_id"
-          required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
-        >
+        <FormLabel htmlFor="organization_id" required>
+          {t("DonationForm.organization")}
+        </FormLabel>
+        <FormSelect id="organization_id" name="organization_id" required>
           <option value="">{t("ClaimForm.organizationPlaceholder")}</option>
           {orgs.map((o) => (
             <option key={o.id} value={o.id}>
               {o.name}
             </option>
           ))}
-        </select>
+        </FormSelect>
       </div>
 
       {/* Donor name */}
       <div>
-        <label htmlFor="donor_name" className="block text-sm text-neutral-400">
-          {t("DonationForm.donorName")}
-        </label>
-        <input
+        <FormLabel htmlFor="donor_name">{t("DonationForm.donorName")}</FormLabel>
+        <FormInput
           id="donor_name"
           name="donor_name"
           type="text"
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("DonationForm.donorNamePlaceholder")}
         />
       </div>
 
       {/* Donor type */}
       <div>
-        <label htmlFor="donor_type" className="block text-sm text-neutral-400">
-          {t("DonationForm.donorType")}
-        </label>
-        <select
-          id="donor_type"
-          name="donor_type"
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
-        >
+        <FormLabel htmlFor="donor_type">{t("DonationForm.donorType")}</FormLabel>
+        <FormSelect id="donor_type" name="donor_type">
           <option value="">{t("DonationForm.donorTypePlaceholder")}</option>
           <option value="individual">{t("DonationForm.individual")}</option>
           <option value="organization">{t("DonationForm.donorOrganization")}</option>
-        </select>
+        </FormSelect>
       </div>
 
       {donationType === "cash" ? (
         <div>
-          <label htmlFor="amount" className="block text-sm text-neutral-400">
-            {t("DonationForm.amount")} <span className="text-error">*</span>
-          </label>
-          <input
+          <FormLabel htmlFor="amount" required>
+            {t("DonationForm.amount")}
+          </FormLabel>
+          <FormInput
             id="amount"
             name="amount"
             type="number"
             min="1"
             step="0.01"
             required
-            className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
             placeholder="0.00"
           />
         </div>
       ) : (
         <fieldset>
-          <legend className="text-sm text-neutral-400">
-            {t("DonationForm.category")} <span className="text-error">*</span>
-          </legend>
+          <FormLegend required>{t("DonationForm.category")}</FormLegend>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {categories.map((c) => (
               <label
@@ -215,39 +207,25 @@ export default function DonationForm() {
       )}
 
       <div>
-        <label htmlFor="date" className="block text-sm text-neutral-400">
-          {t("DonationForm.date")} <span className="text-error">*</span>
-        </label>
-        <input
+        <FormLabel htmlFor="date" required>{t("DonationForm.date")}</FormLabel>
+        <FormInput
           id="date"
           name="date"
           type="date"
           defaultValue={new Date().toISOString().split("T")[0]}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-sm text-neutral-400">
-          {t("DonationForm.notes")}
-        </label>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={3}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-        />
+        <FormLabel htmlFor="notes">{t("DonationForm.notes")}</FormLabel>
+        <FormTextarea id="notes" name="notes" rows={3} />
       </div>
 
-      {error && <p className="text-sm text-error">{error}</p>}
+      <FormError message={error} />
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-neutral-50 shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200 disabled:opacity-50"
-      >
+      <FormSubmitButton disabled={submitting}>
         {submitting ? t("SubmitForm.submitting") : t("DonationForm.submit")}
-      </button>
+      </FormSubmitButton>
     </form>
   );
 }
