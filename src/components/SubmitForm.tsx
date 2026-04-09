@@ -153,8 +153,8 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
         urgency: formData.get("urgency") as string,
         num_people: Number(formData.get("num_people")) || 1,
         notes: (formData.get("notes") as string) || undefined,
-        lat: coords?.lat ?? 0,
-        lng: coords?.lng ?? 0,
+        lat: Math.round((coords?.lat ?? 0) * 1e4) / 1e4,
+        lng: Math.round((coords?.lng ?? 0) * 1e4) / 1e4,
         category_ids: Array.from(selectedCategories),
       };
 

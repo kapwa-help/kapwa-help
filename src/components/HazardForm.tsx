@@ -63,8 +63,8 @@ export default function HazardForm({ coords }: HazardFormProps) {
         event_id: eventId,
         description,
         photo_url: photoUrl,
-        latitude: coords.lat,
-        longitude: coords.lng,
+        latitude: Math.round(coords.lat * 1e4) / 1e4,
+        longitude: Math.round(coords.lng * 1e4) / 1e4,
         reported_by: reportedBy || undefined,
       });
       setSubmitted(true);
