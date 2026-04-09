@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { updateNeedStatus } from "@/lib/queries";
 import type { NeedPoint } from "@/lib/queries";
+import { compressPhoto, uploadPhoto } from "@/lib/photo";
 import ClaimForm from "@/components/ClaimForm";
 
 const STATUS_ORDER = ["pending", "verified", "in_transit", "confirmed"] as const;
@@ -76,7 +77,13 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
     setUpdating(newStatus);
     setError(null);
     try {
-      await updateNeedStatus(point.id, newStatus);
+      let deliveryPhotoUrl: string | undefined;
+      if (newStatus === "confirmed" && photoFile) {
+        const compressed = await compressPhoto(photoFile);
+        deliveryPhotoUrl =
+          (await uploadPhoto("photos", `deliveries/${point.id}.jpg`, compressed)) ?? undefined;
+      }
+      await updateNeedStatus(point.id, newStatus, deliveryPhotoUrl);
       onStatusChange(point.id, newStatus);
     } catch {
       setError(t("PinDetail.updateError"));
