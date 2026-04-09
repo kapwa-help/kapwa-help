@@ -72,7 +72,7 @@ export function ReportPage() {
                 <button
                   type="button"
                   onClick={() => setFormType(null)}
-                  className="text-sm text-neutral-400 hover:text-neutral-50 transition-colors"
+                  className="cursor-pointer text-sm text-neutral-400 hover:text-neutral-50 transition-colors"
                 >
                   {t("ReportForm.change")}
                 </button>
