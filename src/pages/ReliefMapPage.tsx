@@ -14,6 +14,7 @@ import {
   getDeploymentHubs,
   getHazards,
 } from "@/lib/queries";
+import { supabase } from "@/lib/supabase";
 
 export function ReliefMapPage() {
   const { t } = useTranslation();
@@ -73,6 +74,31 @@ export function ReliefMapPage() {
     window.addEventListener("online", handleOnline);
     return () => {
       window.removeEventListener("online", handleOnline);
+    };
+  }, [fetchData]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("relief-map-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "needs" },
+        () => fetchData(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "deployment_hubs" },
+        () => fetchData(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "hazards" },
+        () => fetchData(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
   }, [fetchData]);
 

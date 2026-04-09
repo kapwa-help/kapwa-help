@@ -9,6 +9,7 @@ import {
   setCachedTransparency,
   type TransparencyData,
 } from "@/lib/cache";
+import { supabase } from "@/lib/supabase";
 import {
   getActiveEvent,
   getTotalDonations,
@@ -76,6 +77,31 @@ export function TransparencyPage() {
     const handleOnline = () => fetchData();
     window.addEventListener("online", handleOnline);
     return () => window.removeEventListener("online", handleOnline);
+  }, [fetchData]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("transparency-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "needs" },
+        () => fetchData(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "donations" },
+        () => fetchData(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "purchases" },
+        () => fetchData(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchData]);
 
   if (loading) {
