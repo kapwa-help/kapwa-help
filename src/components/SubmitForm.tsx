@@ -99,7 +99,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (selectedCategories.size === 0) return;
+    if (!coords || selectedCategories.size === 0) return;
     setSubmitting(true);
     setError(null);
 
