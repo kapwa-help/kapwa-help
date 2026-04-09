@@ -16,7 +16,6 @@ const NEED_STATUSES = [
   { key: "pending", color: "bg-neutral-400" },
   { key: "verified", color: "bg-error" },
   { key: "inTransit", color: "bg-warning" },
-  { key: "completed", color: "bg-success" },
 ] as const;
 
 export default function MapLegend({ layers, onToggle }: Props) {

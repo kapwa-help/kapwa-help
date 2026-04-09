@@ -117,7 +117,8 @@ export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
     .select(
       "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))"
     )
-    .eq("event_id", eventId);
+    .eq("event_id", eventId)
+    .in("status", ["pending", "verified", "in_transit"]);
 
   if (error) throw error;
   return data.map((row) => {
