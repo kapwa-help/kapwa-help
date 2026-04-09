@@ -65,8 +65,7 @@ for (const locale of LOCALES) {
 
 test("report page shows hazard form when selected", async ({ page }) => {
   await page.goto("/en/report");
-  const select = page.locator("#form-type");
-  await select.selectOption("hazard");
+  await page.getByRole("button", { name: "Hazard" }).click();
   await expect(page.locator("#hazard-description")).toBeVisible();
 });
 
