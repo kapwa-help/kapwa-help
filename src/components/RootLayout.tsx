@@ -3,6 +3,7 @@ import { Outlet, useParams, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { supportedLocales, type Locale } from "../i18n";
 import { OutboxProvider } from "@/lib/outbox-context";
+import { useEagerCache } from "@/lib/eager-cache";
 
 export function RootLayout() {
   const { locale } = useParams<{ locale: string }>();
@@ -21,6 +22,8 @@ export function RootLayout() {
       document.documentElement.lang = locale!;
     }
   }, [locale, isValid]);
+
+  useEagerCache();
 
   if (!isValid) {
     return <Navigate to="/en" replace />;
