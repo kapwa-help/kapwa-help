@@ -140,7 +140,8 @@
     "statusPending": "Pending",
     "statusVerified": "Verified",
     "statusInTransit": "In Transit",
-    "statusConfirmed": "Confirmed"
+    "statusConfirmed": "Confirmed",
+    "urgencyCritical": "Critical"
   },
   "HubDetail": {
     "inventory": "Available Categories",

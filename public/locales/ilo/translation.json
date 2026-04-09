@@ -140,7 +140,8 @@
     "statusPending": "Naisardeng biit",
     "statusVerified": "Naberipikado",
     "statusInTransit": "Iti Transit",
-    "statusConfirmed": "Nakumpirma"
+    "statusConfirmed": "Nakumpirma",
+    "urgencyCritical": "Kritikal"
   },
   "HubDetail": {
     "inventory": "Dagiti Magun-od a Kategoria",

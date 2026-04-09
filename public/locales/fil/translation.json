@@ -140,7 +140,8 @@
     "statusPending": "Nakabinbin",
     "statusVerified": "Na-verify",
     "statusInTransit": "Sa Transit",
-    "statusConfirmed": "Nakumpirma"
+    "statusConfirmed": "Nakumpirma",
+    "urgencyCritical": "Kritikal"
   },
   "HubDetail": {
     "inventory": "Mga Available na Kategorya",

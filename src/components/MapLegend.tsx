@@ -49,6 +49,12 @@ export default function MapLegend({ layers, onToggle }: Props) {
               </span>
             </div>
           ))}
+          <div className="flex items-center gap-1.5">
+            <span className="pulse-critical h-2 w-2 rounded-full bg-neutral-50" />
+            <span className="text-xs text-neutral-400">
+              {t("ReliefMap.urgencyCritical")}
+            </span>
+          </div>
         </div>
       )}
 
