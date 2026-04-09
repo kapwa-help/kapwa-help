@@ -47,15 +47,17 @@ export default function DonationForm() {
         if (cancelled || !event) return;
         setEventId(event.id);
 
-        // Load orgs (cache-first, needs eventId)
-        getCachedOptions<Organization>("organizations").then((cachedO) => {
-          if (cancelled) return;
-          if (cachedO?.data.length) setOrgs(cachedO.data);
-          getOrganizations(event.id)
-            .then((freshO) => { if (!cancelled) { setOrgs(freshO); setCachedOptions("organizations", freshO); } })
-            .catch(() => {});
-        });
+        // Refresh orgs from network
+        getOrganizations(event.id)
+          .then((freshO) => { if (!cancelled) { setOrgs(freshO); setCachedOptions("organizations", freshO); } })
+          .catch(() => {});
       }).catch(() => {});
+    });
+
+    // Load orgs (cache-first, independent of network)
+    getCachedOptions<Organization>("organizations").then((cachedO) => {
+      if (cancelled) return;
+      if (cachedO?.data.length) setOrgs(cachedO.data);
     });
 
     // Load categories (cache-first)
