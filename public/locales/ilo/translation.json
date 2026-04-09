@@ -150,7 +150,9 @@
   "HazardDetail": {
     "description": "Panangiladawan",
     "reportedBy": "Impadamag Ni",
-    "reported": "Naipadamag"
+    "reported": "Naipadamag",
+    "markResolved": "Markaan a Narisut",
+    "resolving": "Ar-arigen..."
   },
   "HazardForm": {
     "description": "Panangiladawan",

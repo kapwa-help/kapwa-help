@@ -260,6 +260,14 @@ export async function insertHazard(hazard: HazardInsert) {
   if (error) throw error;
 }
 
+export async function resolveHazard(id: string) {
+  const { error } = await supabase
+    .from("hazards")
+    .update({ status: "resolved" })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 // --- Organization queries ---
 
 export async function getOrganizations(eventId: string) {

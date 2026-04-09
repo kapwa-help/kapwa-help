@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { HazardPoint } from "@/lib/queries";
+import { resolveHazard } from "@/lib/queries";
 
 type Props = {
   hazard: HazardPoint;
   onClose: () => void;
+  onResolve?: (id: string) => void;
   variant?: "sheet" | "panel";
 };
 
@@ -21,8 +24,19 @@ function formatRelativeTime(isoString: string): string {
   return `${diffDays}d ago`;
 }
 
-export default function HazardDetailPanel({ hazard, onClose, variant = "sheet" }: Props) {
+export default function HazardDetailPanel({ hazard, onClose, onResolve, variant = "sheet" }: Props) {
   const { t } = useTranslation();
+  const [resolving, setResolving] = useState(false);
+
+  async function handleResolve() {
+    setResolving(true);
+    try {
+      await resolveHazard(hazard.id);
+      onResolve?.(hazard.id);
+    } catch {
+      setResolving(false);
+    }
+  }
 
   const content = (
     <>
@@ -78,6 +92,15 @@ export default function HazardDetailPanel({ hazard, onClose, variant = "sheet" }
           <p className="text-neutral-50">{formatRelativeTime(hazard.createdAt)}</p>
         </div>
       </div>
+
+      {/* Resolve button */}
+      <button
+        onClick={handleResolve}
+        disabled={resolving}
+        className="w-full cursor-pointer rounded-lg bg-success/20 px-4 py-2.5 text-sm font-medium text-success hover:bg-success/30 disabled:opacity-50"
+      >
+        {resolving ? t("HazardDetail.resolving") : t("HazardDetail.markResolved")}
+      </button>
     </>
   );
 

@@ -32,6 +32,7 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
     hazards: true,
   });
   const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
+  const [resolvedHazardIds, setResolvedHazardIds] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<Selected>(null);
 
   // Apply local status overrides
@@ -43,6 +44,12 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
     [needsPoints, statusOverrides]
   );
 
+  // Filter out resolved hazards (optimistic)
+  const activeHazards = useMemo(
+    () => hazards.filter((h) => !resolvedHazardIds.has(h.id)),
+    [hazards, resolvedHazardIds]
+  );
+
   // Summary counts
   const activeNeedsCount = allPoints.filter(
     (p) => p.status === "verified" || p.status === "in_transit"
@@ -50,6 +57,11 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
 
   function toggleLayer(layer: keyof LayerVisibility) {
     setLayers((prev) => ({ ...prev, [layer]: !prev[layer] }));
+  }
+
+  function handleHazardResolve(id: string) {
+    setResolvedHazardIds((prev) => new Set(prev).add(id));
+    setSelected(null);
   }
 
   function handleStatusChange(id: string, newStatus: string) {
@@ -68,7 +80,7 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
         <ReliefMapLeaflet
           needsPoints={allPoints}
           hubs={hubs}
-          hazards={hazards}
+          hazards={activeHazards}
           visibleLayers={layers}
           onNeedSelect={(p: NeedPoint) => setSelected({ type: "need", data: p })}
           onHubSelect={(h: HubPoint) => setSelected({ type: "hub", data: h })}
@@ -98,7 +110,7 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
               <path d="M12 2L1 21h22L12 2z" fill="var(--color-warning)" stroke="var(--color-neutral-50)" strokeWidth="1"/>
               <text x="12" y="18" textAnchor="middle" fontSize="14" fontWeight="bold" fill="var(--color-base)">!</text>
             </svg>
-            <span className="text-xs font-semibold text-neutral-50 lg:text-sm">{hazards.length}</span>
+            <span className="text-xs font-semibold text-neutral-50 lg:text-sm">{activeHazards.length}</span>
             <span className="text-xs text-neutral-400 lg:text-sm">{t("ReliefMap.hazards")}</span>
           </span>
         </div>
@@ -132,6 +144,7 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
               <HazardDetailPanel
                 hazard={selected.data}
                 onClose={() => setSelected(null)}
+                onResolve={handleHazardResolve}
                 variant="panel"
               />
             )}
@@ -159,6 +172,7 @@ export default function ReliefMap({ needsPoints, hubs, hazards }: Props) {
             <HazardDetailPanel
               hazard={selected.data}
               onClose={() => setSelected(null)}
+              onResolve={handleHazardResolve}
             />
           )}
         </div>

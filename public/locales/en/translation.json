@@ -150,7 +150,9 @@
   "HazardDetail": {
     "description": "Description",
     "reportedBy": "Reported By",
-    "reported": "Reported"
+    "reported": "Reported",
+    "markResolved": "Mark as Resolved",
+    "resolving": "Resolving..."
   },
   "HazardForm": {
     "description": "Description",

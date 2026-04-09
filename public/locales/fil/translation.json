@@ -150,7 +150,9 @@
   "HazardDetail": {
     "description": "Paglalarawan",
     "reportedBy": "Iniulat ni",
-    "reported": "Iniulat"
+    "reported": "Iniulat",
+    "markResolved": "Markahan bilang Nalutas",
+    "resolving": "Nilulutas..."
   },
   "HazardForm": {
     "description": "Paglalarawan",
