@@ -106,7 +106,7 @@ export default function DonationForm() {
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label htmlFor="donation_type" className="block text-sm text-neutral-400">
-          {t("DonationForm.type")}
+          {t("DonationForm.type")} <span className="text-error">*</span>
         </label>
         <select
           id="donation_type"
@@ -121,7 +121,7 @@ export default function DonationForm() {
 
       <div>
         <label htmlFor="organization_id" className="block text-sm text-neutral-400">
-          {t("DonationForm.organization")}
+          {t("DonationForm.organization")} <span className="text-error">*</span>
         </label>
         <select
           id="organization_id"
@@ -171,7 +171,7 @@ export default function DonationForm() {
       {donationType === "cash" ? (
         <div>
           <label htmlFor="amount" className="block text-sm text-neutral-400">
-            {t("DonationForm.amount")}
+            {t("DonationForm.amount")} <span className="text-error">*</span>
           </label>
           <input
             id="amount"
@@ -187,7 +187,7 @@ export default function DonationForm() {
       ) : (
         <fieldset>
           <legend className="text-sm text-neutral-400">
-            {t("DonationForm.category")}
+            {t("DonationForm.category")} <span className="text-error">*</span>
           </legend>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {categories.map((c) => (
@@ -216,7 +216,7 @@ export default function DonationForm() {
 
       <div>
         <label htmlFor="date" className="block text-sm text-neutral-400">
-          {t("DonationForm.date")}
+          {t("DonationForm.date")} <span className="text-error">*</span>
         </label>
         <input
           id="date"

@@ -170,7 +170,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       {/* Contact name */}
       <div>
         <label htmlFor="contact_name" className="block text-sm text-neutral-400">
-          {t("SubmitForm.contactName")}
+          {t("SubmitForm.contactName")} <span className="text-error">*</span>
         </label>
         <input
           id="contact_name"
@@ -199,7 +199,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       {/* Aid categories — multi-select checkboxes */}
       <fieldset>
         <legend className="text-sm text-neutral-400">
-          {t("SubmitForm.selectCategories")}
+          {t("SubmitForm.selectCategories")} <span className="text-error">*</span>
         </legend>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {loading ? (
@@ -232,7 +232,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       {/* Access status */}
       <div>
         <label htmlFor="access_status" className="block text-sm text-neutral-400">
-          {t("SubmitForm.accessStatus")}
+          {t("SubmitForm.accessStatus")} <span className="text-error">*</span>
         </label>
         <select
           id="access_status"
@@ -252,7 +252,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       {/* Urgency */}
       <fieldset>
         <legend className="text-sm text-neutral-400">
-          {t("SubmitForm.urgencyLabel")}
+          {t("SubmitForm.urgencyLabel")} <span className="text-error">*</span>
         </legend>
         <div className="mt-2 flex gap-2">
           {(["low", "medium", "high", "critical"] as const).map((level) => {
@@ -295,7 +295,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
       {/* Number of people */}
       <div>
         <label htmlFor="num_people" className="block text-sm text-neutral-400">
-          {t("SubmitForm.numPeople")}
+          {t("SubmitForm.numPeople")} <span className="text-error">*</span>
         </label>
         <input
           id="num_people"

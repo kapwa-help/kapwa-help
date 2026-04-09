@@ -100,7 +100,7 @@ export default function PurchaseForm() {
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label htmlFor="organization_id" className="block text-sm text-neutral-400">
-          {t("PurchaseForm.organization")}
+          {t("PurchaseForm.organization")} <span className="text-error">*</span>
         </label>
         <select
           id="organization_id"
@@ -120,7 +120,7 @@ export default function PurchaseForm() {
       {/* Aid categories — multi-select checkboxes */}
       <fieldset>
         <legend className="text-sm text-neutral-400">
-          {t("PurchaseForm.category")}
+          {t("PurchaseForm.category")} <span className="text-error">*</span>
         </legend>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {categories.map((c) => (
@@ -148,7 +148,7 @@ export default function PurchaseForm() {
 
       <div>
         <label htmlFor="cost" className="block text-sm text-neutral-400">
-          {t("PurchaseForm.cost")}
+          {t("PurchaseForm.cost")} <span className="text-error">*</span>
         </label>
         <input
           id="cost"
@@ -164,7 +164,7 @@ export default function PurchaseForm() {
 
       <div>
         <label htmlFor="date" className="block text-sm text-neutral-400">
-          {t("PurchaseForm.date")}
+          {t("PurchaseForm.date")} <span className="text-error">*</span>
         </label>
         <input
           id="date"

@@ -102,7 +102,7 @@ export default function HazardForm({ coords }: HazardFormProps) {
       {/* Description */}
       <div>
         <label htmlFor="hazard-description" className="block text-sm text-neutral-400">
-          {t("HazardForm.description")}
+          {t("HazardForm.description")} <span className="text-error">*</span>
         </label>
         <textarea
           id="hazard-description"
