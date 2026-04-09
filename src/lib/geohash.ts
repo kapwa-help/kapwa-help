@@ -9,6 +9,11 @@
 
 const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
 
+/** Round a coordinate to 4 decimal places (~11m precision). */
+export function roundCoord(n: number): number {
+  return Math.round(n * 1e4) / 1e4;
+}
+
 export function encodeGeohash(
   lat: number,
   lng: number,

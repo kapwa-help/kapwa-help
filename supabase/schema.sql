@@ -134,8 +134,8 @@ CREATE TABLE hazards (
   event_id uuid NOT NULL REFERENCES events(id),
   description text NOT NULL,
   photo_url text,
-  latitude double precision NOT NULL,
-  longitude double precision NOT NULL,
+  latitude decimal(9,6) NOT NULL,
+  longitude decimal(9,6) NOT NULL,
   status hazard_status NOT NULL DEFAULT 'active',
   reported_by text,
   created_at timestamptz NOT NULL DEFAULT now()

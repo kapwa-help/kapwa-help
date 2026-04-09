@@ -13,6 +13,7 @@ import {
   getOutboxEntries,
   removeFromOutbox,
 } from "@/lib/form-cache";
+import { roundCoord } from "@/lib/geohash";
 import { useOutbox } from "@/lib/outbox-context";
 
 interface AidCategory {
@@ -153,8 +154,8 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
         urgency: formData.get("urgency") as string,
         num_people: Number(formData.get("num_people")) || 1,
         notes: (formData.get("notes") as string) || undefined,
-        lat: Math.round((coords?.lat ?? 0) * 1e4) / 1e4,
-        lng: Math.round((coords?.lng ?? 0) * 1e4) / 1e4,
+        lat: roundCoord(coords?.lat ?? 0),
+        lng: roundCoord(coords?.lng ?? 0),
         category_ids: Array.from(selectedCategories),
       };
 

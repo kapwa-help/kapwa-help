@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getActiveEvent, insertHazard } from "@/lib/queries";
 import { compressPhoto, uploadPhoto } from "@/lib/photo";
+import { roundCoord } from "@/lib/geohash";
 
 interface HazardFormProps {
   coords: { lat: number; lng: number } | null;
@@ -63,8 +64,8 @@ export default function HazardForm({ coords }: HazardFormProps) {
         event_id: eventId,
         description,
         photo_url: photoUrl,
-        latitude: Math.round(coords.lat * 1e4) / 1e4,
-        longitude: Math.round(coords.lng * 1e4) / 1e4,
+        latitude: roundCoord(coords.lat),
+        longitude: roundCoord(coords.lng),
         reported_by: reportedBy || undefined,
       });
       setSubmitted(true);
