@@ -6,13 +6,14 @@
 
 -- Insert a need with its category junction rows
 CREATE OR REPLACE FUNCTION insert_need(
-  p_event_id uuid,
-  p_lat decimal(9,6),
-  p_lng decimal(9,6),
-  p_access_status access_status,
-  p_urgency urgency_level,
-  p_num_people integer,
-  p_contact_name text,
+  p_id uuid DEFAULT gen_random_uuid(),
+  p_event_id uuid DEFAULT NULL,
+  p_lat decimal(9,6) DEFAULT NULL,
+  p_lng decimal(9,6) DEFAULT NULL,
+  p_access_status access_status DEFAULT NULL,
+  p_urgency urgency_level DEFAULT NULL,
+  p_num_people integer DEFAULT NULL,
+  p_contact_name text DEFAULT NULL,
   p_contact_phone text DEFAULT NULL,
   p_notes text DEFAULT NULL,
   p_hub_id uuid DEFAULT NULL,
@@ -21,8 +22,8 @@ CREATE OR REPLACE FUNCTION insert_need(
 DECLARE
   v_need_id uuid;
 BEGIN
-  INSERT INTO needs (event_id, lat, lng, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id)
-  VALUES (p_event_id, p_lat, p_lng, p_access_status, p_urgency, p_num_people, p_contact_name, p_contact_phone, p_notes, p_hub_id)
+  INSERT INTO needs (id, event_id, lat, lng, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id)
+  VALUES (p_id, p_event_id, p_lat, p_lng, p_access_status, p_urgency, p_num_people, p_contact_name, p_contact_phone, p_notes, p_hub_id)
   RETURNING id INTO v_need_id;
 
   IF array_length(p_category_ids, 1) > 0 THEN
@@ -36,10 +37,11 @@ $$;
 
 -- Insert a donation with its category junction rows
 CREATE OR REPLACE FUNCTION insert_donation(
-  p_event_id uuid,
-  p_organization_id uuid,
-  p_type donation_type,
-  p_date date,
+  p_id uuid DEFAULT gen_random_uuid(),
+  p_event_id uuid DEFAULT NULL,
+  p_organization_id uuid DEFAULT NULL,
+  p_type donation_type DEFAULT NULL,
+  p_date date DEFAULT NULL,
   p_donor_name text DEFAULT NULL,
   p_donor_type donor_type DEFAULT NULL,
   p_amount decimal(12,2) DEFAULT NULL,
@@ -49,8 +51,8 @@ CREATE OR REPLACE FUNCTION insert_donation(
 DECLARE
   v_donation_id uuid;
 BEGIN
-  INSERT INTO donations (event_id, organization_id, type, date, donor_name, donor_type, amount, notes)
-  VALUES (p_event_id, p_organization_id, p_type, p_date, p_donor_name, p_donor_type, p_amount, p_notes)
+  INSERT INTO donations (id, event_id, organization_id, type, date, donor_name, donor_type, amount, notes)
+  VALUES (p_id, p_event_id, p_organization_id, p_type, p_date, p_donor_name, p_donor_type, p_amount, p_notes)
   RETURNING id INTO v_donation_id;
 
   IF array_length(p_category_ids, 1) > 0 THEN
@@ -64,18 +66,19 @@ $$;
 
 -- Insert a purchase with its category junction rows
 CREATE OR REPLACE FUNCTION insert_purchase(
-  p_event_id uuid,
-  p_organization_id uuid,
-  p_cost decimal(12,2),
-  p_date date,
+  p_id uuid DEFAULT gen_random_uuid(),
+  p_event_id uuid DEFAULT NULL,
+  p_organization_id uuid DEFAULT NULL,
+  p_cost decimal(12,2) DEFAULT NULL,
+  p_date date DEFAULT NULL,
   p_notes text DEFAULT NULL,
   p_category_ids uuid[] DEFAULT '{}'
 ) RETURNS uuid LANGUAGE plpgsql AS $$
 DECLARE
   v_purchase_id uuid;
 BEGIN
-  INSERT INTO purchases (event_id, organization_id, cost, date, notes)
-  VALUES (p_event_id, p_organization_id, p_cost, p_date, p_notes)
+  INSERT INTO purchases (id, event_id, organization_id, cost, date, notes)
+  VALUES (p_id, p_event_id, p_organization_id, p_cost, p_date, p_notes)
   RETURNING id INTO v_purchase_id;
 
   IF array_length(p_category_ids, 1) > 0 THEN
