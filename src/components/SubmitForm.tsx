@@ -35,6 +35,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [urgency, setUrgency] = useState<string | null>(null);
   const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -254,20 +255,40 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
           {t("SubmitForm.urgencyLabel")}
         </legend>
         <div className="mt-2 flex gap-2">
-          {(["low", "medium", "high", "critical"] as const).map((level) => (
-            <label key={level} className="flex-1 cursor-pointer">
-              <input
-                type="radio"
-                name="urgency"
-                value={level}
-                required
-                className="peer sr-only"
-              />
-              <span className="block rounded-xl border border-neutral-400/20 bg-base px-2 py-3 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
-                {t(`SubmitForm.urgency${level.charAt(0).toUpperCase() + level.slice(1)}`)}
-              </span>
-            </label>
-          ))}
+          {(["low", "medium", "high", "critical"] as const).map((level) => {
+            const bright = {
+              low: "border-success bg-success/20 text-success",
+              medium: "border-warning bg-warning/20 text-warning",
+              high: "border-high bg-high/20 text-high",
+              critical: "border-error bg-error/20 text-error",
+            };
+            const muted = {
+              low: "border-success/30 text-success/40",
+              medium: "border-warning/30 text-warning/40",
+              high: "border-high/30 text-high/40",
+              critical: "border-error/30 text-error/40",
+            };
+            const selected = urgency === level;
+            const dimmed = urgency !== null && !selected;
+            return (
+              <label key={level} className="flex-1 cursor-pointer">
+                <input
+                  type="radio"
+                  name="urgency"
+                  value={level}
+                  required
+                  checked={selected}
+                  onChange={() => setUrgency(level)}
+                  className="sr-only"
+                />
+                <span className={`block rounded-xl border px-2 py-3 text-center text-xs sm:text-sm transition-colors ${
+                  dimmed ? muted[level] : bright[level]
+                }`}>
+                  {t(`SubmitForm.urgency${level.charAt(0).toUpperCase() + level.slice(1)}`)}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </fieldset>
 
