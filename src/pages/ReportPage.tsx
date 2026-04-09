@@ -82,9 +82,6 @@ export function ReportPage() {
                   {locationStatus === "acquiring" && (
                     <span className="text-neutral-400">{t("ReportForm.locationAcquiring")}</span>
                   )}
-                  {locationStatus === "captured" && (
-                    <span className="text-success">{t("ReportForm.locationCaptured")}</span>
-                  )}
                   {locationStatus === "denied" && (
                     <span className="text-warning">
                       {t("ReportForm.locationUnavailable")}{" "}
