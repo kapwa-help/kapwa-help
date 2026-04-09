@@ -29,7 +29,7 @@ npm run verify:headed   # Headed — watch in browser
 | Route | Page | Key Elements |
 |-------|------|-------------|
 | `/:locale` | Relief Map | Header, map with legend, summary bar, zoom controls |
-| `/:locale/transparency` | Transparency | Header, `<h1>`, summary cards, inventory, barangay equity |
+| `/:locale/dashboard` | Dashboard | Header, `<h1>`, summary cards, inventory, barangay equity |
 | `/:locale/report` | Report | Header, `<h1>`, form selector (need/donation/purchase/hazard) |
 
 Supported locales: `en`, `fil`, `ilo`
