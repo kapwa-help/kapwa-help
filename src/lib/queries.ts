@@ -164,12 +164,14 @@ export async function insertNeed(need: NeedInsert) {
   if (error) throw error;
 }
 
-export async function updateNeedStatus(id: string, status: string) {
-  const { error } = await supabase
-    .from("needs")
-    .update({ status })
-    .eq("id", id);
-
+export async function updateNeedStatus(
+  id: string,
+  status: string,
+  deliveryPhotoUrl?: string,
+) {
+  const update: Record<string, string> = { status };
+  if (deliveryPhotoUrl) update.delivery_photo_url = deliveryPhotoUrl;
+  const { error } = await supabase.from("needs").update(update).eq("id", id);
   if (error) throw error;
 }
 

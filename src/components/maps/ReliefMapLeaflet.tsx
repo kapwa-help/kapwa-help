@@ -1,6 +1,12 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { MapContainer, TileLayer, Marker, ZoomControl } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  ZoomControl,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import type { NeedPoint, HubPoint, HazardPoint } from "@/lib/queries";
 
@@ -48,6 +54,27 @@ const DEFAULT_CENTER: [number, number] = [16.62, 120.35];
 const DEFAULT_ZOOM = 11;
 const TILE_ERROR_THRESHOLD = 3;
 
+/** Adjusts the map viewport to fit all data points whenever they change. */
+function FitBounds({
+  points,
+}: {
+  points: [number, number][];
+}) {
+  const map = useMap();
+  const prevKey = useRef("");
+
+  // Build a stable key so we only fly once per distinct set of points
+  const key = points.map((p) => `${p[0]},${p[1]}`).join("|");
+
+  if (points.length > 0 && key !== prevKey.current) {
+    prevKey.current = key;
+    const bounds = L.latLngBounds(points.map(([lat, lng]) => [lat, lng]));
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+  }
+
+  return null;
+}
+
 type Props = {
   needsPoints: NeedPoint[];
   hubs: HubPoint[];
@@ -83,6 +110,21 @@ export default function ReliefMapLeaflet({
     setTilesUnavailable(false);
   }, []);
 
+  // Collect all visible points so the map auto-fits to them
+  const allPoints: [number, number][] = useMemo(() => {
+    const pts: [number, number][] = [];
+    if (visibleLayers.needs) {
+      for (const p of needsPoints) pts.push([p.lat, p.lng]);
+    }
+    if (visibleLayers.hubs) {
+      for (const h of hubs) pts.push([h.lat, h.lng]);
+    }
+    if (visibleLayers.hazards) {
+      for (const h of hazards) pts.push([h.lat, h.lng]);
+    }
+    return pts;
+  }, [needsPoints, hubs, hazards, visibleLayers]);
+
   return (
     <div className="relative h-full w-full overflow-hidden">
       <MapContainer
@@ -92,6 +134,7 @@ export default function ReliefMapLeaflet({
         zoomControl={false}
         style={{ height: "100%", width: "100%" }}
       >
+        <FitBounds points={allPoints} />
         <ZoomControl position="bottomright" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -91,7 +91,8 @@
     "addDeliveryPhoto": "Magdagdag ng Delivery Photo",
     "photoAdded": "Naka-attach na larawan",
     "confirmDelivery": "Kumpirmahin ang Paghahatid",
-    "removePhoto": "Alisin ang larawan"
+    "removePhoto": "Alisin ang larawan",
+    "deliveryPhoto": "Larawan ng Paghahatid"
   },
   "ClaimForm": {
     "respondButton": "Tumugon sa Pangangailangan na ito",

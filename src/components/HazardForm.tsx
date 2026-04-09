@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getActiveEvent, insertHazard } from "@/lib/queries";
+import { compressPhoto, uploadPhoto } from "@/lib/photo";
 
 interface HazardFormProps {
   coords: { lat: number; lng: number } | null;
@@ -50,11 +51,20 @@ export default function HazardForm({ coords }: HazardFormProps) {
         setSubmitting(false);
         return;
       }
+
+      let photoUrl: string | undefined;
+      if (photo) {
+        const compressed = await compressPhoto(photo);
+        const hazardId = crypto.randomUUID();
+        photoUrl = (await uploadPhoto("photos", `hazards/${hazardId}.jpg`, compressed)) ?? undefined;
+      }
+
       await insertHazard({
         event_id: eventId,
         description,
-        latitude: coords.lat,
-        longitude: coords.lng,
+        photo_url: photoUrl,
+        latitude: Math.round(coords.lat * 1e4) / 1e4,
+        longitude: Math.round(coords.lng * 1e4) / 1e4,
         reported_by: reportedBy || undefined,
       });
       setSubmitted(true);

@@ -91,7 +91,8 @@
     "addDeliveryPhoto": "Add Delivery Photo",
     "photoAdded": "Photo attached",
     "confirmDelivery": "Confirm Delivery",
-    "removePhoto": "Remove photo"
+    "removePhoto": "Remove photo",
+    "deliveryPhoto": "Delivery Photo"
   },
   "ClaimForm": {
     "respondButton": "Respond to this Need",
