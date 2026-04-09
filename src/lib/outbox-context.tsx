@@ -12,7 +12,8 @@ import {
   getOutboxEntries,
   removeFromOutbox,
 } from "@/lib/form-cache";
-import { insertNeed } from "@/lib/queries";
+import { insertNeed, insertDonation, insertPurchase, insertHazard } from "@/lib/queries";
+import { uploadPhoto } from "@/lib/photo";
 
 type OutboxContextValue = {
   pendingCount: number;
@@ -34,10 +35,28 @@ export function OutboxProvider({ children }: { children: ReactNode }) {
     flushingRef.current = true;
     try {
       const entries = await getOutboxEntries();
-      for (const entry of entries) {
+      for (const { key, entry } of entries) {
         try {
-          await insertNeed(entry.payload);
-          await removeFromOutbox(entry.key);
+          switch (entry.type) {
+            case "need":
+              await insertNeed(entry.payload);
+              break;
+            case "donation":
+              await insertDonation(entry.payload);
+              break;
+            case "purchase":
+              await insertPurchase(entry.payload);
+              break;
+            case "hazard":
+              if (entry.photo) {
+                const hazardId = entry.payload.id ?? crypto.randomUUID();
+                const url = await uploadPhoto("photos", `hazards/${hazardId}.jpg`, entry.photo);
+                if (url) entry.payload.photo_url = url;
+              }
+              await insertHazard(entry.payload);
+              break;
+          }
+          await removeFromOutbox(key);
         } catch (err: unknown) {
           const isUniqueViolation =
             err &&
@@ -45,7 +64,7 @@ export function OutboxProvider({ children }: { children: ReactNode }) {
             "code" in err &&
             (err as { code: string }).code === "23505";
           if (isUniqueViolation) {
-            await removeFromOutbox(entry.key);
+            await removeFromOutbox(key);
           }
         }
       }
