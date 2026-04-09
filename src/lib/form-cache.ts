@@ -79,7 +79,9 @@ export async function setCachedOptions<T>(
 
 // --- Outbox ---
 
-export async function addToOutbox(entry: Omit<OutboxEntry, "createdAt">): Promise<void> {
+type OutboxInput = OutboxEntry extends infer T ? T extends OutboxEntry ? Omit<T, "createdAt"> : never : never;
+
+export async function addToOutbox(entry: OutboxInput): Promise<void> {
   let db: IDBDatabase | null = null;
   try {
     db = await openDB();

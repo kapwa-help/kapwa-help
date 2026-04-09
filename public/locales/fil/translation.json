@@ -160,6 +160,8 @@
     "submit": "Iulat ang Hazard",
     "submitting": "Submitting...",
     "success": "Matagumpay na naiulat ang Hazard!",
+    "savedTitle": "Naligtas si Hazard!",
+    "savedMessage": "Ipapadala kapag online ka na ulit. Ang larawan ay ia-upload kapag nakakonekta.",
     "error": "Nabigong mag-ulat ng panganib"
   },
   "Transparency": {
@@ -188,6 +190,9 @@
     "notes": "Mga Tala (opsyonal)",
     "submit": "Iulat ang Donasyon",
     "success": "Matagumpay na naiulat ang donasyon!",
+    "successMessage": "salamat po. Ang iyong donasyon ay naitala.",
+    "savedTitle": "Nai-save ang donasyon!",
+    "savedMessage": "Ipapadala kapag online ka na ulit.",
     "error": "Nabigong mag-ulat ng donasyon",
     "donorName": "Pangalan ng Donor",
     "donorNamePlaceholder": "Opsyonal — pangalan ng donor",
@@ -204,6 +209,9 @@
     "notes": "Mga Tala (opsyonal)",
     "submit": "Iulat ang Pagbili",
     "success": "Matagumpay na naiulat ang pagbili!",
+    "successMessage": "salamat po. Ang iyong pagbili ay naitala.",
+    "savedTitle": "Naka-save ang pagbili!",
+    "savedMessage": "Ipapadala kapag online ka na ulit.",
     "error": "Nabigong iulat ang pagbili"
   },
   "Stories": {

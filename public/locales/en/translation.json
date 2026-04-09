@@ -160,6 +160,8 @@
     "submit": "Report Hazard",
     "submitting": "Submitting...",
     "success": "Hazard reported successfully!",
+    "savedTitle": "Hazard saved!",
+    "savedMessage": "Will send when you're back online. Photo will be uploaded when connected.",
     "error": "Failed to report hazard"
   },
   "Transparency": {
@@ -188,6 +190,9 @@
     "notes": "Notes (optional)",
     "submit": "Report Donation",
     "success": "Donation reported successfully!",
+    "successMessage": "Thank you. Your donation has been recorded.",
+    "savedTitle": "Donation saved!",
+    "savedMessage": "Will send when you're back online.",
     "error": "Failed to report donation",
     "donorName": "Donor Name",
     "donorNamePlaceholder": "Optional — name of donor",
@@ -204,6 +209,9 @@
     "notes": "Notes (optional)",
     "submit": "Report Purchase",
     "success": "Purchase reported successfully!",
+    "successMessage": "Thank you. Your purchase has been recorded.",
+    "savedTitle": "Purchase saved!",
+    "savedMessage": "Will send when you're back online.",
     "error": "Failed to report purchase"
   },
   "Stories": {
