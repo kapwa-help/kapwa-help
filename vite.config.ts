@@ -13,7 +13,7 @@ export default defineConfig({
     tailwindcss(),
     tsconfigPaths(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       manifest: {
         name: "Kapwa Help - Disaster Relief Coordination",
         short_name: "Kapwa Help",
