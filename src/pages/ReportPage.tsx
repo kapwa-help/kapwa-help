@@ -43,46 +43,6 @@ export function ReportPage() {
     <div className="min-h-dvh bg-base">
       <Header />
       <main className="mx-auto max-w-xl px-4 py-8">
-        {/* Location — shared across all form types */}
-        <div className="mb-4">
-          {locationStatus === "acquiring" && (
-            <p className="text-sm text-neutral-400">
-              {t("SubmitForm.locationAcquiring")}
-            </p>
-          )}
-          {locationStatus === "captured" && coords && (
-            <p className="text-sm text-success">
-              {t("SubmitForm.locationCaptured", {
-                lat: coords.lat.toFixed(2),
-                lng: coords.lng.toFixed(2),
-              })}
-            </p>
-          )}
-          {locationStatus === "denied" && (
-            <div className="space-y-2">
-              <p className="text-sm text-warning">
-                {t("SubmitForm.locationDenied")}
-              </p>
-              <button
-                type="button"
-                onClick={requestLocation}
-                className="text-sm text-primary hover:underline"
-              >
-                {t("SubmitForm.locationRetry")}
-              </button>
-            </div>
-          )}
-          {locationStatus === "idle" && (
-            <button
-              type="button"
-              onClick={requestLocation}
-              className="text-sm text-primary hover:underline"
-            >
-              {t("SubmitForm.shareLocation")}
-            </button>
-          )}
-        </div>
-
         {/* Type selector or selected indicator */}
         {formType === null ? (
           <>
@@ -104,17 +64,42 @@ export function ReportPage() {
           </>
         ) : (
           <>
-            <div className="mb-6 flex items-center gap-3">
-              <span className="rounded-lg bg-primary/20 px-3 py-1.5 text-sm font-medium text-primary">
-                {t(formOptions.find((o) => o.value === formType)!.labelKey)}
-              </span>
-              <button
-                type="button"
-                onClick={() => setFormType(null)}
-                className="text-sm text-neutral-400 hover:text-neutral-50 transition-colors"
-              >
-                {t("ReportForm.change")}
-              </button>
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="rounded-lg bg-primary/20 px-3 py-1.5 text-sm font-medium text-primary">
+                  {t(formOptions.find((o) => o.value === formType)!.labelKey)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFormType(null)}
+                  className="text-sm text-neutral-400 hover:text-neutral-50 transition-colors"
+                >
+                  {t("ReportForm.change")}
+                </button>
+              </div>
+              {(formType === "need" || formType === "hazard") && (
+                <div className="text-sm">
+                  {locationStatus === "acquiring" && (
+                    <span className="text-neutral-400">{t("ReportForm.locationAcquiring")}</span>
+                  )}
+                  {locationStatus === "captured" && (
+                    <span className="text-success">{t("ReportForm.locationCaptured")}</span>
+                  )}
+                  {locationStatus === "denied" && (
+                    <span className="text-warning">
+                      {t("ReportForm.locationUnavailable")}{" "}
+                      <button type="button" onClick={requestLocation} className="text-primary hover:underline">
+                        {t("ReportForm.retry")}
+                      </button>
+                    </span>
+                  )}
+                  {locationStatus === "idle" && (
+                    <button type="button" onClick={requestLocation} className="text-primary hover:underline">
+                      {t("ReportForm.shareLocation")}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Form content */}

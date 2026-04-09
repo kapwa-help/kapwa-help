@@ -180,7 +180,12 @@
     "optionDonation": "Donation",
     "optionPurchase": "Purchase",
     "optionHazard": "Hazard",
-    "change": "Change"
+    "change": "Change",
+    "locationAcquiring": "Getting location...",
+    "locationCaptured": "\u2713 Location captured",
+    "locationUnavailable": "Location unavailable",
+    "retry": "Retry",
+    "shareLocation": "Share location"
   },
   "DonationForm": {
     "type": "Donation Type",
