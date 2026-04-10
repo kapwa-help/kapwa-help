@@ -5,7 +5,10 @@ import {
   getAidCategories,
   getActiveEvent,
   insertDonation,
+  type DonationInsert,
 } from "@/lib/queries";
+import { getCachedOptions, setCachedOptions, addToOutbox } from "@/lib/form-cache";
+import { useOutbox } from "@/lib/outbox-context";
 import {
   FormLabel,
   FormLegend,
@@ -31,26 +34,53 @@ interface AidCategory {
 
 export default function DonationForm() {
   const { t } = useTranslation();
+  const { refreshCount } = useOutbox();
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [categories, setCategories] = useState<AidCategory[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [donationType, setDonationType] = useState<"cash" | "in_kind">("cash");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [savedOffline, setSavedOffline] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
-    getActiveEvent().then((event) => {
-      if (event) {
+    let cancelled = false;
+
+    // Load active event (cache-first)
+    getCachedOptions<{ id: string; name: string }>("activeEvent").then((cachedE) => {
+      if (cancelled) return;
+      if (cachedE?.data.length) setEventId(cachedE.data[0].id);
+
+      getActiveEvent().then((event) => {
+        if (cancelled || !event) return;
         setEventId(event.id);
-        getOrganizations(event.id).then(setOrgs).catch(() => {});
-      }
+
+        // Refresh orgs from network
+        getOrganizations(event.id)
+          .then((freshO) => { if (!cancelled) { setOrgs(freshO); setCachedOptions("organizations", freshO); } })
+          .catch(() => {});
+      }).catch(() => {});
     });
-    getAidCategories()
-      .then(setCategories)
-      .catch(() => {});
+
+    // Load orgs (cache-first, independent of network)
+    getCachedOptions<Organization>("organizations").then((cachedO) => {
+      if (cancelled) return;
+      if (cachedO?.data.length) setOrgs(cachedO.data);
+    });
+
+    // Load categories (cache-first)
+    getCachedOptions<AidCategory>("aidCategories").then((cachedC) => {
+      if (cancelled) return;
+      if (cachedC?.data.length) setCategories(cachedC.data);
+      getAidCategories()
+        .then((freshC) => { if (!cancelled) { setCategories(freshC); setCachedOptions("aidCategories", freshC); } })
+        .catch(() => {});
+    });
+
+    return () => { cancelled = true; };
   }, []);
 
   function toggleCategory(id: string) {
@@ -75,7 +105,9 @@ export default function DonationForm() {
         setSubmitting(false);
         return;
       }
-      await insertDonation({
+      const id = crypto.randomUUID();
+      const payload: DonationInsert = {
+        id,
         event_id: eventId,
         organization_id: formData.get("organization_id") as string,
         donor_name: (formData.get("donor_name") as string) || undefined,
@@ -85,8 +117,21 @@ export default function DonationForm() {
         date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],
         notes: (formData.get("notes") as string) || undefined,
         category_ids: donationType === "in_kind" ? Array.from(selectedCategories) : undefined,
-      });
-      setSubmitted(true);
+      };
+
+      try {
+        await insertDonation(payload);
+        setSubmitted(true);
+      } catch {
+        try {
+          await addToOutbox({ type: "donation", payload });
+          refreshCount();
+          setSavedOffline(true);
+          setSubmitted(true);
+        } catch {
+          setError(t("DonationForm.error"));
+        }
+      }
     } catch {
       setError(t("DonationForm.error"));
     } finally {
@@ -97,10 +142,16 @@ export default function DonationForm() {
   if (submitted) {
     return (
       <FormSuccess>
-        <h2 className="text-xl font-bold text-success">{t("DonationForm.success")}</h2>
+        <h2 className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}>
+          {t(savedOffline ? "DonationForm.savedTitle" : "DonationForm.success")}
+        </h2>
+        <p className="mt-2 text-neutral-400">
+          {t(savedOffline ? "DonationForm.savedMessage" : "DonationForm.successMessage")}
+        </p>
         <FormSuccessButton
           onClick={() => {
             setSubmitted(false);
+            setSavedOffline(false);
             setDonationType("cash");
             setSelectedCategories(new Set());
             setFormKey((k) => k + 1);

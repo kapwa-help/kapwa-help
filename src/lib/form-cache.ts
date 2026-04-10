@@ -1,7 +1,7 @@
-import type { NeedInsert } from "@/lib/queries";
+import type { NeedInsert, DonationInsert, PurchaseInsert, HazardInsert } from "@/lib/queries";
 
 const DB_NAME = "luaid-forms";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const OPTIONS_STORE = "options";
 const OUTBOX_STORE = "outbox";
 
@@ -10,10 +10,11 @@ type CachedOptions<T> = {
   updatedAt: number;
 };
 
-type OutboxEntry = {
-  payload: NeedInsert;
-  createdAt: number;
-};
+type OutboxEntry =
+  | { type: "need"; payload: NeedInsert; createdAt: number }
+  | { type: "donation"; payload: DonationInsert; createdAt: number }
+  | { type: "purchase"; payload: PurchaseInsert; createdAt: number }
+  | { type: "hazard"; payload: HazardInsert; photo?: Blob; createdAt: number };
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -78,36 +79,37 @@ export async function setCachedOptions<T>(
 
 // --- Outbox ---
 
-export async function addToOutbox(payload: NeedInsert): Promise<void> {
+type OutboxInput = OutboxEntry extends infer T ? T extends OutboxEntry ? Omit<T, "createdAt"> : never : never;
+
+export async function addToOutbox(entry: OutboxInput): Promise<void> {
   let db: IDBDatabase | null = null;
   try {
     db = await openDB();
     const tx = db.transaction(OUTBOX_STORE, "readwrite");
     const store = tx.objectStore(OUTBOX_STORE);
-    store.add({ payload, createdAt: Date.now() } satisfies OutboxEntry);
+    store.add({ ...entry, createdAt: Date.now() });
   } finally {
     db?.close();
   }
 }
 
 export async function getOutboxEntries(): Promise<
-  { key: IDBValidKey; payload: NeedInsert }[]
+  { key: IDBValidKey; entry: OutboxEntry }[]
 > {
   let db: IDBDatabase | null = null;
   try {
     db = await openDB();
-    return await new Promise<{ key: IDBValidKey; payload: NeedInsert }[]>(
+    return await new Promise<{ key: IDBValidKey; entry: OutboxEntry }[]>(
       (resolve) => {
         const tx = db!.transaction(OUTBOX_STORE, "readonly");
         const store = tx.objectStore(OUTBOX_STORE);
         const request = store.openCursor();
-        const entries: { key: IDBValidKey; payload: NeedInsert }[] = [];
+        const entries: { key: IDBValidKey; entry: OutboxEntry }[] = [];
 
         request.onsuccess = () => {
           const cursor = request.result;
           if (cursor) {
-            const entry = cursor.value as OutboxEntry;
-            entries.push({ key: cursor.key, payload: entry.payload });
+            entries.push({ key: cursor.key, entry: cursor.value as OutboxEntry });
             cursor.continue();
           } else {
             resolve(entries);

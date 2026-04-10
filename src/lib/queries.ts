@@ -58,6 +58,7 @@ export interface NeedInsert {
 }
 
 export interface DonationInsert {
+  id?: string;
   event_id: string;
   organization_id: string;
   donor_name?: string;
@@ -70,6 +71,7 @@ export interface DonationInsert {
 }
 
 export interface PurchaseInsert {
+  id?: string;
   event_id: string;
   organization_id: string;
   cost: number;
@@ -79,6 +81,7 @@ export interface PurchaseInsert {
 }
 
 export interface HazardInsert {
+  id?: string;
   event_id: string;
   description: string;
   photo_url?: string;
@@ -149,6 +152,7 @@ export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
 
 export async function insertNeed(need: NeedInsert) {
   const { error } = await supabase.rpc("insert_need", {
+    p_id: need.id ?? null,
     p_event_id: need.event_id,
     p_lat: need.lat,
     p_lng: need.lng,
@@ -316,6 +320,7 @@ export async function getDonationsByOrganization(eventId: string) {
 
 export async function insertDonation(donation: DonationInsert) {
   const { error } = await supabase.rpc("insert_donation", {
+    p_id: donation.id ?? null,
     p_event_id: donation.event_id,
     p_organization_id: donation.organization_id,
     p_type: donation.type,
@@ -373,6 +378,7 @@ export async function getRecentPurchases(eventId: string) {
 
 export async function insertPurchase(purchase: PurchaseInsert) {
   const { error } = await supabase.rpc("insert_purchase", {
+    p_id: purchase.id ?? null,
     p_event_id: purchase.event_id,
     p_organization_id: purchase.organization_id,
     p_cost: purchase.cost,

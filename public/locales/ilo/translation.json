@@ -163,6 +163,8 @@
     "submit": "Ireport ti Peligro",
     "submitting": "Submitting...",
     "success": "Naballigi ti impadamag ti Hazard!",
+    "savedTitle": "Naisalakan ti peggad!",
+    "savedMessage": "Ipatulodna inton agsublika nga online. Mai-upload ti retrato no maikonekta.",
     "error": "Napaay a nangipadamag iti peggad"
   },
   "Transparency": {
@@ -191,6 +193,9 @@
     "notes": "Dagiti Pakaammo (opsional)",
     "submit": "Ireport ti Donasion",
     "success": "Naballigi ti naipadamag a donasion!",
+    "successMessage": "Aagyaman. Nairekord ti donasionyo.",
+    "savedTitle": "Naisalakan ti donasion!",
+    "savedMessage": "Ipatulodna inton agsublika nga online.",
     "error": "Napaay a nangipadamag iti donasion",
     "donorName": "Nagan ti Donor",
     "donorNamePlaceholder": "Opsional — nagan ti donor",
@@ -207,6 +212,9 @@
     "notes": "Dagiti Pakaammo (opsional)",
     "submit": "Report ti Panaggatang",
     "success": "Naballigi ti naipadamag a panaggatang!",
+    "successMessage": "Aagyaman. Nairekord ti ginatangmo.",
+    "savedTitle": "Nasalbar ti panaggatang!",
+    "savedMessage": "Ipatulodna inton agsublika nga online.",
     "error": "Napaay a nangipadamag iti panaggatang"
   },
   "Stories": {

@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { getActiveEvent, insertHazard } from "@/lib/queries";
+import { getActiveEvent, insertHazard, type HazardInsert } from "@/lib/queries";
 import { compressPhoto, uploadPhoto } from "@/lib/photo";
 import { roundCoord } from "@/lib/geohash";
+import { getCachedOptions, addToOutbox } from "@/lib/form-cache";
+import { useOutbox } from "@/lib/outbox-context";
 import {
   FormLabel,
   FormInput,
@@ -19,6 +21,7 @@ interface HazardFormProps {
 
 export default function HazardForm({ coords }: HazardFormProps) {
   const { t } = useTranslation();
+  const { refreshCount } = useOutbox();
   const [description, setDescription] = useState("");
   const [reportedBy, setReportedBy] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
@@ -26,13 +29,18 @@ export default function HazardForm({ coords }: HazardFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [savedOffline, setSavedOffline] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
-    getActiveEvent()
-      .then((event) => { if (event) setEventId(event.id); })
-      .catch(() => {});
+    getCachedOptions<{ id: string; name: string }>("activeEvent").then((cachedE) => {
+      if (cachedE?.data.length) setEventId(cachedE.data[0].id);
+
+      getActiveEvent()
+        .then((event) => { if (event) setEventId(event.id); })
+        .catch(() => {});
+    });
   }, []);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -62,22 +70,42 @@ export default function HazardForm({ coords }: HazardFormProps) {
         return;
       }
 
-      let photoUrl: string | undefined;
+      const id = crypto.randomUUID();
+
+      // Compress photo if present (works offline — pure browser APIs)
+      let compressedPhoto: Blob | undefined;
       if (photo) {
-        const compressed = await compressPhoto(photo);
-        const hazardId = crypto.randomUUID();
-        photoUrl = (await uploadPhoto("photos", `hazards/${hazardId}.jpg`, compressed)) ?? undefined;
+        compressedPhoto = await compressPhoto(photo);
       }
 
-      await insertHazard({
+      const payload: HazardInsert = {
+        id,
         event_id: eventId,
         description,
-        photo_url: photoUrl,
         latitude: roundCoord(coords.lat),
         longitude: roundCoord(coords.lng),
         reported_by: reportedBy || undefined,
-      });
-      setSubmitted(true);
+      };
+
+      try {
+        // Online path: upload photo then insert
+        if (compressedPhoto) {
+          const photoUrl = (await uploadPhoto("photos", `hazards/${id}.jpg`, compressedPhoto)) ?? undefined;
+          payload.photo_url = photoUrl;
+        }
+        await insertHazard(payload);
+        setSubmitted(true);
+      } catch {
+        try {
+          // Offline path: store payload + photo blob in outbox
+          await addToOutbox({ type: "hazard", payload, photo: compressedPhoto });
+          refreshCount();
+          setSavedOffline(true);
+          setSubmitted(true);
+        } catch {
+          setError(t("HazardForm.error"));
+        }
+      }
     } catch {
       setError(t("HazardForm.error"));
     } finally {
@@ -88,12 +116,18 @@ export default function HazardForm({ coords }: HazardFormProps) {
   if (submitted) {
     return (
       <FormSuccess>
-        <h2 className="text-xl font-bold text-success">
-          {t("HazardForm.success")}
+        <h2 className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}>
+          {t(savedOffline ? "HazardForm.savedTitle" : "HazardForm.success")}
         </h2>
+        {savedOffline && (
+          <p className="mt-2 text-neutral-400">
+            {t("HazardForm.savedMessage")}
+          </p>
+        )}
         <FormSuccessButton
           onClick={() => {
             setSubmitted(false);
+            setSavedOffline(false);
             setDescription("");
             setReportedBy("");
             removePhoto();

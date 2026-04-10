@@ -52,12 +52,19 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
   useEffect(() => {
     let cancelled = false;
 
-    // Load active event
-    getActiveEvent()
-      .then((event) => {
-        if (!cancelled && event) setEventId(event.id);
-      })
-      .catch(() => {});
+    // Load active event (cache-first)
+    getCachedOptions<{ id: string; name: string }>("activeEvent").then((cachedE) => {
+      if (cancelled) return;
+      if (cachedE?.data.length) {
+        setEventId(cachedE.data[0].id);
+      }
+
+      getActiveEvent()
+        .then((event) => {
+          if (!cancelled && event) setEventId(event.id);
+        })
+        .catch(() => {});
+    });
 
     // Load aid categories (cache-first)
     getCachedOptions<AidCategory>("aidCategories").then((cachedC) => {
@@ -131,7 +138,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
         setSubmitted(true);
       } catch {
         try {
-          await addToOutbox(payload);
+          await addToOutbox({ type: "need", payload });
           refreshCount();
           setSavedOffline(true);
           setSubmitted(true);

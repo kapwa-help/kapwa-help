@@ -5,7 +5,10 @@ import {
   getAidCategories,
   getActiveEvent,
   insertPurchase,
+  type PurchaseInsert,
 } from "@/lib/queries";
+import { getCachedOptions, setCachedOptions, addToOutbox } from "@/lib/form-cache";
+import { useOutbox } from "@/lib/outbox-context";
 import {
   FormLabel,
   FormLegend,
@@ -31,23 +34,52 @@ interface AidCategory {
 
 export default function PurchaseForm() {
   const { t } = useTranslation();
+  const { refreshCount } = useOutbox();
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [categories, setCategories] = useState<AidCategory[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [savedOffline, setSavedOffline] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
-    getActiveEvent().then((event) => {
-      if (event) {
+    let cancelled = false;
+
+    // Load active event (cache-first)
+    getCachedOptions<{ id: string; name: string }>("activeEvent").then((cachedE) => {
+      if (cancelled) return;
+      if (cachedE?.data.length) setEventId(cachedE.data[0].id);
+
+      getActiveEvent().then((event) => {
+        if (cancelled || !event) return;
         setEventId(event.id);
-        getOrganizations(event.id).then(setOrgs).catch(() => {});
-      }
+
+        // Refresh orgs from network
+        getOrganizations(event.id)
+          .then((freshO) => { if (!cancelled) { setOrgs(freshO); setCachedOptions("organizations", freshO); } })
+          .catch(() => {});
+      }).catch(() => {});
     });
-    getAidCategories().then(setCategories).catch(() => {});
+
+    // Load orgs (cache-first, independent of network)
+    getCachedOptions<Organization>("organizations").then((cachedO) => {
+      if (cancelled) return;
+      if (cachedO?.data.length) setOrgs(cachedO.data);
+    });
+
+    // Load categories (cache-first)
+    getCachedOptions<AidCategory>("aidCategories").then((cachedC) => {
+      if (cancelled) return;
+      if (cachedC?.data.length) setCategories(cachedC.data);
+      getAidCategories()
+        .then((freshC) => { if (!cancelled) { setCategories(freshC); setCachedOptions("aidCategories", freshC); } })
+        .catch(() => {});
+    });
+
+    return () => { cancelled = true; };
   }, []);
 
   function toggleCategory(id: string) {
@@ -73,15 +105,30 @@ export default function PurchaseForm() {
         setSubmitting(false);
         return;
       }
-      await insertPurchase({
+      const id = crypto.randomUUID();
+      const payload: PurchaseInsert = {
+        id,
         event_id: eventId,
         organization_id: formData.get("organization_id") as string,
         cost: Number(formData.get("cost")),
         date: (formData.get("date") as string) || new Date().toISOString().split("T")[0],
         notes: (formData.get("notes") as string) || undefined,
         category_ids: Array.from(selectedCategories),
-      });
-      setSubmitted(true);
+      };
+
+      try {
+        await insertPurchase(payload);
+        setSubmitted(true);
+      } catch {
+        try {
+          await addToOutbox({ type: "purchase", payload });
+          refreshCount();
+          setSavedOffline(true);
+          setSubmitted(true);
+        } catch {
+          setError(t("PurchaseForm.error"));
+        }
+      }
     } catch {
       setError(t("PurchaseForm.error"));
     } finally {
@@ -92,10 +139,16 @@ export default function PurchaseForm() {
   if (submitted) {
     return (
       <FormSuccess>
-        <h2 className="text-xl font-bold text-success">{t("PurchaseForm.success")}</h2>
+        <h2 className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}>
+          {t(savedOffline ? "PurchaseForm.savedTitle" : "PurchaseForm.success")}
+        </h2>
+        <p className="mt-2 text-neutral-400">
+          {t(savedOffline ? "PurchaseForm.savedMessage" : "PurchaseForm.successMessage")}
+        </p>
         <FormSuccessButton
           onClick={() => {
             setSubmitted(false);
+            setSavedOffline(false);
             setSelectedCategories(new Set());
             setFormKey((k) => k + 1);
           }}
