@@ -50,7 +50,7 @@ export default function Header() {
 
   const navItems = [
     { to: `/${locale}`, label: t("Navigation.reliefMap"), end: true },
-    { to: `/${locale}/transparency`, label: t("Navigation.transparency") },
+    { to: `/${locale}/dashboard`, label: t("Navigation.dashboard") },
   ];
 
   return (

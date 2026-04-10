@@ -27,11 +27,11 @@ for (const locale of LOCALES) {
   });
 }
 
-// ── Transparency page smoke tests ────────────────────────────────
+// ── Dashboard page smoke tests ──────────────────────────────────
 
 for (const locale of LOCALES) {
-  test(`transparency page renders in ${locale}`, async ({ page }) => {
-    await page.goto(`/${locale}/transparency`);
+  test(`dashboard page renders in ${locale}`, async ({ page }) => {
+    await page.goto(`/${locale}/dashboard`);
 
     // Header brand
     await expect(page.locator("text=Kapwa Help")).toBeVisible();
@@ -41,7 +41,7 @@ for (const locale of LOCALES) {
 
     // Screenshot for visual verification
     await page.screenshot({
-      path: `tests/e2e/screenshots/transparency-${locale}.png`,
+      path: `tests/e2e/screenshots/dashboard-${locale}.png`,
       fullPage: true,
     });
   });
@@ -65,8 +65,7 @@ for (const locale of LOCALES) {
 
 test("report page shows hazard form when selected", async ({ page }) => {
   await page.goto("/en/report");
-  const select = page.locator("#form-type");
-  await select.selectOption("hazard");
+  await page.getByRole("button", { name: "Hazard" }).click();
   await expect(page.locator("#hazard-description")).toBeVisible();
 });
 
@@ -94,9 +93,9 @@ test("locale switcher changes URL", async ({ page }) => {
 test("nav links navigate between pages", async ({ page }) => {
   await page.goto("/en");
 
-  // Click Transparency nav link
-  await page.locator("nav").getByText(/transparency/i).click();
-  await expect(page).toHaveURL(/\/en\/transparency$/);
+  // Click Dashboard nav link
+  await page.locator("nav").getByText(/dashboard/i).click();
+  await expect(page).toHaveURL(/\/en\/dashboard$/);
   await expect(page.locator("h1")).toBeVisible();
 });
 
@@ -112,10 +111,10 @@ test("mobile hamburger menu navigates between pages", async ({ page }) => {
   const menuButton = page.getByRole("button", { name: /menu/i });
   await expect(menuButton).toBeVisible();
 
-  // Open menu and click Transparency
+  // Open menu and click Dashboard
   await menuButton.click();
-  await page.getByTestId("mobile-nav").getByText(/transparency/i).click();
-  await expect(page).toHaveURL(/\/en\/transparency$/);
+  await page.getByTestId("mobile-nav").getByText(/dashboard/i).click();
+  await expect(page).toHaveURL(/\/en\/dashboard$/);
 
   // Menu should close after navigation
   await expect(page.getByTestId("mobile-nav")).toBeHidden();

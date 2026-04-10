@@ -78,6 +78,8 @@ CREATE POLICY "anon_read_hazards" ON hazards
   FOR SELECT USING (true);
 CREATE POLICY "anon_insert_hazards" ON hazards
   FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon_update_hazards" ON hazards
+  FOR UPDATE USING (true);
 
 -- Deployments
 ALTER TABLE deployments ENABLE ROW LEVEL SECURITY;

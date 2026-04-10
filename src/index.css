@@ -16,6 +16,7 @@
   --color-accent: #80CED7;
   --color-success: #10B981;
   --color-warning: #FBBF24;
+  --color-high: #F97316;
   --color-error: #FF6B6B;
   --color-neutral-50: #FFFFFF;
   --color-neutral-100: #CCDBDC;
@@ -59,4 +60,21 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
+}
+
+@keyframes pulse-critical {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 107, 107, 0); }
+}
+
+.pulse-critical {
+  animation: pulse-critical 2s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-critical {
+    animation: none;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.5);
+  }
 }

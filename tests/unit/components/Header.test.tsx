@@ -73,18 +73,18 @@ describe("Header", () => {
     expect(reportLink.querySelector("span")).toBeNull();
   });
 
-  it("renders navigation links for relief map and transparency", () => {
+  it("renders navigation links for relief map and dashboard", () => {
     renderHeader();
     // Each link appears twice (desktop nav + mobile nav)
     expect(screen.getAllByRole("link", { name: "Navigation.reliefMap" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "Navigation.transparency" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Navigation.dashboard" })).toHaveLength(2);
   });
 
   it("navigation links point to locale-prefixed routes", () => {
     renderHeader();
     // Check the desktop nav links (first of each pair)
     expect(screen.getAllByRole("link", { name: "Navigation.reliefMap" })[0]).toHaveAttribute("href", "/en");
-    expect(screen.getAllByRole("link", { name: "Navigation.transparency" })[0]).toHaveAttribute("href", "/en/transparency");
+    expect(screen.getAllByRole("link", { name: "Navigation.dashboard" })[0]).toHaveAttribute("href", "/en/dashboard");
   });
 
   it("renders a hamburger menu button on mobile", () => {

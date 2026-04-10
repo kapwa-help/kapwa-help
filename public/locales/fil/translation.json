@@ -16,8 +16,8 @@
     "stories": "Mga kwento",
     "deployments": "Mga deployment",
     "reliefOps": "Relief Ops",
-    "reliefMap": "Relief Map",
-    "transparency": "Transparency"
+    "reliefMap": "Mapa",
+    "dashboard": "Dashboard"
   },
   "Dashboard": {
     "hero": "Koordinasyon ng Tulong sa Komunidad",
@@ -140,7 +140,8 @@
     "statusPending": "Nakabinbin",
     "statusVerified": "Na-verify",
     "statusInTransit": "Sa Transit",
-    "statusConfirmed": "Nakumpirma"
+    "statusConfirmed": "Nakumpirma",
+    "urgencyCritical": "Kritikal"
   },
   "HubDetail": {
     "inventory": "Mga Available na Kategorya",
@@ -149,7 +150,9 @@
   "HazardDetail": {
     "description": "Paglalarawan",
     "reportedBy": "Iniulat ni",
-    "reported": "Iniulat"
+    "reported": "Iniulat",
+    "markResolved": "Markahan bilang Nalutas",
+    "resolving": "Nilulutas..."
   },
   "HazardForm": {
     "description": "Paglalarawan",

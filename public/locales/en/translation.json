@@ -16,8 +16,8 @@
     "stories": "Stories",
     "deployments": "Deployments",
     "reliefOps": "Relief Ops",
-    "reliefMap": "Relief Map",
-    "transparency": "Transparency"
+    "reliefMap": "Map",
+    "dashboard": "Dashboard"
   },
   "Dashboard": {
     "hero": "Community Relief Coordination",
@@ -140,7 +140,8 @@
     "statusPending": "Pending",
     "statusVerified": "Verified",
     "statusInTransit": "In Transit",
-    "statusConfirmed": "Confirmed"
+    "statusConfirmed": "Confirmed",
+    "urgencyCritical": "Critical"
   },
   "HubDetail": {
     "inventory": "Available Categories",
@@ -149,7 +150,9 @@
   "HazardDetail": {
     "description": "Description",
     "reportedBy": "Reported By",
-    "reported": "Reported"
+    "reported": "Reported",
+    "markResolved": "Mark as Resolved",
+    "resolving": "Resolving..."
   },
   "HazardForm": {
     "description": "Description",
@@ -177,7 +180,17 @@
     "submitNeed": "Submit a Need",
     "reportDonation": "Report a Donation",
     "reportPurchase": "Report a Purchase",
-    "reportHazard": "Report a Hazard"
+    "reportHazard": "Report a Hazard",
+    "optionNeed": "Need",
+    "optionDonation": "Donation",
+    "optionPurchase": "Purchase",
+    "optionHazard": "Hazard",
+    "change": "Change",
+    "locationAcquiring": "Getting location...",
+    "locationCaptured": "\u2713 Location captured",
+    "locationUnavailable": "Location unavailable",
+    "retry": "Retry",
+    "shareLocation": "Share location"
   },
   "DonationForm": {
     "type": "Donation Type",
@@ -250,7 +263,7 @@
     "savedMessage": "Will send when you're back online.",
     "gapCategory": "Type of Need",
     "gapPlaceholder": "Select type of need",
-    "accessStatus": "Road Access",
+    "accessStatus": "Accessibility",
     "accessPlaceholder": "How can this area be reached?",
     "accessTruck": "Truck accessible",
     "access4x4": "4x4 vehicle only",

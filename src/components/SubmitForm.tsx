@@ -13,6 +13,17 @@ import {
 } from "@/lib/form-cache";
 import { roundCoord } from "@/lib/geohash";
 import { useOutbox } from "@/lib/outbox-context";
+import {
+  FormLabel,
+  FormLegend,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  FormSubmitButton,
+  FormError,
+  FormSuccess,
+  FormSuccessButton,
+} from "@/components/forms/form-fields";
 
 interface AidCategory {
   id: string;
@@ -35,6 +46,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
   const [formKey, setFormKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [urgency, setUrgency] = useState<string | null>(null);
   const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,7 +106,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (selectedCategories.size === 0) return;
+    if (!coords || selectedCategories.size === 0) return;
     setSubmitting(true);
     setError(null);
 
@@ -143,7 +155,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
 
   if (submitted) {
     return (
-      <div className="text-center py-8">
+      <FormSuccess>
         <h2
           className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}
         >
@@ -156,18 +168,17 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
               : "SubmitForm.successMessage"
           )}
         </p>
-        <button
+        <FormSuccessButton
           onClick={() => {
             setSubmitted(false);
             setSavedOffline(false);
             setSelectedCategories(new Set());
             setFormKey((k) => k + 1);
           }}
-          className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
           {t("SubmitForm.submitAnother")}
-        </button>
-      </div>
+        </FormSuccessButton>
+      </FormSuccess>
     );
   }
 
@@ -175,38 +186,34 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       {/* Contact name */}
       <div>
-        <label htmlFor="contact_name" className="block text-sm text-neutral-400">
+        <FormLabel htmlFor="contact_name" required>
           {t("SubmitForm.contactName")}
-        </label>
-        <input
+        </FormLabel>
+        <FormInput
           id="contact_name"
           name="contact_name"
           type="text"
           required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.contactNamePlaceholder")}
         />
       </div>
 
       {/* Contact phone */}
       <div>
-        <label htmlFor="contact_phone" className="block text-sm text-neutral-400">
+        <FormLabel htmlFor="contact_phone">
           {t("SubmitForm.contactPhone")}
-        </label>
-        <input
+        </FormLabel>
+        <FormInput
           id="contact_phone"
           name="contact_phone"
           type="tel"
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.contactPhonePlaceholder")}
         />
       </div>
 
       {/* Aid categories — multi-select checkboxes */}
       <fieldset>
-        <legend className="text-sm text-neutral-400">
-          {t("SubmitForm.selectCategories")}
-        </legend>
+        <FormLegend required>{t("SubmitForm.selectCategories")}</FormLegend>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {loading ? (
             <p className="col-span-full text-sm text-neutral-400">{t("SubmitForm.loadingOptions")}</p>
@@ -226,6 +233,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
                   onChange={() => toggleCategory(c.id)}
                   className="sr-only"
                 />
+                <span className="opacity-60">{selectedCategories.has(c.id) ? "✓" : "+"}</span>
                 {c.icon && <span>{c.icon}</span>}
                 <span>{c.name}</span>
               </label>
@@ -236,88 +244,91 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
 
       {/* Access status */}
       <div>
-        <label htmlFor="access_status" className="block text-sm text-neutral-400">
+        <FormLabel htmlFor="access_status" required>
           {t("SubmitForm.accessStatus")}
-        </label>
-        <select
-          id="access_status"
-          name="access_status"
-          required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
-        >
+        </FormLabel>
+        <FormSelect id="access_status" name="access_status" required>
           <option value="">{t("SubmitForm.accessPlaceholder")}</option>
           <option value="truck">{t("SubmitForm.accessTruck")}</option>
           <option value="4x4">{t("SubmitForm.access4x4")}</option>
           <option value="boat">{t("SubmitForm.accessBoat")}</option>
           <option value="foot_only">{t("SubmitForm.accessFootOnly")}</option>
           <option value="cut_off">{t("SubmitForm.accessCutOff")}</option>
-        </select>
+        </FormSelect>
       </div>
 
       {/* Urgency */}
       <fieldset>
-        <legend className="text-sm text-neutral-400">
-          {t("SubmitForm.urgencyLabel")}
-        </legend>
+        <FormLegend required>{t("SubmitForm.urgencyLabel")}</FormLegend>
         <div className="mt-2 flex gap-2">
-          {(["low", "medium", "high", "critical"] as const).map((level) => (
-            <label key={level} className="flex-1 cursor-pointer">
-              <input
-                type="radio"
-                name="urgency"
-                value={level}
-                required
-                className="peer sr-only"
-              />
-              <span className="block rounded-xl border border-neutral-400/20 bg-base px-2 py-3 text-center text-xs peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:text-primary sm:text-sm">
-                {t(`SubmitForm.urgency${level.charAt(0).toUpperCase() + level.slice(1)}`)}
-              </span>
-            </label>
-          ))}
+          {(["low", "medium", "high", "critical"] as const).map((level) => {
+            const bright = {
+              low: "border-success bg-success/20 text-success",
+              medium: "border-warning bg-warning/20 text-warning",
+              high: "border-high bg-high/20 text-high",
+              critical: "border-error bg-error/20 text-error",
+            };
+            const muted = {
+              low: "border-success/30 text-success/40",
+              medium: "border-warning/30 text-warning/40",
+              high: "border-high/30 text-high/40",
+              critical: "border-error/30 text-error/40",
+            };
+            const selected = urgency === level;
+            const dimmed = urgency !== null && !selected;
+            return (
+              <label key={level} className="flex-1 cursor-pointer">
+                <input
+                  type="radio"
+                  name="urgency"
+                  value={level}
+                  required
+                  checked={selected}
+                  onChange={() => setUrgency(level)}
+                  className="sr-only"
+                />
+                <span className={`block rounded-xl border px-2 py-3 text-center text-xs sm:text-sm transition-colors ${
+                  dimmed ? muted[level] : bright[level]
+                }`}>
+                  {t(`SubmitForm.urgency${level.charAt(0).toUpperCase() + level.slice(1)}`)}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </fieldset>
 
       {/* Number of people */}
       <div>
-        <label htmlFor="num_people" className="block text-sm text-neutral-400">
+        <FormLabel htmlFor="num_people" required>
           {t("SubmitForm.numPeople")}
-        </label>
-        <input
+        </FormLabel>
+        <FormInput
           id="num_people"
           name="num_people"
           type="number"
           min="1"
           required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.numPeoplePlaceholder")}
         />
       </div>
 
       {/* Notes */}
       <div>
-        <label htmlFor="notes" className="block text-sm text-neutral-400">
-          {t("SubmitForm.notes")}
-        </label>
-        <textarea
+        <FormLabel htmlFor="notes">{t("SubmitForm.notes")}</FormLabel>
+        <FormTextarea
           id="notes"
           name="notes"
           rows={3}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder={t("SubmitForm.notesPlaceholder")}
         />
       </div>
 
-      {/* Error message */}
-      {error && <p className="text-sm text-error">{error}</p>}
+      <FormError message={error} />
 
-      {/* Submit button */}
-      <button
-        type="submit"
-        disabled={submitting || selectedCategories.size === 0}
-        className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-neutral-50 shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200 disabled:opacity-50"
-      >
+      <FormSubmitButton disabled={submitting || selectedCategories.size === 0}>
         {submitting ? t("SubmitForm.submitting") : t("SubmitForm.submit")}
-      </button>
+      </FormSubmitButton>
     </form>
   );
 }

@@ -16,8 +16,8 @@
     "stories": "Dagiti Estoria",
     "deployments": "Dagiti pannakaipakat",
     "reliefOps": "Relief Ops",
-    "reliefMap": "Mapa ti Relief",
-    "transparency": "Kinalawag"
+    "reliefMap": "Mapa",
+    "dashboard": "Dashboard"
   },
   "Dashboard": {
     "hero": "Koordinasion ti Tulong iti Komunidad",
@@ -140,7 +140,8 @@
     "statusPending": "Naisardeng biit",
     "statusVerified": "Naberipikado",
     "statusInTransit": "Iti Transit",
-    "statusConfirmed": "Nakumpirma"
+    "statusConfirmed": "Nakumpirma",
+    "urgencyCritical": "Kritikal"
   },
   "HubDetail": {
     "inventory": "Dagiti Magun-od a Kategoria",
@@ -149,7 +150,9 @@
   "HazardDetail": {
     "description": "Panangiladawan",
     "reportedBy": "Impadamag Ni",
-    "reported": "Naipadamag"
+    "reported": "Naipadamag",
+    "markResolved": "Markaan a Narisut",
+    "resolving": "Ar-arigen..."
   },
   "HazardForm": {
     "description": "Panangiladawan",

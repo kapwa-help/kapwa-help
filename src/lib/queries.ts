@@ -120,7 +120,8 @@ export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
     .select(
       "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))"
     )
-    .eq("event_id", eventId);
+    .eq("event_id", eventId)
+    .in("status", ["pending", "verified", "in_transit"]);
 
   if (error) throw error;
   return data.map((row) => {
@@ -260,6 +261,14 @@ export async function getHazards(eventId: string): Promise<HazardPoint[]> {
 
 export async function insertHazard(hazard: HazardInsert) {
   const { error } = await supabase.from("hazards").insert(hazard);
+  if (error) throw error;
+}
+
+export async function resolveHazard(id: string) {
+  const { error } = await supabase
+    .from("hazards")
+    .update({ status: "resolved" })
+    .eq("id", id);
   if (error) throw error;
 }
 

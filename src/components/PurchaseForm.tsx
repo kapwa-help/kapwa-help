@@ -9,6 +9,17 @@ import {
 } from "@/lib/queries";
 import { getCachedOptions, setCachedOptions, addToOutbox } from "@/lib/form-cache";
 import { useOutbox } from "@/lib/outbox-context";
+import {
+  FormLabel,
+  FormLegend,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  FormSubmitButton,
+  FormError,
+  FormSuccess,
+  FormSuccessButton,
+} from "@/components/forms/form-fields";
 
 interface Organization {
   id: string;
@@ -127,54 +138,46 @@ export default function PurchaseForm() {
 
   if (submitted) {
     return (
-      <div className="text-center py-8">
+      <FormSuccess>
         <h2 className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}>
           {t(savedOffline ? "PurchaseForm.savedTitle" : "PurchaseForm.success")}
         </h2>
         <p className="mt-2 text-neutral-400">
           {t(savedOffline ? "PurchaseForm.savedMessage" : "PurchaseForm.successMessage")}
         </p>
-        <button
+        <FormSuccessButton
           onClick={() => {
             setSubmitted(false);
             setSavedOffline(false);
             setSelectedCategories(new Set());
             setFormKey((k) => k + 1);
           }}
-          className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
           {t("ReportForm.reportPurchase")}
-        </button>
-      </div>
+        </FormSuccessButton>
+      </FormSuccess>
     );
   }
 
   return (
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="organization_id" className="block text-sm text-neutral-400">
+        <FormLabel htmlFor="organization_id" required>
           {t("PurchaseForm.organization")}
-        </label>
-        <select
-          id="organization_id"
-          name="organization_id"
-          required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
-        >
+        </FormLabel>
+        <FormSelect id="organization_id" name="organization_id" required>
           <option value="">{t("ClaimForm.organizationPlaceholder")}</option>
           {orgs.map((o) => (
             <option key={o.id} value={o.id}>
               {o.name}
             </option>
           ))}
-        </select>
+        </FormSelect>
       </div>
 
       {/* Aid categories — multi-select checkboxes */}
       <fieldset>
-        <legend className="text-sm text-neutral-400">
-          {t("PurchaseForm.category")}
-        </legend>
+        <FormLegend required>{t("PurchaseForm.category")}</FormLegend>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {categories.map((c) => (
             <label
@@ -191,6 +194,7 @@ export default function PurchaseForm() {
                 onChange={() => toggleCategory(c.id)}
                 className="sr-only"
               />
+              <span className="opacity-60">{selectedCategories.has(c.id) ? "✓" : "+"}</span>
               {c.icon && <span>{c.icon}</span>}
               <span>{c.name}</span>
             </label>
@@ -199,55 +203,38 @@ export default function PurchaseForm() {
       </fieldset>
 
       <div>
-        <label htmlFor="cost" className="block text-sm text-neutral-400">
-          {t("PurchaseForm.cost")}
-        </label>
-        <input
+        <FormLabel htmlFor="cost" required>{t("PurchaseForm.cost")}</FormLabel>
+        <FormInput
           id="cost"
           name="cost"
           type="number"
           min="0"
           step="0.01"
           required
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           placeholder="0.00"
         />
       </div>
 
       <div>
-        <label htmlFor="date" className="block text-sm text-neutral-400">
-          {t("PurchaseForm.date")}
-        </label>
-        <input
+        <FormLabel htmlFor="date" required>{t("PurchaseForm.date")}</FormLabel>
+        <FormInput
           id="date"
           name="date"
           type="date"
           defaultValue={new Date().toISOString().split("T")[0]}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-sm text-neutral-400">
-          {t("PurchaseForm.notes")}
-        </label>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={3}
-          className="mt-1 w-full rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-neutral-50 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-        />
+        <FormLabel htmlFor="notes">{t("PurchaseForm.notes")}</FormLabel>
+        <FormTextarea id="notes" name="notes" rows={3} />
       </div>
 
-      {error && <p className="text-sm text-error">{error}</p>}
+      <FormError message={error} />
 
-      <button
-        type="submit"
-        disabled={submitting || selectedCategories.size === 0}
-        className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-neutral-50 shadow-[0_0_12px_rgba(14,154,167,0.3)] hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)] transition-all duration-200 disabled:opacity-50"
-      >
+      <FormSubmitButton disabled={submitting || selectedCategories.size === 0}>
         {submitting ? t("SubmitForm.submitting") : t("PurchaseForm.submit")}
-      </button>
+      </FormSubmitButton>
     </form>
   );
 }
