@@ -15,7 +15,7 @@ const formOptions: { value: FormType; labelKey: string }[] = [
   { value: "hazard", labelKey: "ReportForm.optionHazard" },
 ];
 
-export function ReportPage() {
+export default function ReportPage() {
   const { t } = useTranslation();
   const [formType, setFormType] = useState<FormType | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);

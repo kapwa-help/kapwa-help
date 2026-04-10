@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Outlet, useParams, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { supportedLocales, type Locale } from "../i18n";
@@ -31,7 +31,9 @@ export function RootLayout() {
 
   return (
     <OutboxProvider>
-      <Outlet />
+      <Suspense fallback={null}>
+        <Outlet />
+      </Suspense>
     </OutboxProvider>
   );
 }
