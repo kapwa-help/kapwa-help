@@ -22,9 +22,9 @@ function makeNeedIcon(status: string, urgency?: string) {
   const cls = urgency === "critical" ? "pulse-critical" : "";
   return L.divIcon({
     className: "",
-    html: `<div class="${cls}" style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid var(--color-neutral-50);box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    html: `<div class="${cls}" style="width:24px;height:24px;border-radius:50%;background:${color};border:2px solid var(--color-neutral-50);box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
   });
 }
 
@@ -153,6 +153,7 @@ export default function ReliefMapLeaflet({
               key={`need-${point.id}`}
               position={[point.lat, point.lng]}
               icon={makeNeedIcon(point.status, point.urgency)}
+              alt={`${point.status} need: ${point.categories[0]?.name ?? "uncategorized"}`}
               eventHandlers={{ click: () => onNeedSelect(point) }}
             />
           ))}
@@ -164,6 +165,7 @@ export default function ReliefMapLeaflet({
               key={`hub-${hub.id}`}
               position={[hub.lat, hub.lng]}
               icon={makeHubIcon()}
+              alt={`Relief hub: ${hub.name}`}
               eventHandlers={{ click: () => onHubSelect(hub) }}
             />
           ))}
@@ -175,6 +177,7 @@ export default function ReliefMapLeaflet({
               key={`hazard-${hazard.id}`}
               position={[hazard.lat, hazard.lng]}
               icon={makeHazardIcon()}
+              alt={`Hazard: ${hazard.description}`}
               eventHandlers={{ click: () => onHazardSelect(hazard) }}
             />
           ))}
