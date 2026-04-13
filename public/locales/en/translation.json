@@ -158,6 +158,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Describe the hazard...",
     "photo": "Photo (optional)",
+    "photoButton": "Photo",
     "reportedBy": "Your Name (optional)",
     "reportedByPlaceholder": "Optional — for follow-up",
     "submit": "Report Hazard",

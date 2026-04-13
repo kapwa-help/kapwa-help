@@ -158,6 +158,7 @@
     "description": "Panangiladawan",
     "descriptionPlaceholder": "Iladawan ti peggad...",
     "photo": "Ladawan (opsional)",
+    "photoButton": "Ladawan",
     "reportedBy": "Ti Naganmo (opsional)",
     "reportedByPlaceholder": "Opsional — para iti panangsurot",
     "submit": "Ireport ti Peligro",

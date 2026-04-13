@@ -158,6 +158,7 @@
     "description": "Paglalarawan",
     "descriptionPlaceholder": "Ilarawan ang panganib...",
     "photo": "Larawan (opsyonal)",
+    "photoButton": "Larawan",
     "reportedBy": "Iyong Pangalan (opsyonal)",
     "reportedByPlaceholder": "Opsyonal — para sa follow-up",
     "submit": "Iulat ang Hazard",
