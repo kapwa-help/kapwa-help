@@ -36,13 +36,13 @@ export default function HubDetailPanel({ hub, onClose, variant = "sheet" }: Prop
       {/* Hub name */}
       <h3 className="mb-1 text-lg font-semibold text-neutral-50">{hub.name}</h3>
 
-      {/* Notes */}
-      {hub.notes && (
-        <p className="mb-4 text-sm text-neutral-400">{hub.notes}</p>
+      {/* Description — subtitle */}
+      {hub.description && (
+        <p className="mb-4 text-sm text-neutral-400">{hub.description}</p>
       )}
 
       {/* Inventory — category checklist */}
-      <div>
+      <div className="mb-4">
         <p className="mb-2 text-sm font-medium text-neutral-400">
           {t("HubDetail.inventory")}
         </p>
@@ -60,6 +60,20 @@ export default function HubDetailPanel({ hub, onClose, variant = "sheet" }: Prop
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      {/* Notes — free-text status/needs */}
+      <div>
+        <p className="mb-2 text-sm font-medium text-neutral-400">
+          {t("HubDetail.notes")}
+        </p>
+        {hub.notes ? (
+          <p className="whitespace-pre-line rounded-lg bg-base/30 px-3 py-2 text-sm text-neutral-50">
+            {hub.notes}
+          </p>
+        ) : (
+          <p className="text-sm text-neutral-400/60">{t("HubDetail.noNotes")}</p>
         )}
       </div>
     </>

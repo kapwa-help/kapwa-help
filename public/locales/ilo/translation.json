@@ -16,8 +16,7 @@
     "stories": "Dagiti Estoria",
     "deployments": "Dagiti pannakaipakat",
     "reliefOps": "Relief Ops",
-    "reliefMap": "Mapa",
-    "dashboard": "Dashboard"
+    "reliefMap": "Mapa"
   },
   "Dashboard": {
     "hero": "Koordinasion ti Tulong iti Komunidad",
@@ -145,7 +144,9 @@
   },
   "HubDetail": {
     "inventory": "Dagiti Magun-od a Kategoria",
-    "noInventory": "Awan ti datos ti imbentaryo"
+    "noInventory": "Awan ti datos ti imbentaryo",
+    "notes": "Dagiti Pakaammo",
+    "noNotes": "Awan pay ti nota"
   },
   "HazardDetail": {
     "description": "Panangiladawan",
@@ -181,7 +182,17 @@
     "submitNeed": "Mangisubmitir iti Kasapulan",
     "reportDonation": "Ireport ti Donasion",
     "reportPurchase": "Ireport ti Gatang",
-    "reportHazard": "Ireport ti Peligro"
+    "reportHazard": "Ireport ti Peligro",
+    "optionNeed": "Kasapulan",
+    "optionDonation": "Donasion",
+    "optionPurchase": "Gumatang",
+    "optionHazard": "Bangen",
+    "change": "Baliwan",
+    "locationAcquiring": "Magun-od ti lokasion...",
+    "locationCaptured": "✓ Lokasion a naala",
+    "locationUnavailable": "Saan a magun-od ti lokasion",
+    "retry": "Padasem manen",
+    "shareLocation": "Ibinglay ti lokasion"
   },
   "DonationForm": {
     "type": "Kita ti Donasion",
