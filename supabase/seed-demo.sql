@@ -232,16 +232,16 @@ END $$;
 -- ============================================================
 -- Hazards
 -- ============================================================
-INSERT INTO hazards (id, event_id, description, latitude, longitude, status, reported_by) VALUES
+INSERT INTO hazards (id, event_id, description, photo_url, latitude, longitude, status, reported_by) VALUES
   ('10000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001',
-   'Major flooding along Bauang River — water level 2m above normal', 16.5412, 120.3301, 'active', 'MDRRMO Bauang'),
+   'Major flooding along Bauang River — water level 2m above normal', '/demo-hazards/flooding.jpg', 16.5412, 120.3301, 'active', 'MDRRMO Bauang'),
   ('10000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001',
-   'Landslide blocking Naguilian Road km 14', 16.5189, 120.3956, 'active', 'PNP Naguilian'),
+   'Landslide blocking Naguilian Road km 14', '/demo-hazards/landslide.jpg', 16.5189, 120.3956, 'active', 'PNP Naguilian'),
   ('10000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001',
-   'Downed power lines near Bacnotan market', 16.7289, 120.3512, 'active', NULL),
+   'Downed power lines near Bacnotan market', '/demo-hazards/power-lines.jpg', 16.7289, 120.3512, 'active', NULL),
   ('10000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000001',
-   'Bridge weakened at San Gabriel crossing — do not use heavy vehicles', 16.6945, 120.4123, 'resolved', 'DPWH La Union')
-ON CONFLICT DO NOTHING;
+   'Bridge weakened at San Gabriel crossing — do not use heavy vehicles', '/demo-hazards/bridge.jpg', 16.6945, 120.4123, 'resolved', 'DPWH La Union')
+ON CONFLICT (id) DO UPDATE SET photo_url = EXCLUDED.photo_url;
 
 -- ============================================================
 -- Deployments (for confirmed needs)
