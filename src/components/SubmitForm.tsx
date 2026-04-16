@@ -123,7 +123,7 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
         id,
         event_id: eventId,
         contact_name: formData.get("contact_name") as string,
-        contact_phone: (formData.get("contact_phone") as string) || undefined,
+        contact_phone: formData.get("contact_phone") as string,
         access_status: formData.get("access_status") as string,
         urgency: formData.get("urgency") as string,
         num_people: Number(formData.get("num_people")) || 1,
@@ -200,13 +200,14 @@ export default function SubmitForm({ coords }: SubmitFormProps) {
 
       {/* Contact phone */}
       <div>
-        <FormLabel htmlFor="contact_phone">
+        <FormLabel htmlFor="contact_phone" required>
           {t("SubmitForm.contactPhone")}
         </FormLabel>
         <FormInput
           id="contact_phone"
           name="contact_phone"
           type="tel"
+          required
           placeholder={t("SubmitForm.contactPhonePlaceholder")}
         />
       </div>

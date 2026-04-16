@@ -24,6 +24,7 @@ export default function HazardForm({ coords }: HazardFormProps) {
   const { refreshCount } = useOutbox();
   const [description, setDescription] = useState("");
   const [reportedBy, setReportedBy] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,6 +86,7 @@ export default function HazardForm({ coords }: HazardFormProps) {
         latitude: roundCoord(coords.lat),
         longitude: roundCoord(coords.lng),
         reported_by: reportedBy || undefined,
+        contact_phone: contactPhone || undefined,
       };
 
       try {
@@ -130,6 +132,7 @@ export default function HazardForm({ coords }: HazardFormProps) {
             setSavedOffline(false);
             setDescription("");
             setReportedBy("");
+            setContactPhone("");
             removePhoto();
           }}
         >
@@ -211,6 +214,20 @@ export default function HazardForm({ coords }: HazardFormProps) {
           value={reportedBy}
           onChange={(e) => setReportedBy(e.target.value)}
           placeholder={t("HazardForm.reportedByPlaceholder")}
+        />
+      </div>
+
+      {/* Contact phone */}
+      <div>
+        <FormLabel htmlFor="hazard-contact-phone">
+          {t("HazardForm.contactPhone")}
+        </FormLabel>
+        <FormInput
+          id="hazard-contact-phone"
+          type="tel"
+          value={contactPhone}
+          onChange={(e) => setContactPhone(e.target.value)}
+          placeholder={t("HazardForm.contactPhonePlaceholder")}
         />
       </div>
 

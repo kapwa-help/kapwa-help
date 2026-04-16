@@ -1,5 +1,5 @@
 const DB_NAME = "luaid";
-const DB_VERSION = 6;
+const DB_VERSION = 7;
 const STORE_NAME = "dashboard";
 
 const RELIEF_MAP_KEY = "reliefMap";
@@ -40,6 +40,7 @@ export type ReliefMapData = {
     lng: number;
     status: string;
     reportedBy: string | null;
+    contactPhone: string | null;
     createdAt: string;
   }[];
 };

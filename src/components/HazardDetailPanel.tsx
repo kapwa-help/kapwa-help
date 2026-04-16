@@ -87,6 +87,20 @@ export default function HazardDetailPanel({ hazard, onClose, onResolve, variant 
           </div>
         )}
 
+        {hazard.contactPhone && (
+          <div>
+            <span className="text-neutral-400">{t("HazardDetail.contactPhone")}</span>
+            <p className="text-neutral-50">
+              <a
+                href={`tel:${hazard.contactPhone}`}
+                className="text-primary hover:underline"
+              >
+                {hazard.contactPhone}
+              </a>
+            </p>
+          </div>
+        )}
+
         <div>
           <span className="text-neutral-400">{t("HazardDetail.reported")}</span>
           <p className="text-neutral-50">{formatRelativeTime(hazard.createdAt)}</p>
