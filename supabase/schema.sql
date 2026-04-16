@@ -138,6 +138,7 @@ CREATE TABLE hazards (
   longitude decimal(9,6) NOT NULL,
   status hazard_status NOT NULL DEFAULT 'active',
   reported_by text,
+  contact_phone text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
