@@ -16,7 +16,7 @@ Service worker is only generated on production build. Use `npm run build && npm 
 
 ## Dashboard Caching (`src/lib/cache.ts`)
 
-Stale-while-revalidate with IndexedDB (DB version 6):
+Stale-while-revalidate with IndexedDB (version tracked by `DB_VERSION` in `src/lib/cache.ts` — bump it when the cache shape changes so stale entries are dropped on upgrade):
 - Two cache keys: `reliefMap` (map page data) and `transparency` (transparency page data)
 - On load: cached data renders immediately, fresh data fetched in background
 - Auto-refresh on `online` event
