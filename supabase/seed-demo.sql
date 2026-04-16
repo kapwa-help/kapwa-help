@@ -33,16 +33,23 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 INSERT INTO deployment_hubs (id, event_id, name, lat, lng, description, notes) VALUES
   ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001',
-   'San Juan Municipal Hall', 16.6619, 120.3269, 'Main coordination center', 'Open 24/7 during relief ops'),
+   'San Juan Municipal Hall', 16.6619, 120.3269, 'Main coordination center',
+   'Open 24/7 during relief ops. Running low on hot meals — requesting more rice and canned goods. Volunteers needed for evening shifts. Coordinator: Mayor''s Office, 0917-555-0101.'),
   ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001',
-   'Bacnotan Community Center', 16.7314, 120.3494, 'Northern relief staging area', NULL),
+   'Bacnotan Community Center', 16.7314, 120.3494, 'Northern relief staging area',
+   'Staging area currently at ~80% capacity. Urgent need for blankets and children''s clothing for evacuees. Contact Brgy. Capt. Reyes at 0917-555-0202.'),
   ('c0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001',
-   'San Fernando City Hall', 16.6159, 120.3167, 'Provincial capital hub', 'Serves as backup comms center'),
+   'San Fernando City Hall', 16.6159, 120.3167, 'Provincial capital hub',
+   'Serves as backup comms center. Supplies adequate. Looking for volunteers for Saturday and Sunday shifts. Satellite phone available for remote coordination.'),
   ('c0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000001',
-   'Bauang Relief Center', 16.5328, 120.3378, 'Southern relief distribution', NULL),
+   'Bauang Relief Center', 16.5328, 120.3378, 'Southern relief distribution',
+   'Southern distribution point. Drinking water stock lasts ~2 days — resupply requested. Medical team on-site until 6 PM daily. Bridge access OK via truck.'),
   ('c0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000001',
-   'Luna Emergency Shelter', 16.8555, 120.3803, 'Emergency shelter for evacuees', 'Capacity: ~200 people')
-ON CONFLICT DO NOTHING;
+   'Luna Emergency Shelter', 16.8555, 120.3803, 'Emergency shelter for evacuees',
+   'Capacity: ~200 people (currently sheltering 145). Need hygiene kits and additional cots. Road access via 4x4 only after landslide at km 14.')
+ON CONFLICT (id) DO UPDATE SET
+  description = EXCLUDED.description,
+  notes = EXCLUDED.notes;
 
 -- ============================================================
 -- Hub Inventory (which categories each hub has)

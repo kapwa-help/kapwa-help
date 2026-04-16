@@ -16,8 +16,7 @@
     "stories": "Mga kwento",
     "deployments": "Mga deployment",
     "reliefOps": "Relief Ops",
-    "reliefMap": "Mapa",
-    "dashboard": "Dashboard"
+    "reliefMap": "Mapa"
   },
   "Dashboard": {
     "hero": "Koordinasyon ng Tulong sa Komunidad",
@@ -145,7 +144,9 @@
   },
   "HubDetail": {
     "inventory": "Mga Available na Kategorya",
-    "noInventory": "Walang data ng imbentaryo"
+    "noInventory": "Walang data ng imbentaryo",
+    "notes": "Mga Tala",
+    "noNotes": "Wala pang tala"
   },
   "HazardDetail": {
     "description": "Paglalarawan",
@@ -181,7 +182,17 @@
     "submitNeed": "Magsumite ng isang Pangangailangan",
     "reportDonation": "Mag-ulat ng Donasyon",
     "reportPurchase": "Mag-ulat ng isang Pagbili",
-    "reportHazard": "Mag-ulat ng isang Hazard"
+    "reportHazard": "Mag-ulat ng isang Hazard",
+    "optionNeed": "Kailangan",
+    "optionDonation": "Donasyon",
+    "optionPurchase": "Bumili",
+    "optionHazard": "Hazard",
+    "change": "Baguhin",
+    "locationAcquiring": "Kinukuha ang lokasyon...",
+    "locationCaptured": "✓ Nakuha ang lokasyon",
+    "locationUnavailable": "Hindi available ang lokasyon",
+    "retry": "Subukan muli",
+    "shareLocation": "Ibahagi ang lokasyon"
   },
   "DonationForm": {
     "type": "Uri ng Donasyon",
