@@ -152,6 +152,7 @@
   "HazardDetail": {
     "description": "Description",
     "reportedBy": "Reported By",
+    "contactPhone": "Phone",
     "reported": "Reported",
     "markResolved": "Mark as Resolved",
     "resolving": "Resolving..."
@@ -163,6 +164,8 @@
     "photoButton": "Photo",
     "reportedBy": "Your Name (optional)",
     "reportedByPlaceholder": "Optional — for follow-up",
+    "contactPhone": "Phone Number (optional)",
+    "contactPhonePlaceholder": "Optional — for follow-up",
     "submit": "Report Hazard",
     "submitting": "Submitting...",
     "success": "Hazard reported successfully!",
@@ -238,7 +241,7 @@
     "contactName": "Your Name",
     "contactNamePlaceholder": "Full name",
     "contactPhone": "Phone Number",
-    "contactPhonePlaceholder": "Optional — for follow-up",
+    "contactPhonePlaceholder": "Required — for follow-up",
     "selectCategories": "Types of Need",
     "notes": "Additional Notes",
     "notesPlaceholder": "Any details that would help...",

@@ -151,6 +151,7 @@
   "HazardDetail": {
     "description": "Paglalarawan",
     "reportedBy": "Iniulat ni",
+    "contactPhone": "Telepono",
     "reported": "Iniulat",
     "markResolved": "Markahan bilang Nalutas",
     "resolving": "Nilulutas..."
@@ -162,6 +163,8 @@
     "photoButton": "Larawan",
     "reportedBy": "Iyong Pangalan (opsyonal)",
     "reportedByPlaceholder": "Opsyonal — para sa follow-up",
+    "contactPhone": "Numero ng Telepono (opsyonal)",
+    "contactPhonePlaceholder": "Opsyonal — para sa follow-up",
     "submit": "Iulat ang Hazard",
     "submitting": "Submitting...",
     "success": "Matagumpay na naiulat ang Hazard!",
@@ -237,7 +240,7 @@
     "contactName": "Pangalan mo",
     "contactNamePlaceholder": "Buong pangalan",
     "contactPhone": "Numero ng Telepono",
-    "contactPhonePlaceholder": "Opsyonal — para sa follow-up",
+    "contactPhonePlaceholder": "Kinakailangan — para sa follow-up",
     "selectCategories": "Mga Uri ng Pangangailangan",
     "notes": "Karagdagang Tala",
     "notesPlaceholder": "Anumang mga detalye na makakatulong...",

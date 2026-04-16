@@ -151,6 +151,7 @@
   "HazardDetail": {
     "description": "Panangiladawan",
     "reportedBy": "Impadamag Ni",
+    "contactPhone": "Telepono",
     "reported": "Naipadamag",
     "markResolved": "Markaan a Narisut",
     "resolving": "Ar-arigen..."
@@ -162,6 +163,8 @@
     "photoButton": "Ladawan",
     "reportedBy": "Ti Naganmo (opsional)",
     "reportedByPlaceholder": "Opsional — para iti panangsurot",
+    "contactPhone": "Numero ti Telepono (opsional) .",
+    "contactPhonePlaceholder": "Opsional — para iti panangsurot",
     "submit": "Ireport ti Peligro",
     "submitting": "Submitting...",
     "success": "Naballigi ti impadamag ti Hazard!",
@@ -237,7 +240,7 @@
     "contactName": "Ti Naganmo",
     "contactNamePlaceholder": "Buo a nagan",
     "contactPhone": "Numero ti Telepono",
-    "contactPhonePlaceholder": "Opsional — para iti panangsurot",
+    "contactPhonePlaceholder": "Masapul — para iti panangsurot",
     "selectCategories": "Dagiti Kita ti Kasapulan",
     "notes": "Dagiti Kanayonan a Nota",
     "notesPlaceholder": "Aniaman a detalye a makatulong...",
