@@ -37,6 +37,7 @@ export type HazardPoint = {
   lng: number;
   status: string;
   reportedBy: string | null;
+  contactPhone: string | null;
   createdAt: string;
 };
 
@@ -88,6 +89,7 @@ export interface HazardInsert {
   latitude: number;
   longitude: number;
   reported_by?: string;
+  contact_phone?: string;
 }
 
 export interface DeploymentInsert {
@@ -242,7 +244,7 @@ export async function getHubs(eventId: string) {
 export async function getHazards(eventId: string): Promise<HazardPoint[]> {
   const { data, error } = await supabase
     .from("hazards")
-    .select("id, description, photo_url, latitude, longitude, status, reported_by, created_at")
+    .select("id, description, photo_url, latitude, longitude, status, reported_by, contact_phone, created_at")
     .eq("event_id", eventId)
     .eq("status", "active");
   if (error) throw error;
@@ -255,6 +257,7 @@ export async function getHazards(eventId: string): Promise<HazardPoint[]> {
     lng: Number(row.longitude),
     status: row.status,
     reportedBy: row.reported_by,
+    contactPhone: row.contact_phone,
     createdAt: row.created_at as string,
   }));
 }
