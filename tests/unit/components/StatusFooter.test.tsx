@@ -23,10 +23,12 @@ describe("StatusFooter", () => {
     expect(screen.getByText("Dashboard.offline")).toBeInTheDocument();
   });
 
-  it("renders event name when provided", () => {
+  it("renders event name with responding-to label when provided", () => {
     vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
     render(<StatusFooter eventName="Typhoon Emong" />);
-    expect(screen.getByText("Typhoon Emong")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Dashboard\.respondingTo:\s*Typhoon Emong/),
+    ).toBeInTheDocument();
   });
 
   it("renders updatedAt timestamp when provided", () => {

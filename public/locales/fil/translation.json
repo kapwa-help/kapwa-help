@@ -35,6 +35,7 @@
     "deployments": "mga deployment",
     "beneficiaries": "mga benepisyaryo",
     "online": "Online",
+    "respondingTo": "Kasalukuyang tumutugon sa",
     "lastUpdated": "Huling Na-update",
     "loading": "Nilo-load ang dashboard…",
     "loadError": "Nabigong i-load ang data ng dashboard",

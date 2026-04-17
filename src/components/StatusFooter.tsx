@@ -40,7 +40,7 @@ export default function StatusFooter({ eventName, updatedAt }: Props) {
       </span>
       {eventName && (
         <span className="flex items-center gap-2">
-          {eventName}
+          {t("Dashboard.respondingTo")}: {eventName}
         </span>
       )}
       <span className="flex items-center gap-2">

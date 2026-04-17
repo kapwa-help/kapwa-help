@@ -36,6 +36,7 @@
     "deployments": "deployments",
     "beneficiaries": "beneficiaries",
     "online": "Online",
+    "respondingTo": "Currently Responding To",
     "lastUpdated": "Last Updated",
     "loading": "Loading\u2026",
     "loadError": "Failed to load data",
