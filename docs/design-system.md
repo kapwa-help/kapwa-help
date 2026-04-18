@@ -4,15 +4,16 @@ Production reference for Kapwa Help's design tokens and styling patterns. Source
 
 ## Typography
 
-Three font families, all loaded locally (no CDN — offline-first):
+Two-tier font strategy — system fonts for body text, one custom font for brand identity:
 
-| Font | Weight | Usage | Package / Source |
-|------|--------|-------|------------------|
-| **Karla Variable** | Regular | Body text | `@fontsource-variable/karla` |
-| **Rubik Variable** | Regular | Headings (`h1`–`h6`) | `@fontsource-variable/rubik` |
-| **Kagitingan Bold** | Bold | Logo only (`font-logo` utility) | Custom, `public/fonts/Kagitingan-Bold.otf` |
+| Font | Weight | Usage | Source | Caching |
+|------|--------|-------|--------|---------|
+| **System UI** | Variable | Body text, headings | Native to device (`system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`) | Zero bytes — uses OS fonts |
+| **Kagitingan Bold** | Bold | Logo only (`font-logo` utility) | Custom, `public/fonts/Kagitingan-Bold.otf` | HTTP cache only (not in SW precache) |
 
-Fallback stack: `"Karla", Arial, sans-serif` (body), `"Rubik", Arial, sans-serif` (headings).
+Kagitingan is intentionally not precached by the service worker — it's a ~45 kB `.otf` file that degrades gracefully to sans-serif on the rare cold-offline + evicted-HTTP-cache edge case. `font-display: swap` ensures the logo renders immediately in the fallback and swaps to Kagitingan when loaded. Trade-off chosen to minimize first-install bandwidth for 2G/3G disaster-zone users.
+
+The font is an Edsel Pingol design inspired by *Araw ng Kagitingan* (Philippine Day of Valor) — a deliberate cultural choice for a Philippine disaster-relief app.
 
 ## Color Tokens
 

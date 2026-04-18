@@ -41,9 +41,10 @@ Single dark theme. Dark `bg-base` background with `bg-secondary` card surfaces.
 
 ## Fonts
 
-- **Body:** Karla Variable via `@fontsource-variable/karla` (no CDN — offline-first)
-- **Headings:** Rubik Variable via `@fontsource-variable/rubik`
-- **Logo:** Kagitingan Bold (custom, loaded from `public/fonts/` via `@font-face`; use `font-logo` utility)
+- **Body + Headings:** System UI stack (`system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`). Zero bytes — uses OS-native fonts.
+- **Logo:** Kagitingan Bold (custom, loaded from `public/fonts/Kagitingan-Bold.otf` via `@font-face`; use `font-logo` utility). Uses `font-display: swap`.
+- **Not precached by SW** — Kagitingan is `.otf` and `workbox.globPatterns` in `vite.config.ts` matches only `woff2`. Intentional: saves ~45 kB on first install; logo degrades to sans-serif on rare cold-offline case.
+- **No npm font packages** — do not reintroduce `@fontsource-variable/*` without a conscious reversal of this tradeoff.
 
 ## Leaflet Override
 
