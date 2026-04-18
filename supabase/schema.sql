@@ -23,6 +23,40 @@ CREATE TABLE events (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- === Admin Users ===
+-- Presence in this table = admin. Rows are only created by the invite flow
+-- (via the handle_new_user trigger below reading role='admin' metadata).
+
+CREATE TABLE admin_users (
+  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email text NOT NULL,
+  display_name text,
+  invited_by uuid REFERENCES admin_users(user_id),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Trigger to auto-provision an admin_users row when invite metadata is set.
+CREATE OR REPLACE FUNCTION handle_new_user() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  IF COALESCE(new.raw_user_meta_data ->> 'role', '') = 'admin' THEN
+    INSERT INTO public.admin_users (user_id, email, invited_by, display_name)
+    VALUES (
+      new.id,
+      new.email,
+      NULLIF(new.raw_user_meta_data ->> 'invited_by', '')::uuid,
+      new.raw_user_meta_data ->> 'display_name'
+    );
+  END IF;
+  RETURN new;
+END;
+$$;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
 -- Organizations (financial/accountability layer)
 CREATE TABLE organizations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -75,6 +109,8 @@ CREATE TABLE needs (
   contact_phone text,
   notes text,
   delivery_photo_url text,
+  created_by uuid REFERENCES auth.users(id),
+  verified_by uuid REFERENCES auth.users(id),
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -97,6 +133,7 @@ CREATE TABLE donations (
   amount decimal(12,2),
   date date NOT NULL,
   notes text,
+  created_by uuid REFERENCES auth.users(id),
   created_at timestamptz NOT NULL DEFAULT now(),
   CHECK ((type = 'cash' AND amount IS NOT NULL) OR type = 'in_kind')
 );
@@ -117,6 +154,7 @@ CREATE TABLE purchases (
   cost decimal(12,2) NOT NULL,
   date date NOT NULL,
   notes text,
+  created_by uuid REFERENCES auth.users(id),
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -150,8 +188,27 @@ CREATE TABLE deployments (
   need_id uuid NOT NULL UNIQUE REFERENCES needs(id),
   date date NOT NULL,
   notes text,
+  created_by uuid REFERENCES auth.users(id),
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- === Public Views (PII-stripped) ===
+-- Relies on default security_invoker=off: queries run with view owner's
+-- permissions, deliberately bypassing base-table RLS to expose only
+-- non-PII columns to anon readers.
+
+CREATE VIEW needs_public AS
+  SELECT id, event_id, hub_id, lat, lng, access_status, urgency,
+         status, num_people, notes, delivery_photo_url, created_at
+    FROM needs;
+
+CREATE VIEW hazards_public AS
+  SELECT id, event_id, description, photo_url, latitude, longitude,
+         status, created_at
+    FROM hazards;
+
+GRANT SELECT ON needs_public TO anon, authenticated;
+GRANT SELECT ON hazards_public TO anon, authenticated;
 
 -- Seed aid categories
 INSERT INTO aid_categories (name, icon) VALUES
