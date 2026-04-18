@@ -1,10 +1,26 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
 
+const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
+
 export default function UpdatePrompt() {
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
-  } = useRegisterSW();
+  } = useRegisterSW({
+    onRegisteredSW(_swUrl, registration) {
+      if (!registration) return;
+
+      setInterval(() => registration.update(), UPDATE_CHECK_INTERVAL_MS);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          registration.update();
+        }
+      });
+
+      window.addEventListener("online", () => registration.update());
+    },
+  });
 
   if (!needRefresh) return null;
 
