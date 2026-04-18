@@ -9,6 +9,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import type { NeedPoint, HubPoint, HazardPoint } from "@/lib/queries";
+import { mark } from "@/lib/perf-log";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "var(--color-neutral-400)",
@@ -134,6 +135,7 @@ export default function ReliefMapLeaflet({
         scrollWheelZoom={true}
         zoomControl={false}
         style={{ height: "100%", width: "100%" }}
+        whenReady={() => mark("app:leaflet-ready")}
       >
         <FitBounds points={allPoints} />
         <ZoomControl position="bottomright" />
