@@ -38,14 +38,14 @@ export default function StatusFooter({ eventName, updatedAt }: Props) {
         </span>
         {isOnline ? t("Dashboard.online") : t("Dashboard.offline")}
       </span>
+      <span className="flex items-center gap-2">
+        {t("Dashboard.lastUpdated")}: {displayTime}
+      </span>
       {eventName && (
         <span className="flex items-center gap-2">
           {t("Dashboard.respondingTo")}: {eventName}
         </span>
       )}
-      <span className="flex items-center gap-2">
-        {t("Dashboard.lastUpdated")}: {displayTime}
-      </span>
     </footer>
   );
 }
