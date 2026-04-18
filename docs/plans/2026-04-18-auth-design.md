@@ -26,10 +26,10 @@ This document specifies the minimal auth system needed to unblock a real deploym
 
 ## Non-goals (explicitly deferred)
 
-- **Middle "volunteer" tier**. Schema supports it (`user_role` enum; additional roles can be added without migration), but v1 has only `'admin'` as a functional role. `'viewer'` is reserved as the default-for-any-signup.
+- **Middle "volunteer" tier**. V1 has only admin-vs-not-admin via the `admin_users` table. If later conversations with coordinators establish a need for volunteer or coordinator tiers, the evolution is: rename `admin_users` → `profiles`, add a `user_role` enum column, update the trigger and `is_admin()` helper. Mechanical one-time migration, ~15 minutes of SQL, trivial while prod has no real data.
 - **Event-scoped admins**. Admins are global across all events. An `admin_events` junction table can be added later if coordination spans independent relief operations.
 - **Google OAuth / phone OTP**. Magic link only for v1; other providers are a dashboard toggle if needed later.
-- **Admin demotion / deletion UI**. Schema supports it via `profiles.role`; no UI wired up in v1.
+- **Admin demotion / deletion UI**. Demotion is a row delete from `admin_users`; deletion of a user is `auth.admin.deleteUser()` via the service role key. No UI wired up in v1.
 - **Audit log viewer**. `created_by` / `verified_by` columns capture the data, but v1 has no UI to surface it.
 - **Multi-locale invite emails**. English only for v1.
 - **Rate limiting on invites**. Not addressed at the app layer; Supabase's built-in per-project rate limits are considered sufficient for v1.
@@ -62,35 +62,29 @@ VITE_AUTH_MODE            # 'open' (demo) or 'strict' (prod)
 
 ## Role model
 
-Two roles, stored in a `user_role` enum:
+Single role: **admin**, represented by presence in the `admin_users` table. A user with a row is an admin; a user without a row (including anonymous visitors and any non-invited signups) has no special capabilities beyond what anon RLS grants.
 
-- `admin`: can perform all writes (donations, purchases, need lifecycle transitions, deployments, hub management), can read full `needs` and `hazards` tables including PII, can invite other admins.
-- `viewer`: default for any new signup (used only if Supabase public signup is accidentally enabled; functionally equivalent to anonymous — no gated capabilities).
+No role enum or `role` column is introduced in v1. If a follow-up conversation with coordinators establishes a need for additional tiers (volunteer, coordinator, etc.), the evolution path is: rename `admin_users` → `profiles`, add a `user_role` enum column defaulted to `'admin'` (everyone already in that table is by definition an admin), update the trigger and `is_admin()` helper. Mechanical, ~15 minutes of SQL, no data-migration risk while prod is pre-real.
 
-Anonymous visitors have no row in `profiles`. Their capabilities are defined entirely by RLS on tables and views.
+Admins can: perform all writes (donations, purchases, need lifecycle transitions, deployments, hub management), read full `needs` and `hazards` tables including PII, and invite other admins.
 
 ## Schema changes
 
 Applied via a **full rewrite** of `supabase/schema.sql`. No `ALTER TABLE` migrations — this is a state-based schema definition applied to fresh projects.
 
-### New enum
+### New table: `admin_users`
 
 ```sql
-create type user_role as enum ('admin', 'viewer');
-```
-
-### New table: `profiles`
-
-```sql
-create table profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
+create table admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
   email text not null,
   display_name text,
-  role user_role not null default 'viewer',
-  invited_by uuid references profiles(id),
+  invited_by uuid references admin_users(user_id),
   created_at timestamptz not null default now()
 );
 ```
+
+Presence in this table is the authoritative admin check. To demote, delete the row. To promote, insert a row. No enum, no role column, no default-value reasoning to audit.
 
 ### Audit columns on existing tables (inlined into `CREATE TABLE`)
 
@@ -126,19 +120,23 @@ Views omit `contact_name` and `contact_phone` on needs; `reported_by` and `conta
 
 The views rely on Postgres's default `security_invoker = off` behavior — queries against the view run with the view owner's permissions (superuser in Supabase), which deliberately bypasses RLS on the underlying base tables. This is the intended mechanism for exposing a non-PII subset of `needs` and `hazards` to anonymous readers. Supabase's `security_invoker_view` lint warning can be suppressed for these two views with a `-- supabase:ignore` directive or noted as intentional in code review.
 
-### Trigger: auto-provision `profiles` on signup
+### Trigger: auto-provision `admin_users` on invited signup
 
 ```sql
 create function handle_new_user() returns trigger as $$
 begin
-  insert into public.profiles (id, email, role, invited_by, display_name)
-  values (
-    new.id,
-    new.email,
-    coalesce((new.raw_user_meta_data ->> 'role')::user_role, 'viewer'),
-    (new.raw_user_meta_data ->> 'invited_by')::uuid,
-    new.raw_user_meta_data ->> 'display_name'
-  );
+  -- Only create an admin_users row when the invite flow explicitly set role=admin.
+  -- Non-invited signups (if somehow enabled) produce an auth.users row but no
+  -- admin_users row, and therefore gain no admin capability.
+  if coalesce(new.raw_user_meta_data ->> 'role', '') = 'admin' then
+    insert into public.admin_users (user_id, email, invited_by, display_name)
+    values (
+      new.id,
+      new.email,
+      (new.raw_user_meta_data ->> 'invited_by')::uuid,
+      new.raw_user_meta_data ->> 'display_name'
+    );
+  end if;
   return new;
 end;
 $$ language plpgsql security definer;
@@ -148,7 +146,7 @@ create trigger on_auth_user_created
   for each row execute function handle_new_user();
 ```
 
-Metadata values (`role`, `invited_by`, `display_name`) are set by the `invite-admin` edge function. Defaults ensure any non-invite signup (e.g., accidental direct signup) lands as `viewer` with no admin capabilities.
+The `role = 'admin'` metadata acts as the discriminator. It's attached only by the `invite-admin` edge function (which requires an existing admin to call it), so there is no path to admin other than explicit invitation.
 
 ## RLS — demo vs prod
 
@@ -165,7 +163,7 @@ Strict policies. Uses a helper:
 ```sql
 create function is_admin() returns boolean as $$
   select exists (
-    select 1 from profiles where id = auth.uid() and role = 'admin'
+    select 1 from admin_users where user_id = auth.uid()
   );
 $$ language sql stable security definer;
 ```
@@ -182,7 +180,7 @@ Access matrix:
 | `donation_categories`, `purchase_categories` | ❌ | ❌ | ✅ | ✅ |
 | `donations`, `purchases`, `deployments` | ❌ | ❌ | ✅ | ✅ |
 | `events`, `organizations`, `deployment_hubs`, `aid_categories`, `hub_inventory` | ✅ (dashboard needs them) | ❌ | ✅ | ✅ (admin only) |
-| `profiles` | own row only | ❌ | ✅ (all rows) | via edge function only |
+| `admin_users` | own row only | ❌ | ✅ (all rows) | via edge function only |
 
 ### Anon insert of needs — how RPC interacts with RLS
 
@@ -208,12 +206,12 @@ Location: `supabase/functions/invite-admin/index.ts`. Deployed to prod project o
 Responsibilities:
 
 1. Read the caller's JWT from the `Authorization` header.
-2. Look up the caller's `profiles.role`; reject with 403 if not `'admin'`.
+2. Verify the caller has a row in `admin_users` (or call `is_admin()`); reject with 403 if not.
 3. Parse `{ email, display_name? }` from request body.
 4. Call `adminClient.auth.admin.inviteUserByEmail(email, { data: { role: 'admin', invited_by: <caller_uid>, display_name } })` using the service role key.
 5. Return success or error JSON.
 
-The `profiles` row for the invitee is created automatically by the `handle_new_user` trigger when Supabase creates the `auth.users` row.
+The `admin_users` row for the invitee is created automatically by the `handle_new_user` trigger, which fires on `auth.users` insert and reads the `role = 'admin'` metadata attached by the invite call.
 
 Secrets: `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_URL` injected as edge function secrets (never reach the browser).
 
@@ -233,17 +231,17 @@ Once per prod-project lifetime. The prod hosting deployment isn't required at th
      user_metadata: { role: 'admin' },
    });
    ```
-   The `handle_new_user` trigger auto-provisions the matching `profiles` row with `role='admin'` from the metadata.
-2. Verify in the Supabase dashboard: `auth.users` has your row, `public.profiles` has `role='admin'`.
+   The `handle_new_user` trigger auto-provisions the matching `admin_users` row from the `role: 'admin'` metadata.
+2. Verify in the Supabase dashboard: `auth.users` has your row, `public.admin_users` has a row with your `user_id`.
 3. Done. Next time prod hosting is deployed, request a magic link from the login UI and you'll land as admin.
 
-**Fallback path (if the script above isn't convenient):** temporarily enable public signup in the dashboard, deploy prod hosting, request a magic link, run `update profiles set role = 'admin' where email = '...'` in the SQL editor, then disable public signup again.
+**Fallback path (if the script above isn't convenient):** temporarily enable public signup in the dashboard, deploy prod hosting, request a magic link, then in the SQL editor run `insert into admin_users (user_id, email) select id, email from auth.users where email = 'jacob@example.com';` — then disable public signup again.
 
 ## Client-side changes
 
 ### New files
 
-- `src/hooks/use-auth.ts` — reads Supabase auth state + `profiles.role`, returns `{ user, role, isAdmin, login, logout }`.
+- `src/hooks/use-auth.ts` — reads Supabase auth state + checks for the caller's row in `admin_users`, returns `{ user, isAdmin, login, logout }`.
 - `src/pages/login.tsx` — magic link request form.
 - `src/pages/auth-callback.tsx` — handles the Supabase auth callback URL.
 - `src/components/invite-admin-modal.tsx` — admin-only, calls the edge function.
@@ -265,10 +263,10 @@ Once per prod-project lifetime. The prod hosting deployment isn't required at th
   - Queries use base tables (readable by anon on demo due to permissive RLS).
 
 - `AUTH_MODE === 'strict'` (prod):
-  - `isAdmin` is derived from the user's `profiles.role`.
+  - `isAdmin` is derived from the presence of the user's row in `admin_users`.
   - Login UI is rendered when no session exists.
   - Admin UI components are gated by `isAdmin`.
-  - Anon-viewer queries use `_public` views; admin queries use base tables.
+  - Queries from non-admin clients (anonymous or authenticated-without-admin-row) use `_public` views; admin queries use base tables.
 
 ### Offline behavior
 
@@ -300,7 +298,7 @@ Single coordinated cutover, since the demo is not yet shared publicly and can be
 - **Prod** deployment:
   - Anonymous visitor can view the map, dashboard, aggregate stats — no PII visible anywhere.
   - Anonymous visitor can submit a need or hazard via the existing public forms.
-  - Non-admin (any logged-in `viewer`) sees the same as anonymous.
+  - Non-admin logged-in user (any `auth.users` row without a matching `admin_users` row) sees the same as anonymous.
   - Admin logs in via magic link, sees full reporter PII, can verify and progress needs, create donations/purchases/deployments, invite other admins.
   - Admin session persists across offline periods; offline admin actions queue via outbox and replay on reconnect.
   - Direct anon attempts to `INSERT` into `donations`, `purchases`, `deployments` via the Supabase client are rejected by RLS with a 403.
