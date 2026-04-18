@@ -16,7 +16,7 @@ import {
 } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
 
-export function ReliefMapPage() {
+export default function ReliefMapPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<ReliefMapData | null>(null);
   const [loading, setLoading] = useState(true);

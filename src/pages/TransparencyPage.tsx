@@ -19,7 +19,7 @@ import {
   getRecentPurchases,
 } from "@/lib/queries";
 
-export function TransparencyPage() {
+export default function TransparencyPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<TransparencyData | null>(null);
   const [loading, setLoading] = useState(true);

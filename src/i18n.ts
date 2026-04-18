@@ -27,7 +27,7 @@ i18n
       caches: [],
     },
 
-    react: { useSuspense: true },
+    react: { useSuspense: false },
   });
 
 export default i18n;

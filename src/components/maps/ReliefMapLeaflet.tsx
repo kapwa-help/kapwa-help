@@ -22,32 +22,32 @@ function makeNeedIcon(status: string, urgency?: string) {
   const cls = urgency === "critical" ? "pulse-critical" : "";
   return L.divIcon({
     className: "",
-    html: `<div class="${cls}" style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid var(--color-neutral-50);box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    html: `<div class="${cls}" style="width:24px;height:24px;border-radius:50%;background:${color};border:2px solid var(--color-neutral-50);box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
   });
 }
 
 function makeHubIcon() {
   return L.divIcon({
     className: "",
-    html: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">
       <path d="M12 3L2 12h3v8h14v-8h3L12 3z" fill="var(--color-primary)" stroke="var(--color-neutral-50)" stroke-width="1.5"/>
     </svg>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
   });
 }
 
 function makeHazardIcon() {
   return L.divIcon({
     className: "",
-    html: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="20" viewBox="0 0 24 22" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">
       <path d="M12 2L1 21h22L12 2z" fill="var(--color-warning)" stroke="var(--color-neutral-50)" stroke-width="1"/>
       <text x="12" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--color-base)">!</text>
     </svg>`,
-    iconSize: [22, 20],
-    iconAnchor: [11, 20],
+    iconSize: [24, 24],
+    iconAnchor: [12, 24],
   });
 }
 
@@ -153,6 +153,7 @@ export default function ReliefMapLeaflet({
               key={`need-${point.id}`}
               position={[point.lat, point.lng]}
               icon={makeNeedIcon(point.status, point.urgency)}
+              title={`${point.status} need: ${point.categories[0]?.name ?? "uncategorized"}`}
               eventHandlers={{ click: () => onNeedSelect(point) }}
             />
           ))}
@@ -164,6 +165,7 @@ export default function ReliefMapLeaflet({
               key={`hub-${hub.id}`}
               position={[hub.lat, hub.lng]}
               icon={makeHubIcon()}
+              title={`Relief hub: ${hub.name}`}
               eventHandlers={{ click: () => onHubSelect(hub) }}
             />
           ))}
@@ -175,6 +177,7 @@ export default function ReliefMapLeaflet({
               key={`hazard-${hazard.id}`}
               position={[hazard.lat, hazard.lng]}
               icon={makeHazardIcon()}
+              title={`Hazard: ${hazard.description}`}
               eventHandlers={{ click: () => onHazardSelect(hazard) }}
             />
           ))}

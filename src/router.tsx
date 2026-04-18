@@ -1,8 +1,16 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { RootLayout } from "./components/RootLayout";
-import { ReliefMapPage } from "./pages/ReliefMapPage";
-import { TransparencyPage } from "./pages/TransparencyPage";
-import { ReportPage } from "./pages/ReportPage";
+import { lazyWithReload } from "@/lib/lazy-reload";
+
+const ReliefMapPage = lazyWithReload(
+  () => import("./pages/ReliefMapPage")
+);
+const TransparencyPage = lazyWithReload(
+  () => import("./pages/TransparencyPage")
+);
+const ReportPage = lazyWithReload(
+  () => import("./pages/ReportPage")
+);
 
 export const router = createBrowserRouter([
   {
