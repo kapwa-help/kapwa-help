@@ -55,3 +55,4 @@ Main repo: `kapwa-help/kapwa-help`. Feature branches (`feat/<name>`, `fix/<name>
 - `Problem:` PWA service worker only generated on production build -> `Rule:` Use `npm run build && npm run preview` to test offline behavior
 - `Problem:` UI changes can break silently across locales and routes -> `Rule:` Run `npm run verify` after component, page, route, or i18n changes
 - `Problem:` Untracked files (plans, docs) written before creating a worktree don't appear in the worktree -> `Rule:` Commit any files the worktree session will need *before* creating the worktree
+- `Problem:` Renaming a route without a redirect breaks bookmarks, shared links, search results, and stale clients — the old URL silently renders blank -> `Rule:` Never rename or remove a public URL without adding a redirect from the old path to the new one *in the same commit*. URLs are a public API; client-side SW updates alone don't fix external references.

@@ -81,6 +81,11 @@ test("invalid locale redirects to /en", async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/);
 });
 
+test("legacy /transparency redirects to /dashboard", async ({ page }) => {
+  await page.goto("/en/transparency");
+  await expect(page).toHaveURL(/\/en\/dashboard$/);
+});
+
 test("locale switcher changes URL", async ({ page }) => {
   await page.goto("/en");
   const select = page.locator("header select");

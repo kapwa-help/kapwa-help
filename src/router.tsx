@@ -15,6 +15,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ReliefMapPage /> },
       { path: "dashboard", element: <TransparencyPage /> },
+      { path: "transparency", element: <Navigate to="../dashboard" replace /> },
       { path: "report", element: <ReportPage /> },
     ],
   },
