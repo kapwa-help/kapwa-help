@@ -4,9 +4,11 @@
 
 **Goal:** Add two measurement tools — a Lighthouse harness script and in-app `performance.mark()` instrumentation — so future perf experiments can attribute LCP/FCP deltas to specific code changes with noise-aware confidence.
 
-**Architecture:** Two decoupled pieces. (1) `scripts/perf.ts` spawns `vite preview`, runs Lighthouse N times, computes median±stddev, writes JSON to `perf-results/<sha>-<label>.json`, and prints deltas vs. a prior baseline. (2) `src/lib/perf-log.ts` installs a `PerformanceObserver` for LCP and exposes a deduplicating `mark()` helper wired into four chain points (JS-executed, i18n-ready, cache-checked, leaflet-ready); a `?perf=1` URL param activates console logging.
+**Architecture:** Two decoupled pieces. (1) `scripts/perf.ts` spawns `vite preview`, runs Lighthouse N times, computes median±stddev, writes JSON to `perf-results/<sha>-<label>.json`, and prints deltas vs. a prior baseline. Stats helpers (median, stddev) are inlined in the same file. (2) `src/lib/perf-log.ts` installs a `PerformanceObserver` for LCP and exposes a deduplicating `mark()` helper wired into four chain points (JS-executed, i18n-ready, cache-checked, leaflet-ready); a `?perf=1` URL param activates console logging.
 
-**Tech Stack:** TypeScript strict mode · Vitest for unit tests · `lighthouse` + `chrome-launcher` (new devDeps) · native `PerformanceObserver` / `performance.mark()` APIs · `tsx` for running `.ts` scripts (already installed) · react-leaflet's `MapContainer.whenReady` prop.
+**Tech Stack:** TypeScript strict mode · `lighthouse` + `chrome-launcher` (new devDeps) · native `PerformanceObserver` / `performance.mark()` APIs · `tsx` for running `.ts` scripts (already installed) · react-leaflet's `MapContainer.whenReady` prop.
+
+**Verification strategy:** No unit tests. This is dev tooling where the test would restate the implementation. Verification happens at three integration points: (a) Task 3's browser console check for the instrumentation, (b) Task 6's baseline sanity check against known findings-doc numbers, and (c) the post-implementation checklist's rerun delta check.
 
 **Reference:** `docs/superpowers/specs/2026-04-18-perf-measurement-infra-design.md`
 
@@ -34,7 +36,7 @@ Run:
 npm run build
 ```
 
-Expected: build completes with no TypeScript errors. The `dist/` directory is regenerated but we don't commit it.
+Expected: build completes with no TypeScript errors.
 
 - [ ] **Step 3: Commit**
 
@@ -45,58 +47,12 @@ git commit -m "chore: add lighthouse and chrome-launcher as devDeps"
 
 ---
 
-## Task 2: Create `perf-log.ts` with deduplicating `mark()` helper (TDD)
+## Task 2: Create `perf-log.ts` module
 
 **Files:**
 - Create: `src/lib/perf-log.ts`
-- Create: `src/lib/perf-log.test.ts`
 
-- [ ] **Step 1: Write the failing test**
-
-Create `src/lib/perf-log.test.ts`:
-
-```ts
-import { describe, it, expect, beforeEach } from "vitest";
-import { mark } from "./perf-log";
-
-describe("mark()", () => {
-  beforeEach(() => {
-    performance.clearMarks();
-  });
-
-  it("fires a performance mark the first time a name is used", () => {
-    mark("test:alpha");
-    const entries = performance.getEntriesByName("test:alpha");
-    expect(entries.length).toBe(1);
-  });
-
-  it("deduplicates repeated calls with the same name", () => {
-    mark("test:beta");
-    mark("test:beta");
-    mark("test:beta");
-    const entries = performance.getEntriesByName("test:beta");
-    expect(entries.length).toBe(1);
-  });
-
-  it("allows distinct names to each fire once", () => {
-    mark("test:gamma");
-    mark("test:delta");
-    expect(performance.getEntriesByName("test:gamma").length).toBe(1);
-    expect(performance.getEntriesByName("test:delta").length).toBe(1);
-  });
-});
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run:
-```bash
-npm test -- src/lib/perf-log.test.ts
-```
-
-Expected: FAIL — "Cannot find module './perf-log'".
-
-- [ ] **Step 3: Create `src/lib/perf-log.ts` with the minimal module**
+- [ ] **Step 1: Create `src/lib/perf-log.ts`**
 
 ```ts
 /**
@@ -104,8 +60,7 @@ Expected: FAIL — "Cannot find module './perf-log'".
  *
  * `mark()` records a performance.mark entry once per name per page load.
  * `installPerfLogging()` sets up the LCP observer and optional console
- * output (gated by `?perf=1` in the URL). Called from main.tsx; not
- * triggered during unit tests.
+ * output (gated by `?perf=1` in the URL). Called from main.tsx.
  */
 
 type LCPEntry = PerformanceEntry & {
@@ -182,29 +137,20 @@ function logTimeline(): void {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 2: Verify it typechecks**
 
 Run:
 ```bash
-npm test -- src/lib/perf-log.test.ts
+npm run build
 ```
 
-Expected: PASS — all three `mark()` tests green.
+Expected: build succeeds. No TypeScript errors.
 
-- [ ] **Step 5: Run full test suite to confirm no regressions**
-
-Run:
-```bash
-npm test
-```
-
-Expected: all pre-existing tests still pass; new `perf-log` tests pass.
-
-- [ ] **Step 6: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
-git add src/lib/perf-log.ts src/lib/perf-log.test.ts
-git commit -m "feat: add perf-log module with deduplicating mark helper and LCP observer"
+git add src/lib/perf-log.ts
+git commit -m "feat: add perf-log module with mark helper and LCP observer"
 ```
 
 ---
@@ -452,7 +398,7 @@ Run:
 npm run build
 ```
 
-Expected: build succeeds. No TypeScript errors. The output mentions that `dist/` was regenerated — don't commit it.
+Expected: build succeeds. No TypeScript errors.
 
 - [ ] **Step 6: Manual verification in dev server**
 
@@ -470,7 +416,7 @@ Expected: After the page loads and ~500ms pass, a console group titled `[perf] K
 - `app:i18n-ready`
 - `app:cache-checked`
 - `app:leaflet-ready`
-- `LCP (IMG)` (or similar — whatever the LCP element was)
+- `LCP (IMG)` (or whatever tag wins the LCP race)
 
 Values monotonically increase, deltas are positive.
 
@@ -478,14 +424,16 @@ Then open `http://localhost:5173/en` (no `?perf=1`). Expected: no `[perf]` outpu
 
 Stop the dev server with Ctrl+C.
 
-- [ ] **Step 7: Run the smoke tests to confirm no regressions**
+**If any mark is missing from the timeline:** check that the file-specific edit from Steps 1-4 was applied correctly. A missing row means either the mark was never called (check imports) or the mark name has a typo (must start with `app:`).
+
+- [ ] **Step 7: Run the existing test suite and smoke tests to confirm no regressions**
 
 Run:
 ```bash
-npm run verify
+npm test && npm run verify
 ```
 
-Expected: all Playwright smoke tests pass. No visual regressions — we only added instrumentation.
+Expected: all pre-existing unit tests pass; all Playwright smoke tests pass. No visual or behavior regressions — we only added instrumentation.
 
 - [ ] **Step 8: Commit**
 
@@ -496,136 +444,12 @@ git commit -m "feat: instrument critical-chain marks for perf diagnostics"
 
 ---
 
-## Task 4: Create `perf-stats.ts` helpers with TDD
-
-**Files:**
-- Create: `scripts/perf-stats.ts`
-- Create: `scripts/perf-stats.test.ts`
-
-- [ ] **Step 1: Write the failing test**
-
-Create `scripts/perf-stats.test.ts`:
-
-```ts
-import { describe, it, expect } from "vitest";
-import { median, stddev, summarize } from "./perf-stats";
-
-describe("median", () => {
-  it("returns the middle value of an odd-length sorted list", () => {
-    expect(median([1, 2, 3, 4, 5])).toBe(3);
-  });
-
-  it("returns the average of the two middle values for even-length", () => {
-    expect(median([1, 2, 3, 4])).toBe(2.5);
-  });
-
-  it("does not require input to be pre-sorted", () => {
-    expect(median([5, 1, 3, 2, 4])).toBe(3);
-  });
-
-  it("handles a single-element array", () => {
-    expect(median([42])).toBe(42);
-  });
-});
-
-describe("stddev", () => {
-  it("returns 0 for a constant list", () => {
-    expect(stddev([5, 5, 5, 5])).toBe(0);
-  });
-
-  it("returns the population stddev for a known list", () => {
-    // values: 2, 4, 4, 4, 5, 5, 7, 9 → mean 5, variance 4, stddev 2
-    expect(stddev([2, 4, 4, 4, 5, 5, 7, 9])).toBe(2);
-  });
-
-  it("returns 0 for a single-element array (no variance)", () => {
-    expect(stddev([10])).toBe(0);
-  });
-});
-
-describe("summarize", () => {
-  it("returns median, min, max, and stddev for a list", () => {
-    const result = summarize([10, 20, 30, 40, 50]);
-    expect(result.median).toBe(30);
-    expect(result.min).toBe(10);
-    expect(result.max).toBe(50);
-    expect(result.stddev).toBeCloseTo(14.142, 2);
-  });
-});
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run:
-```bash
-npm test -- scripts/perf-stats.test.ts
-```
-
-Expected: FAIL — "Cannot find module './perf-stats'".
-
-- [ ] **Step 3: Create `scripts/perf-stats.ts`**
-
-```ts
-/** Pure statistical helpers for the perf harness. */
-
-export function median(values: number[]): number {
-  if (values.length === 0) return NaN;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1] + sorted[mid]) / 2
-    : sorted[mid];
-}
-
-export function stddev(values: number[]): number {
-  if (values.length <= 1) return 0;
-  const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-  const variance =
-    values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
-  return Math.sqrt(variance);
-}
-
-export type Summary = {
-  median: number;
-  min: number;
-  max: number;
-  stddev: number;
-};
-
-export function summarize(values: number[]): Summary {
-  return {
-    median: median(values),
-    min: Math.min(...values),
-    max: Math.max(...values),
-    stddev: stddev(values),
-  };
-}
-```
-
-- [ ] **Step 4: Run test to verify it passes**
-
-Run:
-```bash
-npm test -- scripts/perf-stats.test.ts
-```
-
-Expected: PASS — all stats tests green.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add scripts/perf-stats.ts scripts/perf-stats.test.ts
-git commit -m "feat: add perf-stats helpers (median, stddev, summarize)"
-```
-
----
-
-## Task 5: Create `scripts/perf.ts` Lighthouse harness
+## Task 4: Create `scripts/perf.ts` Lighthouse harness (with inlined stats)
 
 **Files:**
 - Create: `scripts/perf.ts`
 
-- [ ] **Step 1: Create `scripts/perf.ts` with the harness**
+- [ ] **Step 1: Create `scripts/perf.ts` with the harness (stats inlined at the top)**
 
 ```ts
 /**
@@ -655,12 +479,43 @@ import { execSync } from "node:child_process";
 import { createConnection } from "node:net";
 import lighthouse from "lighthouse";
 import * as chromeLauncher from "chrome-launcher";
-import { summarize, type Summary } from "./perf-stats";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const RESULTS_DIR = resolve(ROOT, "perf-results");
 const PREVIEW_PORT = 4173;
+
+// ── Stats helpers ────────────────────────────────────────
+
+function median(values: number[]): number {
+  if (values.length === 0) return NaN;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid];
+}
+
+function stddev(values: number[]): number {
+  if (values.length <= 1) return 0;
+  const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+  const variance =
+    values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
+  return Math.sqrt(variance);
+}
+
+type Summary = { median: number; min: number; max: number; stddev: number };
+
+function summarize(values: number[]): Summary {
+  return {
+    median: median(values),
+    min: Math.min(...values),
+    max: Math.max(...values),
+    stddev: stddev(values),
+  };
+}
+
+// ── Types ────────────────────────────────────────────────
 
 type Args = {
   label: string;
@@ -690,6 +545,8 @@ type ResultFile = {
   raw: RunMetrics[];
 };
 
+// ── CLI + git ────────────────────────────────────────────
+
 function parseArgs(argv: string[]): Args {
   const args: Args = {
     label: "",
@@ -718,6 +575,8 @@ function getGitInfo(): { sha: string; branch: string; dirty: boolean } {
   const dirty = execSync("git status --porcelain", { cwd: ROOT }).toString().trim().length > 0;
   return { sha, branch, dirty };
 }
+
+// ── Lighthouse orchestration ─────────────────────────────
 
 function waitForPort(port: number, timeoutMs = 10_000): Promise<void> {
   const start = Date.now();
@@ -762,6 +621,8 @@ async function runLighthouseOnce(url: string, port: number): Promise<RunMetrics>
   };
 }
 
+// ── Compare target resolution ────────────────────────────
+
 function findBaselineFile(): string | null {
   if (!existsSync(RESULTS_DIR)) return null;
   const files = readdirSync(RESULTS_DIR)
@@ -789,6 +650,8 @@ function printDeltaTable(current: ResultFile, baseline: ResultFile): void {
     console.log(`  ${k.padEnd(13)} ${sign}${delta}  (${b} → ${c})${pct}`);
   }
 }
+
+// ── Main ─────────────────────────────────────────────────
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
@@ -915,18 +778,18 @@ Run:
 npx tsc --noEmit scripts/perf.ts
 ```
 
-Expected: no TypeScript errors. If `tsc` reports errors about missing types for `lighthouse` or `chrome-launcher`, the `npm install` from Task 1 should have included type declarations — reinstall if needed.
+Expected: no TypeScript errors. If `tsc` reports missing types for `lighthouse` or `chrome-launcher`, the `npm install` from Task 1 should have included type declarations; reinstall if needed.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add scripts/perf.ts
-git commit -m "feat: add perf harness script"
+git commit -m "feat: add perf harness script with inlined stats"
 ```
 
 ---
 
-## Task 6: Wire npm script and create `perf-results/` directory
+## Task 5: Wire npm script and create `perf-results/` directory
 
 **Files:**
 - Modify: `package.json` (add `perf` script)
@@ -983,7 +846,7 @@ git commit -m "chore: add perf npm script and perf-results directory"
 
 ---
 
-## Task 7: Capture baseline measurement
+## Task 6: Capture baseline measurement
 
 **Files:**
 - Create: `perf-results/<sha>-baseline.json` (auto-generated by the script)
@@ -1015,13 +878,13 @@ Expected: one file matching `<sha>-baseline.json` exists. The JSON includes `tim
 
 - [ ] **Step 3: Sanity-check the numbers against the findings doc**
 
-The current findings doc (`docs/loading-performance-findings.md`) records:
+The current `docs/loading-performance-findings.md` records:
 - Performance: 86
 - LCP: 4.1s (4100ms)
 - FCP: 1.9s (1900ms)
 - TBT: 0ms
 
-Your baseline median should be within ~10% of these values. If numbers are dramatically different (e.g., LCP 10s or Performance 30), something is wrong — debug before committing. Rerun with `--runs=9` if stddev on LCP exceeds 300ms to get a tighter read.
+Your baseline median should be within ~10% of these values. **This is also the implicit verification that the stats functions (`median`, `stddev`, `summarize`) work correctly** — if they were broken, numbers would come out as `NaN`, `0`, or absurdly large. If numbers are dramatically off, debug before committing. Rerun with `--runs=9` if stddev on LCP exceeds 300ms to get a tighter read.
 
 - [ ] **Step 4: Commit the baseline**
 
@@ -1037,7 +900,7 @@ Run:
 npm test && npm run verify
 ```
 
-Expected: all unit tests and Playwright smoke tests pass.
+Expected: all pre-existing tests pass; all Playwright smoke tests pass.
 
 ---
 
@@ -1045,10 +908,10 @@ Expected: all unit tests and Playwright smoke tests pass.
 
 Before opening the PR, confirm:
 
-- [ ] `npm test` passes (includes new `perf-log` and `perf-stats` tests)
+- [ ] `npm test` passes (pre-existing tests, no new ones added)
 - [ ] `npm run build` succeeds with no TypeScript errors
 - [ ] `npm run verify` passes all Playwright smoke tests
-- [ ] `npm run dev` → `http://localhost:5173/en?perf=1` shows `[perf] Kapwa Help timeline` in console
+- [ ] `npm run dev` → `http://localhost:5173/en?perf=1` shows `[perf] Kapwa Help timeline` in console with all 5 expected rows
 - [ ] `npm run dev` → `http://localhost:5173/en` (no query param) shows no `[perf]` output
-- [ ] `npm run perf -- --label=test-rerun` produces a delta table against the committed baseline (deltas should be ~0 since no app code changed since baseline)
-- [ ] `perf-results/<sha>-baseline.json` committed and matches findings-doc numbers within ~10%
+- [ ] `npm run perf -- --label=test-rerun` produces a delta table against the committed baseline with deltas near 0 (since no app code changed since baseline) — if deltas are large or nonsensical, stats logic may be broken
+- [ ] `perf-results/<sha>-baseline.json` committed and median values are within ~10% of findings-doc numbers
