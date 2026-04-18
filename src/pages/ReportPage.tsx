@@ -10,9 +10,9 @@ type FormType = "need" | "donation" | "purchase" | "hazard";
 
 const formOptions: { value: FormType; labelKey: string }[] = [
   { value: "need", labelKey: "ReportForm.optionNeed" },
+  { value: "hazard", labelKey: "ReportForm.optionHazard" },
   { value: "donation", labelKey: "ReportForm.optionDonation" },
   { value: "purchase", labelKey: "ReportForm.optionPurchase" },
-  { value: "hazard", labelKey: "ReportForm.optionHazard" },
 ];
 
 export function ReportPage() {
