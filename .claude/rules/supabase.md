@@ -22,7 +22,7 @@ row.organizations as unknown as { name: string }
 
 ## RLS Policies
 
-Defined in `supabase/rls-policies.sql`:
+Defined in `supabase/rls-demo.sql` (demo project) and `supabase/rls-prod.sql` (prod project):
 - **Anon read**: SELECT on all 12 tables
 - **Anon insert**: INSERT on `needs`, `need_categories`, `donations`, `donation_categories`, `purchases`, `purchase_categories`, `deployments`, `hazards`, `hub_inventory`
 - **Anon update**: UPDATE on `needs` (demo phase — tighten when auth is implemented)
