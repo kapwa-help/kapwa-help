@@ -1,13 +1,15 @@
-@import "@fontsource-variable/karla";
-@import "@fontsource-variable/rubik";
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+/* Kagitingan is intentionally not precached by the service worker — logo
+   degrades gracefully to sans-serif on cold-offline + evicted-HTTP-cache.
+   Saves ~45 kB on first install, meaningful on 2G/3G disaster-zone networks. */
 @font-face {
   font-family: 'Kagitingan';
   src: url('/fonts/Kagitingan-Bold.otf') format('opentype');
   font-weight: bold;
   font-style: normal;
+  font-display: swap;
 }
 
 @theme inline {
@@ -32,11 +34,11 @@ html {
 body {
   background: var(--color-base);
   color: var(--color-neutral-50);
-  font-family: "Karla", Arial, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Rubik", Arial, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .leaflet-popup-content-wrapper {
