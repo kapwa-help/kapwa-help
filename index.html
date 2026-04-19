@@ -8,9 +8,44 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <title>Kapwa Help - Disaster Relief Coordination</title>
     <meta name="description" content="Citizen-led disaster relief coordination for La Union, Philippines" />
+    <!--
+      Inline shell CSS + markup below. Paints at HTML-parse time — before
+      the JS bundle arrives over the wire — so users see a branded loading
+      state instead of a blank white screen on slow mobile networks.
+      src/components/AppShell.tsx mirrors this DOM and is used as the
+      React Suspense fallback so the HTML→React handoff is seamless.
+      Colors are hardcoded from .claude/rules/design-system.md (base,
+      neutral-100, neutral-400) because inline CSS cannot reference the
+      Tailwind theme tokens.
+    -->
+    <style>
+      html, body { margin: 0; padding: 0; background: #001A26; color: #CCDBDC;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      #root { min-height: 100vh; }
+      .shell { display: flex; flex-direction: column; min-height: 100vh; }
+      .shell-header { display: flex; align-items: center; padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(154, 209, 212, 0.2); gap: 0.5rem; }
+      .shell-logo { width: 28px; height: 28px; }
+      .shell-wordmark { font-size: 1.125rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.01em; }
+      .shell-body { flex: 1; display: flex; align-items: center; justify-content: center;
+        padding: 2rem 1rem; }
+      .shell-loading { color: #9AD1D4; font-size: 0.875rem; opacity: 0.7;
+        animation: shellPulse 1.6s ease-in-out infinite; }
+      @keyframes shellPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.85; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="shell" role="status" aria-live="polite" aria-label="Kapwa Help is loading">
+        <div class="shell-header">
+          <img class="shell-logo" src="/icons/kapwahelp_v1.svg" alt="" />
+          <span class="shell-wordmark">Kapwa Help</span>
+        </div>
+        <div class="shell-body">
+          <span class="shell-loading">Loading…</span>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

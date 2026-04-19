@@ -1,0 +1,47 @@
+{
+  "label": "2026-04-19-shell-suspense-match",
+  "url": "http://localhost:4273/en",
+  "runs": 3,
+  "profile": {
+    "network": {
+      "offline": false,
+      "downloadThroughput": 51200,
+      "uploadThroughput": 51200,
+      "latency": 2000
+    },
+    "cpuSlowdown": 6,
+    "viewport": {
+      "width": 412,
+      "height": 869
+    },
+    "deviceScaleFactor": 2.625
+  },
+  "cache": "cold",
+  "capturedAt": "2026-04-19T14:53:14.057Z",
+  "runs_data": [
+    {
+      "navigationStart": 0,
+      "firstPaint": 4616,
+      "firstContentfulPaint": 4616,
+      "domContentLoaded": 7839.800000190735,
+      "loadEvent": 7840.5,
+      "screenshotCount": 28
+    },
+    {
+      "navigationStart": 0,
+      "firstPaint": 4608,
+      "firstContentfulPaint": 4608,
+      "domContentLoaded": 7841.799999952316,
+      "loadEvent": 7842.799999952316,
+      "screenshotCount": 28
+    },
+    {
+      "navigationStart": 0,
+      "firstPaint": 4608,
+      "firstContentfulPaint": 4608,
+      "domContentLoaded": 7838.600000143051,
+      "loadEvent": 7839,
+      "screenshotCount": 28
+    }
+  ]
+}
