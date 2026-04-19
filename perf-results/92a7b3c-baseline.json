@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-04-19T00:00:59.058Z",
+  "commitSha": "92a7b3c",
+  "branch": "perf/measurement-infra",
+  "label": "baseline",
+  "url": "http://localhost:4273/en",
+  "runs": 5,
+  "throttling": "mobile-default",
+  "metrics": {
+    "performance": {
+      "median": 82,
+      "min": 78,
+      "max": 83,
+      "stddev": 1.743559577416269
+    },
+    "lcp": {
+      "median": 4674,
+      "min": 4537,
+      "max": 5107,
+      "stddev": 200.38223474150595
+    },
+    "fcp": {
+      "median": 1877,
+      "min": 1877,
+      "max": 1877,
+      "stddev": 0
+    },
+    "tbt": {
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "stddev": 0
+    },
+    "speedIndex": {
+      "median": 2023,
+      "min": 1978,
+      "max": 4333,
+      "stddev": 926.5636729334904
+    }
+  },
+  "raw": [
+    {
+      "performance": 78,
+      "lcp": 5107,
+      "fcp": 1877,
+      "tbt": 0,
+      "speedIndex": 4333
+    },
+    {
+      "performance": 83,
+      "lcp": 4537,
+      "fcp": 1877,
+      "tbt": 0,
+      "speedIndex": 2023
+    },
+    {
+      "performance": 82,
+      "lcp": 4674,
+      "fcp": 1877,
+      "tbt": 0,
+      "speedIndex": 1978
+    },
+    {
+      "performance": 82,
+      "lcp": 4604,
+      "fcp": 1877,
+      "tbt": 0,
+      "speedIndex": 2059
+    },
+    {
+      "performance": 82,
+      "lcp": 4676,
+      "fcp": 1877,
+      "tbt": 0,
+      "speedIndex": 2010
+    }
+  ]
+}
