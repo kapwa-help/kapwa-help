@@ -28,4 +28,13 @@ The FCP delta reflects the consolidation: in the baseline, the browser emitted f
 
 The blank-white interval is unchanged (network-bound), but the "unbranded dark screen" interval is eliminated entirely. Time-to-orient drops from ~7.9s to ~4.6s — the first moment where the user can tell what app they're looking at.
 
-Compare `frames/` in this directory against `../2026-04-19-baseline/` to see the side-by-side.
+## Reproducing
+
+Frames and Chrome traces are not committed. To recreate:
+
+```bash
+git checkout <commit-that-added-inline-shell>
+npm run perf:mobile -- --label=2026-04-19-inline-shell --runs=3 --capture-ms=10000
+```
+
+`summary.json` in this directory has the per-run paint/load timings.

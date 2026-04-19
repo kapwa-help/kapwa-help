@@ -49,5 +49,7 @@ yarn-error.log*
 *.tsbuildinfo
 supabase/.temp/
 
-# mobile perf capture traces — regenerate via `npm run perf:mobile` when needed
+# mobile perf capture artifacts — regenerable via `npm run perf:mobile`
+# Summary.json and README.md stay tracked; binary frames + traces don't.
 docs/testing/results/**/trace.json
+docs/testing/results/**/frames/

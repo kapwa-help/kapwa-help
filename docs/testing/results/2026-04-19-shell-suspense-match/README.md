@@ -27,4 +27,13 @@ Checked each captured frame from 4.6s through 20.7s (when the full app renders).
 
 Task 7 was to evaluate whether to disable i18n Suspense. With the matching AppShell fallback, Suspense is no longer a UX problem — it actually helps us avoid the placeholder-key flash that Filipino/Ilocano users would have seen if we'd turned it off. So we can close Task 7 with "Suspense kept, fallback fixed."
 
-See `frames/` for the screencast. Compare against `../2026-04-19-inline-shell/` to see the flicker that this commit eliminates (shell → bare Loading → app vs. shell → app).
+## Reproducing
+
+Frames and Chrome traces are not committed. To recreate:
+
+```bash
+git checkout <commit-with-appshell-fallback>
+npm run perf:mobile -- --label=2026-04-19-shell-suspense-match --runs=3 --capture-ms=10000
+```
+
+`summary.json` in this directory has the per-run paint/load timings.

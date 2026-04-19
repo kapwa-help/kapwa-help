@@ -26,4 +26,13 @@ Captured against the HEAD of `perf/mobile-network` before any perf tasks landed.
 
 No visible app chrome or brand identity until ~8s into the load. This is the experience Task 2 (inline app shell) aims to fix.
 
-See `summary.json` for per-run numbers and `run-<n>/frames/` for the paint-event screencast.
+## Reproducing
+
+Frames and Chrome traces are not committed (regenerable, ~500 KB per capture). To recreate:
+
+```bash
+git checkout main
+npm run perf:mobile -- --label=2026-04-19-baseline --runs=3 --capture-ms=10000
+```
+
+`summary.json` in this directory has the per-run paint/load timings.
