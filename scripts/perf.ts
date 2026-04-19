@@ -29,7 +29,7 @@ import * as chromeLauncher from "chrome-launcher";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const RESULTS_DIR = resolve(ROOT, "perf-results");
-const PREVIEW_PORT = 4173;
+const PREVIEW_PORT = 4273;
 
 // ── Stats helpers ────────────────────────────────────────
 
@@ -128,7 +128,7 @@ function waitForPort(port: number, timeoutMs = 10_000): Promise<void> {
   const start = Date.now();
   return new Promise((resolvePromise, rejectPromise) => {
     const attempt = () => {
-      const sock = createConnection({ port, host: "127.0.0.1" });
+      const sock = createConnection({ port, host: "localhost" });
       sock.on("connect", () => {
         sock.end();
         resolvePromise();
