@@ -106,7 +106,13 @@ BEGIN
   VALUES (p_event_id, p_hub_id, p_need_id, p_date, p_notes, auth.uid())
   RETURNING id INTO v_deployment_id;
 
-  UPDATE needs SET status = p_status, verified_by = auth.uid() WHERE id = p_need_id;
+  -- verified_by uses COALESCE so it sticks to the first admin who set it;
+  -- subsequent create_deployment calls (status transitions beyond 'verified')
+  -- leave the original verifier intact.
+  UPDATE needs
+     SET status = p_status,
+         verified_by = COALESCE(verified_by, auth.uid())
+   WHERE id = p_need_id;
 
   RETURN v_deployment_id;
 END;
