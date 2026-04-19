@@ -23,7 +23,7 @@ Stale-while-revalidate with IndexedDB (version tracked by `DB_VERSION` in `src/l
 
 ## Map Tile Caching (`vite.config.ts`)
 
-OSM tiles use Workbox CacheFirst strategy (cache name: `map-tiles`, max 200 tiles, 30-day expiry). `ReliefMapLeaflet` shows fallback overlay after 3 consecutive `tileerror` events; clears when tiles load again.
+OSM tiles use Workbox CacheFirst strategy (cache name: `map-tiles`, max 500 tiles, 30-day expiry). `ReliefMapLeaflet` shows fallback overlay after 3 consecutive `tileerror` events; clears when tiles load again. On app mount `prewarmTileCache()` (`src/lib/tile-prewarm.ts`) background-fetches a 3×3 grid at zooms 10/11/12 around La Union (~27 tiles) so warm visits paint instantly.
 
 ## Eager Reference Data Cache (`src/lib/eager-cache.ts`)
 
