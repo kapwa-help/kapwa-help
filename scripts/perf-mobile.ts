@@ -213,17 +213,28 @@ async function captureRun(
   mkdirSync(framesDir, { recursive: true });
   const frames: { tMs: number; path: string }[] = [];
 
+  // Screencast fires once per composited frame, so CSS animations can spam
+  // hundreds of near-identical frames. Bucket by DEDUP_BUCKET_MS to keep
+  // ~5 frames/sec — enough granularity to see state transitions, small enough
+  // for git.
+  const DEDUP_BUCKET_MS = 200;
+  let lastBucket = -1;
   const onFrame = async (params: {
     data: string;
     metadata?: { timestamp?: number };
     sessionId: number;
   }) => {
     const tMs = Date.now() - navStartWall;
-    const idx = frames.length;
-    const name = `frame-${String(idx).padStart(3, "0")}-${String(tMs).padStart(5, "0")}ms.jpg`;
-    const path = resolve(framesDir, name);
-    writeFileSync(path, Buffer.from(params.data, "base64"));
-    frames.push({ tMs, path });
+    const bucket = Math.floor(tMs / DEDUP_BUCKET_MS);
+    const shouldKeep = bucket !== lastBucket;
+    if (shouldKeep) {
+      lastBucket = bucket;
+      const idx = frames.length;
+      const name = `frame-${String(idx).padStart(3, "0")}-${String(tMs).padStart(5, "0")}ms.jpg`;
+      const path = resolve(framesDir, name);
+      writeFileSync(path, Buffer.from(params.data, "base64"));
+      frames.push({ tMs, path });
+    }
     try {
       await cdp.send("Page.screencastFrameAck", { sessionId: params.sessionId });
     } catch {
