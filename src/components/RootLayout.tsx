@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { prewarmTileCache } from "@/lib/tile-prewarm";
 import { Outlet, useParams, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { supportedLocales, type Locale } from "../i18n";
@@ -24,6 +25,13 @@ export function RootLayout() {
   }, [locale, isValid]);
 
   useEagerCache();
+
+  useEffect(() => {
+    // Defer by one tick so tile fetches don't compete with the critical
+    // path (bundle parse, first paint, reference data fetch).
+    const handle = window.setTimeout(prewarmTileCache, 0);
+    return () => window.clearTimeout(handle);
+  }, []);
 
   if (!isValid) {
     return <Navigate to="/en" replace />;

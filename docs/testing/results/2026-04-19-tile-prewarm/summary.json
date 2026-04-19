@@ -1,0 +1,47 @@
+{
+  "label": "2026-04-19-tile-prewarm",
+  "url": "http://localhost:4273/en",
+  "runs": 3,
+  "profile": {
+    "network": {
+      "offline": false,
+      "downloadThroughput": 51200,
+      "uploadThroughput": 51200,
+      "latency": 2000
+    },
+    "cpuSlowdown": 6,
+    "viewport": {
+      "width": 412,
+      "height": 869
+    },
+    "deviceScaleFactor": 2.625
+  },
+  "cache": "cold",
+  "capturedAt": "2026-04-19T15:30:13.094Z",
+  "runs_data": [
+    {
+      "navigationStart": 0,
+      "firstPaint": 4756,
+      "firstContentfulPaint": 4756,
+      "domContentLoaded": 8024.799999952316,
+      "loadEvent": 8024.900000095367,
+      "screenshotCount": 29
+    },
+    {
+      "navigationStart": 0,
+      "firstPaint": 4644,
+      "firstContentfulPaint": 4644,
+      "domContentLoaded": 7937.5,
+      "loadEvent": 7937.5,
+      "screenshotCount": 29
+    },
+    {
+      "navigationStart": 0,
+      "firstPaint": 4676,
+      "firstContentfulPaint": 4676,
+      "domContentLoaded": 7927.199999809265,
+      "loadEvent": 7928.199999809265,
+      "screenshotCount": 29
+    }
+  ]
+}
