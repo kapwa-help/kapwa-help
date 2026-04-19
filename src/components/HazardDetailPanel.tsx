@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { HazardPoint } from "@/lib/queries";
 import { resolveHazard } from "@/lib/queries";
+import { AdminOnly } from "@/components/AdminOnly";
 
 type Props = {
   hazard: HazardPoint;
@@ -107,14 +108,16 @@ export default function HazardDetailPanel({ hazard, onClose, onResolve, variant 
         </div>
       </div>
 
-      {/* Resolve button */}
-      <button
-        onClick={handleResolve}
-        disabled={resolving}
-        className="w-full cursor-pointer rounded-lg bg-success/20 px-4 py-2.5 text-sm font-medium text-success hover:bg-success/30 disabled:opacity-50"
-      >
-        {resolving ? t("HazardDetail.resolving") : t("HazardDetail.markResolved")}
-      </button>
+      {/* Resolve button — admin only */}
+      <AdminOnly>
+        <button
+          onClick={handleResolve}
+          disabled={resolving}
+          className="w-full cursor-pointer rounded-lg bg-success/20 px-4 py-2.5 text-sm font-medium text-success hover:bg-success/30 disabled:opacity-50"
+        >
+          {resolving ? t("HazardDetail.resolving") : t("HazardDetail.markResolved")}
+        </button>
+      </AdminOnly>
     </>
   );
 

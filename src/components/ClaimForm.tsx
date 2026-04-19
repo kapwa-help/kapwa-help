@@ -6,6 +6,7 @@ import {
   getActiveEvent,
 } from "@/lib/queries";
 import type { NeedPoint } from "@/lib/queries";
+import { AdminOnly } from "@/components/AdminOnly";
 
 type Props = {
   point: NeedPoint;
@@ -78,17 +79,20 @@ export default function ClaimForm({ point, onClaimed }: Props) {
 
   if (!isOpen) {
     return (
-      <button
-        onClick={handleOpen}
-        disabled={!isOnline}
-        className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80 disabled:opacity-40"
-      >
-        {t("ClaimForm.respondButton")}
-      </button>
+      <AdminOnly>
+        <button
+          onClick={handleOpen}
+          disabled={!isOnline}
+          className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-neutral-50 hover:bg-primary/80 disabled:opacity-40"
+        >
+          {t("ClaimForm.respondButton")}
+        </button>
+      </AdminOnly>
     );
   }
 
   return (
+    <AdminOnly>
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-3">
       <h4 className="text-sm font-semibold text-neutral-50">
         {t("ClaimForm.title")}
@@ -140,5 +144,6 @@ export default function ClaimForm({ point, onClaimed }: Props) {
         <p className="text-center text-xs text-error">{error}</p>
       )}
     </form>
+    </AdminOnly>
   );
 }
