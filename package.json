@@ -13,6 +13,7 @@
     "translate": "tsx scripts/translate.ts",
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "perf": "tsx scripts/perf.ts",
+    "perf:mobile": "tsx scripts/perf-mobile.ts",
     "verify": "npx playwright test",
     "verify:headed": "npx playwright test --headed"
   },
