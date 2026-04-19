@@ -22,10 +22,10 @@ row.organizations as unknown as { name: string }
 
 ## RLS Policies
 
-Defined in `supabase/rls-demo.sql` (demo project) and `supabase/rls-prod.sql` (prod project):
-- **Anon read**: SELECT on all 12 tables
-- **Anon insert**: INSERT on `needs`, `need_categories`, `donations`, `donation_categories`, `purchases`, `purchase_categories`, `deployments`, `hazards`, `hub_inventory`
-- **Anon update**: UPDATE on `needs` (demo phase — tighten when auth is implemented)
+Defined in `supabase/rls-demo.sql` (demo project, permissive) and `supabase/rls-prod.sql` (prod project, auth-gated):
+- **Demo**: anon can SELECT/INSERT/UPDATE as needed across all 12 tables.
+- **Prod**: anon reads go through PII-stripped views (`needs_public`, `hazards_public`); anon can only INSERT `needs`/`need_categories`/`hazards`; everything else (donations, purchases, deployments, need-lifecycle updates) is admin-only via the `is_admin()` helper.
+- **Admin gate**: presence of a row in `admin_users` keyed by `auth.uid()`. Rows are only created by the invite flow (edge function → `auth.admin.inviteUserByEmail` → `handle_new_user` trigger, gated on `invited_at IS NOT NULL`).
 
 ## Schema
 

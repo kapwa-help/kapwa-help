@@ -36,11 +36,16 @@ CREATE TABLE admin_users (
 );
 
 -- Trigger to auto-provision an admin_users row when invite metadata is set.
+-- SECURITY: gate on new.invited_at IS NOT NULL — only users created via
+-- auth.admin.inviteUserByEmail (service role) have this set. This prevents
+-- a self-signup from claiming admin by passing role='admin' in user metadata
+-- even if signup is accidentally enabled in the Supabase dashboard.
 CREATE OR REPLACE FUNCTION handle_new_user() RETURNS trigger
   LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  IF COALESCE(new.raw_user_meta_data ->> 'role', '') = 'admin' THEN
+  IF new.invited_at IS NOT NULL
+     AND COALESCE(new.raw_user_meta_data ->> 'role', '') = 'admin' THEN
     INSERT INTO public.admin_users (user_id, email, invited_by, display_name)
     VALUES (
       new.id,
@@ -193,16 +198,17 @@ CREATE TABLE deployments (
 );
 
 -- === Public Views (PII-stripped) ===
--- Relies on default security_invoker=off: queries run with view owner's
--- permissions, deliberately bypassing base-table RLS to expose only
--- non-PII columns to anon readers.
+-- security_invoker=false is set EXPLICITLY (not relying on Postgres defaults):
+-- these views run with the view owner's permissions, deliberately bypassing
+-- base-table RLS so anon readers can see the non-PII subset. The base tables'
+-- RLS (rls-prod.sql) denies anon SELECT; the view is the only anon read path.
 
-CREATE VIEW needs_public AS
+CREATE VIEW needs_public WITH (security_invoker=false) AS
   SELECT id, event_id, hub_id, lat, lng, access_status, urgency,
          status, num_people, notes, delivery_photo_url, created_at
     FROM needs;
 
-CREATE VIEW hazards_public AS
+CREATE VIEW hazards_public WITH (security_invoker=false) AS
   SELECT id, event_id, description, photo_url, latitude, longitude,
          status, created_at
     FROM hazards;

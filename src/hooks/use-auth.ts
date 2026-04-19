@@ -14,7 +14,9 @@ export type UseAuthState = {
 export function useAuth(): UseAuthState {
   const [user, setUser] = useState<User | null>(null);
   const [isAdminRow, setIsAdminRow] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // In open mode there's nothing to gate on — admin is always true —
+  // so loading starts false to avoid flashing blank gated UI on first render.
+  const [loading, setLoading] = useState(AUTH_MODE !== 'open');
 
   useEffect(() => {
     let active = true;
@@ -37,7 +39,12 @@ export function useAuth(): UseAuthState {
       setLoading(false);
     };
 
-    supabase.auth.getSession().then(({ data }) => handle(data.session));
+    supabase.auth
+      .getSession()
+      .then(({ data }) => handle(data.session))
+      .catch(() => {
+        if (active) setLoading(false);
+      });
     const { data: { subscription } } =
       supabase.auth.onAuthStateChange((_evt, session) => handle(session));
 
