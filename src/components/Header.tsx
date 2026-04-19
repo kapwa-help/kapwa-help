@@ -3,6 +3,9 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useLocation, Link, NavLink } from "react-router";
 import { supportedLocales, type Locale } from "../i18n";
 import { useOutbox } from "@/lib/outbox-context";
+import { AUTH_MODE } from "@/lib/auth-mode";
+import { useAuthContext } from "@/lib/auth-context";
+import { InviteAdminModal } from "./InviteAdminModal";
 
 const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
@@ -41,7 +44,10 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { pendingCount } = useOutbox();
+  const { isAdmin } = useAuthContext();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const showInvite = AUTH_MODE === 'strict' && isAdmin;
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const subPath = locale ? location.pathname.replace(`/${locale}`, "") : "";
@@ -73,6 +79,15 @@ export default function Header() {
               {item.label}
             </NavLink>
           ))}
+          {showInvite && (
+            <button
+              type="button"
+              onClick={() => setInviteOpen(true)}
+              className={navLinkClass(false)}
+            >
+              Invite admin
+            </button>
+          )}
         </nav>
         <div className="flex flex-1 items-center justify-end gap-4">
           <div className="flex items-center gap-2">
@@ -132,7 +147,20 @@ export default function Header() {
             {item.label}
           </NavLink>
         ))}
+        {showInvite && (
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false);
+              setInviteOpen(true);
+            }}
+            className={`${navLinkClass(false, true)} text-left`}
+          >
+            Invite admin
+          </button>
+        )}
       </div>
+      <InviteAdminModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
     </header>
   );
 }

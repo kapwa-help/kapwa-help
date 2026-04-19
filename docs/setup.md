@@ -24,7 +24,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 EOF
 ```
 
-> **Is it safe to share these?** Yes. This is the Supabase **anon (public) key** — it is designed to be exposed. It ships to every user's browser in the built JavaScript bundle and is visible in network requests on the deployed site. Supabase's security model does not rely on this key being secret — all access control is enforced by [Row Level Security (RLS)](https://supabase.com/docs/guides/auth/row-level-security) policies on the database. Our RLS policies grant public **read-only** access to all tables (see `supabase/rls-policies.sql`).
+> **Is it safe to share these?** Yes. This is the Supabase **anon (public) key** — it is designed to be exposed. It ships to every user's browser in the built JavaScript bundle and is visible in network requests on the deployed site. Supabase's security model does not rely on this key being secret — all access control is enforced by [Row Level Security (RLS)](https://supabase.com/docs/guides/auth/row-level-security) policies on the database. Our RLS policies grant public **read-only** access to all tables (see `supabase/rls-demo.sql`).
 >
 > The **service role key** (which bypasses RLS) is never committed and is only needed for admin scripts like the KML seeder.
 
@@ -58,7 +58,7 @@ If you want a private database instance instead of using the shared one:
 
 1. Create a project at [supabase.com/dashboard](https://supabase.com/dashboard)
 2. Run `supabase/schema.sql` in the **SQL Editor** (creates 7 tables + aid categories)
-3. Run `supabase/rls-policies.sql` in the **SQL Editor** (enables public read access)
+3. Run `supabase/rls-demo.sql` in the **SQL Editor** (enables public read access)
 4. Update `.env.local` with your project's URL and anon key (from **Settings → API**)
 5. Optionally seed data:
    - **Real data:** Add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`, then run `npx tsx supabase/seed-kml.ts data/Emong_relief_operations.kml`

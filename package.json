@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "translate": "tsx scripts/translate.ts",
+    "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "perf": "tsx scripts/perf.ts",
     "verify": "npx playwright test",
     "verify:headed": "npx playwright test --headed"

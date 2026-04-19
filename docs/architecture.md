@@ -77,7 +77,7 @@ events ──┬──→ submissions (needs) ←── aid_categories
 
 ### RLS Policies
 
-Defined in `supabase/rls-policies.sql`:
+Defined in `supabase/rls-demo.sql` (demo project) and `supabase/rls-prod.sql` (prod project):
 - **Anon read:** SELECT on all tables
 - **Anon insert:** INSERT on submissions, deployments, donations, purchases, hazards
 - **Anon update:** UPDATE on submissions and deployments

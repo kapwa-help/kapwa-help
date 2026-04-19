@@ -20,6 +20,16 @@ vi.mock("@/lib/outbox-context", () => ({
   useOutbox: () => mockUseOutbox(),
 }));
 
+vi.mock("@/lib/auth-context", () => ({
+  useAuthContext: () => ({
+    user: null,
+    isAdmin: false,
+    loading: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
+}));
+
 function renderHeader(locale = "en") {
   return render(
     <MemoryRouter initialEntries={[`/${locale}`]}>

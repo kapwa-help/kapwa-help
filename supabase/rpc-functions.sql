@@ -22,8 +22,8 @@ CREATE OR REPLACE FUNCTION insert_need(
 DECLARE
   v_need_id uuid;
 BEGIN
-  INSERT INTO needs (id, event_id, lat, lng, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id)
-  VALUES (p_id, p_event_id, p_lat, p_lng, p_access_status, p_urgency, p_num_people, p_contact_name, p_contact_phone, p_notes, p_hub_id)
+  INSERT INTO needs (id, event_id, lat, lng, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, created_by)
+  VALUES (p_id, p_event_id, p_lat, p_lng, p_access_status, p_urgency, p_num_people, p_contact_name, p_contact_phone, p_notes, p_hub_id, auth.uid())
   RETURNING id INTO v_need_id;
 
   IF array_length(p_category_ids, 1) > 0 THEN
@@ -51,8 +51,8 @@ CREATE OR REPLACE FUNCTION insert_donation(
 DECLARE
   v_donation_id uuid;
 BEGIN
-  INSERT INTO donations (id, event_id, organization_id, type, date, donor_name, donor_type, amount, notes)
-  VALUES (p_id, p_event_id, p_organization_id, p_type, p_date, p_donor_name, p_donor_type, p_amount, p_notes)
+  INSERT INTO donations (id, event_id, organization_id, type, date, donor_name, donor_type, amount, notes, created_by)
+  VALUES (p_id, p_event_id, p_organization_id, p_type, p_date, p_donor_name, p_donor_type, p_amount, p_notes, auth.uid())
   RETURNING id INTO v_donation_id;
 
   IF array_length(p_category_ids, 1) > 0 THEN
@@ -77,8 +77,8 @@ CREATE OR REPLACE FUNCTION insert_purchase(
 DECLARE
   v_purchase_id uuid;
 BEGIN
-  INSERT INTO purchases (id, event_id, organization_id, cost, date, notes)
-  VALUES (p_id, p_event_id, p_organization_id, p_cost, p_date, p_notes)
+  INSERT INTO purchases (id, event_id, organization_id, cost, date, notes, created_by)
+  VALUES (p_id, p_event_id, p_organization_id, p_cost, p_date, p_notes, auth.uid())
   RETURNING id INTO v_purchase_id;
 
   IF array_length(p_category_ids, 1) > 0 THEN
@@ -102,11 +102,17 @@ CREATE OR REPLACE FUNCTION create_deployment(
 DECLARE
   v_deployment_id uuid;
 BEGIN
-  INSERT INTO deployments (event_id, hub_id, need_id, date, notes)
-  VALUES (p_event_id, p_hub_id, p_need_id, p_date, p_notes)
+  INSERT INTO deployments (event_id, hub_id, need_id, date, notes, created_by)
+  VALUES (p_event_id, p_hub_id, p_need_id, p_date, p_notes, auth.uid())
   RETURNING id INTO v_deployment_id;
 
-  UPDATE needs SET status = p_status WHERE id = p_need_id;
+  -- verified_by uses COALESCE so it sticks to the first admin who set it;
+  -- subsequent create_deployment calls (status transitions beyond 'verified')
+  -- leave the original verifier intact.
+  UPDATE needs
+     SET status = p_status,
+         verified_by = COALESCE(verified_by, auth.uid())
+   WHERE id = p_need_id;
 
   RETURN v_deployment_id;
 END;
