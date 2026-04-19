@@ -8,6 +8,7 @@ import {
   setCachedReliefMap,
   type ReliefMapData,
 } from "@/lib/cache";
+import { mark } from "@/lib/perf-log";
 import {
   getActiveEvent,
   getNeedsMapPoints,
@@ -58,6 +59,7 @@ export function ReliefMapPage() {
   useEffect(() => {
     async function init() {
       const cached = await getCachedReliefMap();
+      mark("app:cache-checked");
       if (cached) {
         setData(cached.data);
         setUpdatedAt(new Date(cached.updatedAt));
