@@ -116,22 +116,30 @@ export async function getActiveEvent() {
 
 // --- Needs queries ---
 
-export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
-  const { data, error } = await supabase
-    .from("needs")
-    .select(
-      "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))"
-    )
+export async function getNeedsMapPoints(
+  eventId: string,
+  isAdmin: boolean,
+): Promise<NeedPoint[]> {
+  const source = isAdmin ? "needs" : "needs_public";
+  const fields = isAdmin
+    ? "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))"
+    : "id, lat, lng, status, access_status, urgency, num_people, notes, hub_id, delivery_photo_url, created_at";
+
+  const query = supabase
+    .from(source)
+    .select(fields)
     .eq("event_id", eventId)
     .in("status", ["pending", "verified", "in_transit"]);
 
+  const { data, error } = await query;
   if (error) throw error;
-  return data.map((row) => {
-    const cats = (
-      row.need_categories as unknown as {
-        aid_categories: { id: string; name: string; icon: string };
-      }[]
-    ).map((nc) => nc.aid_categories);
+
+  return (data ?? []).map((row: any) => {
+    const cats = isAdmin
+      ? (row.need_categories as unknown as {
+          aid_categories: { id: string; name: string; icon: string };
+        }[]).map((nc) => nc.aid_categories)
+      : [];
 
     return {
       id: row.id,
@@ -142,8 +150,8 @@ export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
       accessStatus: row.access_status,
       urgency: row.urgency,
       numPeople: row.num_people,
-      contactName: row.contact_name,
-      contactPhone: row.contact_phone,
+      contactName: isAdmin ? row.contact_name : "",
+      contactPhone: isAdmin ? row.contact_phone : null,
       notes: row.notes,
       hubId: row.hub_id,
       deliveryPhotoUrl: row.delivery_photo_url,
@@ -241,23 +249,31 @@ export async function getHubs(eventId: string) {
 
 // --- Hazard queries ---
 
-export async function getHazards(eventId: string): Promise<HazardPoint[]> {
+export async function getHazards(
+  eventId: string,
+  isAdmin: boolean,
+): Promise<HazardPoint[]> {
+  const source = isAdmin ? "hazards" : "hazards_public";
+  const fields = isAdmin
+    ? "id, description, photo_url, latitude, longitude, status, reported_by, contact_phone, created_at"
+    : "id, description, photo_url, latitude, longitude, status, created_at";
+
   const { data, error } = await supabase
-    .from("hazards")
-    .select("id, description, photo_url, latitude, longitude, status, reported_by, contact_phone, created_at")
+    .from(source)
+    .select(fields)
     .eq("event_id", eventId)
     .eq("status", "active");
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
+  return (data ?? []).map((row: any) => ({
     id: row.id,
     description: row.description,
     photoUrl: row.photo_url,
     lat: Number(row.latitude),
     lng: Number(row.longitude),
     status: row.status,
-    reportedBy: row.reported_by,
-    contactPhone: row.contact_phone,
+    reportedBy: isAdmin ? row.reported_by : null,
+    contactPhone: isAdmin ? row.contact_phone : null,
     createdAt: row.created_at as string,
   }));
 }
