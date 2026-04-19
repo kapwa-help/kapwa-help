@@ -1,0 +1,47 @@
+{
+  "label": "2026-04-19-baseline",
+  "url": "http://localhost:4273/en",
+  "runs": 3,
+  "profile": {
+    "network": {
+      "offline": false,
+      "downloadThroughput": 51200,
+      "uploadThroughput": 51200,
+      "latency": 2000
+    },
+    "cpuSlowdown": 6,
+    "viewport": {
+      "width": 412,
+      "height": 869
+    },
+    "deviceScaleFactor": 2.625
+  },
+  "cache": "cold",
+  "capturedAt": "2026-04-19T14:15:52.160Z",
+  "runs_data": [
+    {
+      "navigationStart": 0,
+      "firstPaint": 4588,
+      "firstContentfulPaint": 7920,
+      "domContentLoaded": 7854.299999952316,
+      "loadEvent": 7854.299999952316,
+      "screenshotCount": 6
+    },
+    {
+      "navigationStart": 0,
+      "firstPaint": 4512,
+      "firstContentfulPaint": 7796,
+      "domContentLoaded": 7747.599999904633,
+      "loadEvent": 7747.599999904633,
+      "screenshotCount": 6
+    },
+    {
+      "navigationStart": 0,
+      "firstPaint": 4512,
+      "firstContentfulPaint": 7808,
+      "domContentLoaded": 7755.699999809265,
+      "loadEvent": 7756.799999952316,
+      "screenshotCount": 6
+    }
+  ]
+}

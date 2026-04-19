@@ -48,3 +48,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 supabase/.temp/
+
+# mobile perf capture traces — regenerate via `npm run perf:mobile` when needed
+docs/testing/results/**/trace.json
