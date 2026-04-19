@@ -8,6 +8,16 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <title>Kapwa Help - Disaster Relief Coordination</title>
     <meta name="description" content="Citizen-led disaster relief coordination for La Union, Philippines" />
+    <!--
+      Inline shell CSS + markup below. Paints at HTML-parse time — before
+      the JS bundle arrives over the wire — so users see a branded loading
+      state instead of a blank white screen on slow mobile networks.
+      src/components/AppShell.tsx mirrors this DOM and is used as the
+      React Suspense fallback so the HTML→React handoff is seamless.
+      Colors are hardcoded from .claude/rules/design-system.md (base,
+      neutral-100, neutral-400) because inline CSS cannot reference the
+      Tailwind theme tokens.
+    -->
     <style>
       html, body { margin: 0; padding: 0; background: #001A26; color: #CCDBDC;
         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
