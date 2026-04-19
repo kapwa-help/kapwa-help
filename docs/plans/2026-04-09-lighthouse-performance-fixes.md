@@ -1,5 +1,9 @@
 # Lighthouse Performance Fixes Implementation Plan
 
+> **⚠ SUPERSEDED (2026-04-19) by [`2026-04-19-mobile-network-performance.md`](./2026-04-19-mobile-network-performance.md).**
+>
+> Task 1 of this plan (remove i18n Suspense) was tested and regressed every metric in the local perf harness (see `perf-results/87d2cb2-dirty-i18n-no-suspense.json`). The investigation revealed that this plan's framing — optimize for Lighthouse LCP — did not match the real goal: good UX on low-end Android phones over degraded cellular connections. The new plan keeps most of these tasks (route splitting, preconnect, marker a11y) but reframes them against a Chrome DevTools Android emulation loop and adds two higher-impact items (inline app shell, OSM tile pre-warming). Do not execute this plan; follow the new one.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Reduce LCP from 4.1s to under 2.5s on simulated mobile by breaking the render-blocking dependency chain, splitting route bundles, and improving map marker accessibility.
