@@ -4,6 +4,10 @@
 
 Open-source PWA for disaster relief coordination in La Union, Philippines. Needs-first: field reporters submit needs (with gap category, access status, urgency), coordinators triage via map pins with lifecycle tracking (pending→verified→in_transit→completed→resolved). Dashboard also shows donations, volunteer deployments, and aid distribution. Offline-first for low-connectivity disaster zones.
 
+## Project Phase: Pre-MVP (as of 2026-04-18)
+
+App is iterating toward the end-of-April MVP; product requirements still being clarified with stakeholders. In this phase, prefer iteration speed over exhaustive rigor: lean on manual and integration verification rather than extensive unit tests, avoid premature abstractions, and trust that patterns will clarify as the product firms up. TDD when there's an external oracle (spec requirement, user-visible behavior, integration contract); skip when tests would just restate the implementation. Revisit this posture when entering production.
+
 ## Architecture
 
 - **Frontend**: Vite + React SPA, react-router v7, TypeScript (strict)
