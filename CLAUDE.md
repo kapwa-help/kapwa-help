@@ -48,6 +48,7 @@ npm run verify:headed  # Playwright smoke tests (visible browser)
 ## Critical Rules
 
 - **Verify your own test plan before finishing a branch.** After completing a feature or fix, run each PR test plan item yourself using Playwright CLI (geolocation mocking, offline simulation, permission flows, etc.). Don't defer UI verification to the reviewer. Unit tests (`npm test`) and smoke tests (`npm run verify`) are permanent; test plan items are ad-hoc per-feature and don't need to become permanent e2e specs unless they keep catching regressions.
+- **Evaluate mobile-performance changes against the Android emulation protocol, not Lighthouse.** See `docs/testing/mobile-emulation.md`. Any change justified as "improves mobile performance" must ship with a filmstrip comparison against baseline using Slow-3G + 6× CPU throttle (use `npm run perf:mobile`). Lighthouse score changes alone are not sufficient evidence — we learned this the hard way (see `perf-results/87d2cb2-dirty-i18n-no-suspense.json`).
 
 ## Contributing
 
