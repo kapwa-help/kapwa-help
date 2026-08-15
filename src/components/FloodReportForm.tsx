@@ -233,7 +233,6 @@ export default function FloodReportForm({ onSubmitted }: Props) {
           id="flood-media"
           type="file"
           accept="image/*,video/*"
-          capture="environment"
           onChange={handleFileChange}
           className="hidden"
         />
