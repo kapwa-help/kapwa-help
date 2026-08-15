@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { extractExifGps } from "@/lib/exif-gps";
 import { compressPhoto, uploadMedia } from "@/lib/photo";
@@ -20,18 +20,38 @@ interface Props {
 
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
 
+type DeviceLocationStatus =
+  | "idle"
+  | "loading"
+  | "success"
+  | "permission-denied"
+  | "unavailable"
+  | "timeout"
+  | "unsupported"
+  | "insecure";
+
+const LOCATION_ERROR_KEYS: Partial<Record<DeviceLocationStatus, string>> = {
+  "permission-denied": "FloodWatch.locationPermissionDenied",
+  unavailable: "FloodWatch.locationUnavailable",
+  timeout: "FloodWatch.locationTimedOut",
+  unsupported: "FloodWatch.locationUnsupported",
+  insecure: "FloodWatch.locationInsecure",
+};
+
 export default function FloodReportForm({ onSubmitted }: Props) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef(0);
+  const locationRequestRef = useRef(0);
+  const initialLocationRequestedRef = useRef(false);
 
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [deviceCoords, setDeviceCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [exifCoords, setExifCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [photoTakenAt, setPhotoTakenAt] = useState<Date | null>(null);
-  const [locationSource, setLocationSource] = useState<"exif" | "browser" | null>(null);
-  const [locationLoading, setLocationLoading] = useState(false);
+  const [deviceLocationStatus, setDeviceLocationStatus] = useState<DeviceLocationStatus>("idle");
 
   const [weatherEvent, setWeatherEvent] = useState("");
   const [description, setDescription] = useState("");
@@ -42,22 +62,49 @@ export default function FloodReportForm({ onSubmitted }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function requestBrowserLocation(token: number) {
-    if (!("geolocation" in navigator)) return;
-    setLocationLoading(true);
+  const requestBrowserLocation = useCallback(() => {
+    const requestId = ++locationRequestRef.current;
+    setDeviceCoords(null);
+
+    if (window.isSecureContext === false) {
+      setDeviceLocationStatus("insecure");
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setDeviceLocationStatus("unsupported");
+      return;
+    }
+
+    setDeviceLocationStatus("loading");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        if (selectionRef.current !== token) return;
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocationSource("browser");
-        setLocationLoading(false);
+        if (locationRequestRef.current !== requestId) return;
+        setDeviceCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setDeviceLocationStatus("success");
       },
-      () => {
-        if (selectionRef.current !== token) return;
-        setLocationLoading(false);
+      (locationError) => {
+        if (locationRequestRef.current !== requestId) return;
+        if (locationError.code === 1) setDeviceLocationStatus("permission-denied");
+        else if (locationError.code === 2) setDeviceLocationStatus("unavailable");
+        else if (locationError.code === 3) setDeviceLocationStatus("timeout");
+        else setDeviceLocationStatus("unavailable");
       },
+      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
     );
-  }
+  }, []);
+
+  useEffect(() => {
+    if (initialLocationRequestedRef.current) return;
+    initialLocationRequestedRef.current = true;
+    requestBrowserLocation();
+  }, [requestBrowserLocation]);
+
+  const locationLoading = deviceLocationStatus === "idle" || deviceLocationStatus === "loading";
+  // Device location is authoritative; EXIF is usable only after that attempt ends.
+  const coords = deviceCoords ?? (!locationLoading ? exifCoords : null);
+  const locationSource = deviceCoords ? "browser" : coords ? "exif" : null;
+  const locationErrorKey = LOCATION_ERROR_KEYS[deviceLocationStatus];
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -73,6 +120,8 @@ export default function FloodReportForm({ onSubmitted }: Props) {
     setIsVideo(video);
     setMediaFile(file);
     setError(null);
+    setExifCoords(null);
+    setPhotoTakenAt(null);
 
     if (mediaPreview) URL.revokeObjectURL(mediaPreview);
     setMediaPreview(URL.createObjectURL(file));
@@ -83,30 +132,22 @@ export default function FloodReportForm({ onSubmitted }: Props) {
         const exif = await extractExifGps(file);
         if (selectionRef.current !== token) return;
         if (exif) {
-          setCoords({ lat: exif.lat, lng: exif.lng });
-          setLocationSource("exif");
+          setExifCoords({ lat: exif.lat, lng: exif.lng });
           setPhotoTakenAt(exif.takenAt);
-          return;
         }
       } catch {
         if (selectionRef.current !== token) return;
       }
     }
-
-    // Fallback to browser geolocation
-    setCoords(null);
-    setLocationSource(null);
-    setPhotoTakenAt(null);
-    requestBrowserLocation(token);
   }
 
   function removeMedia() {
+    selectionRef.current += 1;
     setMediaFile(null);
     setIsVideo(false);
     if (mediaPreview) URL.revokeObjectURL(mediaPreview);
     setMediaPreview(null);
-    setCoords(null);
-    setLocationSource(null);
+    setExifCoords(null);
     setPhotoTakenAt(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -239,19 +280,24 @@ export default function FloodReportForm({ onSubmitted }: Props) {
       </div>
 
       {/* Location status */}
-      {mediaFile && (
-        <div className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm">
+      <div
+        className="rounded-xl border border-neutral-400/20 bg-base px-4 py-3 text-sm"
+        aria-live="polite"
+      >
+        <div>
           {locationLoading && (
             <span className="text-neutral-400">{t("FloodWatch.locationAcquiring")}</span>
           )}
           {coords && locationSource === "exif" && (
-            <span className="text-success">{t("FloodWatch.locationExif")}</span>
+            <span className="text-warning">{t("FloodWatch.locationExif")}</span>
           )}
           {coords && locationSource === "browser" && (
-            <span className="text-warning">{t("FloodWatch.locationBrowser")}</span>
+            <span className="text-success">{t("FloodWatch.locationBrowser")}</span>
           )}
           {!coords && !locationLoading && (
-            <span className="text-error">{t("FloodWatch.locationFailed")}</span>
+            <span className="text-error">
+              {t(locationErrorKey ?? "FloodWatch.locationFailed")}
+            </span>
           )}
           {coords && (
             <span className="ml-2 text-neutral-400">
@@ -259,7 +305,21 @@ export default function FloodReportForm({ onSubmitted }: Props) {
             </span>
           )}
         </div>
-      )}
+        {locationErrorKey && (
+          <div className="mt-2 flex items-center justify-between gap-3">
+            {coords && (
+              <span className="text-xs text-neutral-400">{t(locationErrorKey)}</span>
+            )}
+            <button
+              type="button"
+              onClick={requestBrowserLocation}
+              className="ml-auto text-sm font-medium text-primary hover:underline"
+            >
+              {t("FloodWatch.locationRetry")}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Weather Event */}
       <div>

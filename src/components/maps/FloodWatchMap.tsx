@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Marker, Tooltip, ZoomControl } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Tooltip, ZoomControl, useMap } from "react-leaflet";
 import L from "leaflet";
 import type { FloodReport } from "@/lib/flood-queries";
 
@@ -17,6 +18,26 @@ interface Props {
   onSelect: (report: FloodReport) => void;
 }
 
+function FitApprovedReports({ reports }: Pick<Props, "reports">) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (reports.length === 0) return;
+
+    const bounds = L.latLngBounds(reports.map((report) => [report.lat, report.lng]));
+    if (!bounds.isValid()) return;
+
+    if (reports.length === 1) {
+      map.setView(bounds.getCenter(), 13);
+      return;
+    }
+
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+  }, [map, reports]);
+
+  return null;
+}
+
 export default function FloodWatchMap({ reports, onSelect }: Props) {
   return (
     <MapContainer
@@ -30,6 +51,7 @@ export default function FloodWatchMap({ reports, onSelect }: Props) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
       <ZoomControl position="bottomright" />
+      <FitApprovedReports reports={reports} />
       {reports.map((report) => (
         <Marker
           key={report.id}
