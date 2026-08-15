@@ -23,6 +23,7 @@ const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
 export default function FloodReportForm({ onSubmitted }: Props) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const selectionRef = useRef(0);
 
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
@@ -41,20 +42,22 @@ export default function FloodReportForm({ onSubmitted }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const requestBrowserLocation = useCallback(() => {
+  function requestBrowserLocation(token: number) {
     if (!("geolocation" in navigator)) return;
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (selectionRef.current !== token) return;
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationSource("browser");
         setLocationLoading(false);
       },
       () => {
+        if (selectionRef.current !== token) return;
         setLocationLoading(false);
       },
     );
-  }, []);
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -66,6 +69,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
       return;
     }
 
+    const token = ++selectionRef.current;
     setIsVideo(video);
     setMediaFile(file);
     setError(null);
@@ -75,12 +79,17 @@ export default function FloodReportForm({ onSubmitted }: Props) {
 
     // Try EXIF GPS for images
     if (!video) {
-      const exif = await extractExifGps(file);
-      if (exif) {
-        setCoords({ lat: exif.lat, lng: exif.lng });
-        setLocationSource("exif");
-        setPhotoTakenAt(exif.takenAt);
-        return;
+      try {
+        const exif = await extractExifGps(file);
+        if (selectionRef.current !== token) return;
+        if (exif) {
+          setCoords({ lat: exif.lat, lng: exif.lng });
+          setLocationSource("exif");
+          setPhotoTakenAt(exif.takenAt);
+          return;
+        }
+      } catch {
+        if (selectionRef.current !== token) return;
       }
     }
 
@@ -88,7 +97,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
     setCoords(null);
     setLocationSource(null);
     setPhotoTakenAt(null);
-    requestBrowserLocation();
+    requestBrowserLocation(token);
   }
 
   function removeMedia() {
