@@ -304,6 +304,7 @@
     "uploadFailed": "Hindi na-upload ang media",
     "videoTooLarge": "Ang video ay dapat mas mababa sa 50MB",
     "locationAcquiring": "Kinukuha ang lokasyon…",
+    "locationPhotoChecking": "Sinusuri ang lokasyon ng larawan…",
     "locationExif": "Lokasyon mula sa larawan",
     "locationBrowser": "Lokasyon mula sa device",
     "locationFailed": "Hindi matukoy ang lokasyon",

@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import FloodReportForm from "./FloodReportForm";
-import { extractExifGps } from "@/lib/exif-gps";
+import { extractExifGps, type ExifGpsResult } from "@/lib/exif-gps";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -111,28 +111,49 @@ describe("FloodReportForm geolocation", () => {
     expect(screen.getByText("FloodWatch.locationAcquiring")).toBeInTheDocument();
   });
 
-  it("waits for and prefers device location when EXIF resolves first", async () => {
-    vi.mocked(extractExifGps).mockResolvedValue({
-      lat: 16.5,
-      lng: 120.75,
-      takenAt: new Date("2024-06-15T10:30:00"),
-    });
+  it("waits for EXIF and prefers photo location when device location is available", async () => {
+    let resolveExif: (result: ExifGpsResult | null) => void = () => {};
+    vi.mocked(extractExifGps).mockImplementation(
+      () => new Promise((resolve) => { resolveExif = resolve; }),
+    );
     render(<FloodReportForm />);
+
+    act(() => locationSuccess?.(position(14.5995, 120.9842)));
+    expect(screen.getByText("FloodWatch.locationBrowser")).toBeInTheDocument();
 
     selectPhoto();
     await waitFor(() => expect(extractExifGps).toHaveBeenCalled());
 
-    expect(screen.getByText("FloodWatch.locationAcquiring")).toBeInTheDocument();
+    expect(screen.getByText("FloodWatch.locationPhotoChecking")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeDisabled();
 
-    act(() => locationSuccess?.(position(14.5995, 120.9842)));
+    act(() => resolveExif({
+      lat: 16.5,
+      lng: 120.75,
+      takenAt: new Date("2024-06-15T10:30:00"),
+    }));
 
-    expect(screen.getByText("FloodWatch.locationBrowser")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("FloodWatch.locationExif")).toBeInTheDocument();
+    });
+    expect(screen.getByText("16.5000, 120.7500")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeEnabled();
+  });
+
+  it("falls back to device location when the photo has no EXIF GPS", async () => {
+    render(<FloodReportForm />);
+
+    act(() => locationSuccess?.(position(14.5995, 120.9842)));
+    selectPhoto();
+
+    await waitFor(() => {
+      expect(screen.getByText("FloodWatch.locationBrowser")).toBeInTheDocument();
+    });
     expect(screen.getByText("14.5995, 120.9842")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeEnabled();
   });
 
-  it("uses EXIF only after device location is unavailable", async () => {
+  it("uses EXIF when device location is unavailable", async () => {
     vi.mocked(extractExifGps).mockResolvedValue({
       lat: 16.5,
       lng: 120.75,

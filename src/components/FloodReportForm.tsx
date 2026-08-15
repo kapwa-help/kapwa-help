@@ -30,6 +30,8 @@ type DeviceLocationStatus =
   | "unsupported"
   | "insecure";
 
+type ExifLocationStatus = "idle" | "loading" | "found" | "missing";
+
 const LOCATION_ERROR_KEYS: Partial<Record<DeviceLocationStatus, string>> = {
   "permission-denied": "FloodWatch.locationPermissionDenied",
   unavailable: "FloodWatch.locationUnavailable",
@@ -50,6 +52,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
   const [isVideo, setIsVideo] = useState(false);
   const [deviceCoords, setDeviceCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [exifCoords, setExifCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [exifLocationStatus, setExifLocationStatus] = useState<ExifLocationStatus>("idle");
   const [photoTakenAt, setPhotoTakenAt] = useState<Date | null>(null);
   const [deviceLocationStatus, setDeviceLocationStatus] = useState<DeviceLocationStatus>("idle");
 
@@ -100,10 +103,12 @@ export default function FloodReportForm({ onSubmitted }: Props) {
     requestBrowserLocation();
   }, [requestBrowserLocation]);
 
-  const locationLoading = deviceLocationStatus === "idle" || deviceLocationStatus === "loading";
-  // Device location is authoritative; EXIF is usable only after that attempt ends.
-  const coords = deviceCoords ?? (!locationLoading ? exifCoords : null);
-  const locationSource = deviceCoords ? "browser" : coords ? "exif" : null;
+  const deviceLocationLoading = deviceLocationStatus === "idle" || deviceLocationStatus === "loading";
+  const photoLocationLoading = exifLocationStatus === "loading";
+  // Photo location is authoritative; device location is used only after EXIF parsing finishes.
+  const coords = exifCoords ?? (!photoLocationLoading ? deviceCoords : null);
+  const locationSource = exifCoords ? "exif" : coords ? "browser" : null;
+  const locationLoading = photoLocationLoading || (!exifCoords && deviceLocationLoading);
   const locationErrorKey = LOCATION_ERROR_KEYS[deviceLocationStatus];
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -121,6 +126,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
     setMediaFile(file);
     setError(null);
     setExifCoords(null);
+    setExifLocationStatus(video ? "missing" : "loading");
     setPhotoTakenAt(null);
 
     if (mediaPreview) URL.revokeObjectURL(mediaPreview);
@@ -133,10 +139,14 @@ export default function FloodReportForm({ onSubmitted }: Props) {
         if (selectionRef.current !== token) return;
         if (exif) {
           setExifCoords({ lat: exif.lat, lng: exif.lng });
+          setExifLocationStatus("found");
           setPhotoTakenAt(exif.takenAt);
+        } else {
+          setExifLocationStatus("missing");
         }
       } catch {
         if (selectionRef.current !== token) return;
+        setExifLocationStatus("missing");
       }
     }
   }
@@ -148,6 +158,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
     if (mediaPreview) URL.revokeObjectURL(mediaPreview);
     setMediaPreview(null);
     setExifCoords(null);
+    setExifLocationStatus("idle");
     setPhotoTakenAt(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -285,7 +296,10 @@ export default function FloodReportForm({ onSubmitted }: Props) {
         aria-live="polite"
       >
         <div>
-          {locationLoading && (
+          {photoLocationLoading && (
+            <span className="text-neutral-400">{t("FloodWatch.locationPhotoChecking")}</span>
+          )}
+          {!photoLocationLoading && locationLoading && (
             <span className="text-neutral-400">{t("FloodWatch.locationAcquiring")}</span>
           )}
           {coords && locationSource === "exif" && (

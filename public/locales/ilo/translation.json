@@ -304,6 +304,7 @@
     "uploadFailed": "Saan a na-upload ti media",
     "videoTooLarge": "Ti video ket masapul a nababbaba ngem 50MB",
     "locationAcquiring": "Ag-ala ti lokasion…",
+    "locationPhotoChecking": "Maus-usisa ti lokasion ti ladawan…",
     "locationExif": "Lokasion manipud ti ladawan",
     "locationBrowser": "Lokasion manipud ti device",
     "locationFailed": "Saan a mabirukan ti lokasion",

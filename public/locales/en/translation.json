@@ -305,6 +305,7 @@
     "uploadFailed": "Failed to upload media",
     "videoTooLarge": "Video must be under 50MB",
     "locationAcquiring": "Getting location…",
+    "locationPhotoChecking": "Checking photo location…",
     "locationExif": "Location from photo",
     "locationBrowser": "Location from device",
     "locationFailed": "Could not determine location",
