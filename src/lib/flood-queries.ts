@@ -66,7 +66,7 @@ export async function getApprovedFloodReports(): Promise<FloodReport[]> {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data as unknown as FloodReportRow[]).map(mapRow);
+  return ((data ?? []) as unknown as FloodReportRow[]).map(mapRow);
 }
 
 export async function getPendingFloodReports(): Promise<FloodReport[]> {
@@ -77,7 +77,7 @@ export async function getPendingFloodReports(): Promise<FloodReport[]> {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data as unknown as FloodReportRow[]).map(mapRow);
+  return ((data ?? []) as unknown as FloodReportRow[]).map(mapRow);
 }
 
 export async function getAllFloodReports(): Promise<FloodReport[]> {
@@ -87,7 +87,7 @@ export async function getAllFloodReports(): Promise<FloodReport[]> {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data as unknown as FloodReportRow[]).map(mapRow);
+  return ((data ?? []) as unknown as FloodReportRow[]).map(mapRow);
 }
 
 export async function insertFloodReport(report: FloodReportInsert): Promise<void> {

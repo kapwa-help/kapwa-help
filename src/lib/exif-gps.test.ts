@@ -124,7 +124,7 @@ describe("extractExifGps", () => {
 
   it("parses lat/lng/takenAt from a synthetic JPEG with a real EXIF+GPS IFD structure", async () => {
     const bytes = buildSyntheticExifJpeg();
-    const jpeg = new File([bytes], "with-gps.jpg", { type: "image/jpeg" });
+    const jpeg = new File([bytes.buffer as ArrayBuffer], "with-gps.jpg", { type: "image/jpeg" });
     const result = await extractExifGps(jpeg);
 
     expect(result).not.toBeNull();
