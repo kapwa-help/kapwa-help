@@ -1,4 +1,5 @@
 -- Flood Watch RLS policies
+-- Requires is_admin() from rls-prod.sql to already be applied.
 
 alter table flood_reports enable row level security;
 

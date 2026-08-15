@@ -34,3 +34,5 @@ as
     created_at
   from flood_reports
   where status = 'approved';
+
+grant select on flood_reports_public to anon, authenticated;
