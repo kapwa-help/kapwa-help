@@ -85,7 +85,11 @@ export async function extractExifGps(file: File): Promise<ExifGpsResult | null> 
     }
   }
 
-  if (lat === null || lng === null) return null;
+  if (
+    lat === null || lng === null ||
+    !Number.isFinite(lat) || !Number.isFinite(lng) ||
+    Math.abs(lat) > 90 || Math.abs(lng) > 180
+  ) return null;
 
   if (latRef === "S") lat = -lat;
   if (lngRef === "W") lng = -lng;
