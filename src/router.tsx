@@ -12,6 +12,16 @@ const AuthCallbackPage = lazyWithReload(() => import("./pages/AuthCallbackPage")
 const FloodWatchPage = lazyWithReload(() => import("./pages/FloodWatchPage"));
 const FloodWatchAdminPage = lazyWithReload(() => import("./pages/FloodWatchAdminPage"));
 
+const FLOOD_WATCH_HOST = "floodwatch.kapwahelp.org";
+
+function RootRedirect() {
+  const isFloodWatch =
+    typeof window !== "undefined" &&
+    window.location.hostname === FLOOD_WATCH_HOST;
+  if (isFloodWatch) return <Navigate to="/floodwatch" replace />;
+  return <LandingPage />;
+}
+
 function LegacyLocaleRedirect() {
   const { locale } = useParams<{ locale: string }>();
   const { pathname, search, hash } = useLocation();
@@ -20,7 +30,7 @@ function LegacyLocaleRedirect() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <LandingPage /> },
+  { path: "/", element: <RootRedirect /> },
   { path: "/auth/callback", element: <AuthCallbackPage /> },
   {
     path: "/demo/:locale",
