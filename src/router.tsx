@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, useParams, useLocation } from "react-router";
 import { RootLayout } from "./components/RootLayout";
 import { lazyWithReload } from "@/lib/lazy-reload";
+import { AuthProvider } from "@/lib/auth-context";
 const LandingPage = lazyWithReload(() => import("./pages/LandingPage"));
 
 const ReliefMapPage = lazyWithReload(() => import("./pages/ReliefMapPage"));
@@ -8,6 +9,18 @@ const TransparencyPage = lazyWithReload(() => import("./pages/TransparencyPage")
 const ReportPage = lazyWithReload(() => import("./pages/ReportPage"));
 const LoginPage = lazyWithReload(() => import("./pages/LoginPage"));
 const AuthCallbackPage = lazyWithReload(() => import("./pages/AuthCallbackPage"));
+const FloodWatchPage = lazyWithReload(() => import("./pages/FloodWatchPage"));
+const FloodWatchAdminPage = lazyWithReload(() => import("./pages/FloodWatchAdminPage"));
+
+const FLOOD_WATCH_HOST = "floodwatch.kapwahelp.org";
+
+function RootRedirect() {
+  const isFloodWatch =
+    typeof window !== "undefined" &&
+    window.location.hostname === FLOOD_WATCH_HOST;
+  if (isFloodWatch) return <Navigate to="/floodwatch" replace />;
+  return <LandingPage />;
+}
 
 function LegacyLocaleRedirect() {
   const { locale } = useParams<{ locale: string }>();
@@ -17,7 +30,7 @@ function LegacyLocaleRedirect() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <LandingPage /> },
+  { path: "/", element: <RootRedirect /> },
   { path: "/auth/callback", element: <AuthCallbackPage /> },
   {
     path: "/demo/:locale",
@@ -30,6 +43,8 @@ export const router = createBrowserRouter([
       { path: "login", element: <LoginPage /> },
     ],
   },
+  { path: "/floodwatch", element: <AuthProvider><FloodWatchPage /></AuthProvider> },
+  { path: "/floodwatch/admin", element: <AuthProvider><FloodWatchAdminPage /></AuthProvider> },
   {
     path: "/:locale",
     children: [

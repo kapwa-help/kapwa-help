@@ -47,3 +47,25 @@ export async function uploadPhoto(
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;
 }
+
+/**
+ * Upload media (photo or video) to Supabase Storage, preserving its content type.
+ * Returns the public URL, or null if upload fails.
+ */
+export async function uploadMedia(
+  bucket: string,
+  path: string,
+  blob: Blob,
+): Promise<string | null> {
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(path, blob, { contentType: blob.type, upsert: true });
+
+  if (error) {
+    console.error("Media upload failed:", error.message);
+    return null;
+  }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}
