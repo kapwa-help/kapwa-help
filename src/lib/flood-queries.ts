@@ -9,6 +9,7 @@ export interface FloodReport {
   weatherEvent: string | null;
   description: string | null;
   status: "pending" | "approved" | "rejected";
+  eventDate: string | null;
   photoTakenAt: string | null;
   createdAt: string;
   // Admin-only fields (null in public view)
@@ -22,6 +23,7 @@ export interface FloodReportInsert {
   photo_url: string;
   latitude: number;
   longitude: number;
+  event_date: string;
   weather_event?: string;
   description?: string;
   reporter_name?: string;
@@ -37,6 +39,7 @@ interface FloodReportRow {
   weather_event: string | null;
   description: string | null;
   status: "pending" | "approved" | "rejected";
+  event_date: string | null;
   photo_taken_at: string | null;
   created_at: string;
   reporter_name?: string | null;
@@ -52,6 +55,7 @@ function mapRow(row: FloodReportRow): FloodReport {
     weatherEvent: row.weather_event,
     description: row.description,
     status: row.status,
+    eventDate: row.event_date,
     photoTakenAt: row.photo_taken_at,
     createdAt: row.created_at,
     reporterName: row.reporter_name ?? null,
@@ -62,7 +66,7 @@ function mapRow(row: FloodReportRow): FloodReport {
 export async function getApprovedFloodReports(): Promise<FloodReport[]> {
   const { data, error } = await supabase
     .from("flood_reports_public")
-    .select("id, photo_url, latitude, longitude, weather_event, description, status, photo_taken_at, created_at")
+    .select("id, photo_url, latitude, longitude, weather_event, description, status, event_date, photo_taken_at, created_at")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -72,7 +76,7 @@ export async function getApprovedFloodReports(): Promise<FloodReport[]> {
 export async function getPendingFloodReports(): Promise<FloodReport[]> {
   const { data, error } = await supabase
     .from("flood_reports")
-    .select("id, photo_url, latitude, longitude, weather_event, description, status, photo_taken_at, created_at, reporter_name, reporter_phone")
+    .select("id, photo_url, latitude, longitude, weather_event, description, status, event_date, photo_taken_at, created_at, reporter_name, reporter_phone")
     .eq("status", "pending")
     .order("created_at", { ascending: false });
 
@@ -83,7 +87,7 @@ export async function getPendingFloodReports(): Promise<FloodReport[]> {
 export async function getAllFloodReports(): Promise<FloodReport[]> {
   const { data, error } = await supabase
     .from("flood_reports")
-    .select("id, photo_url, latitude, longitude, weather_event, description, status, photo_taken_at, created_at, reporter_name, reporter_phone")
+    .select("id, photo_url, latitude, longitude, weather_event, description, status, event_date, photo_taken_at, created_at, reporter_name, reporter_phone")
     .order("created_at", { ascending: false });
 
   if (error) throw error;

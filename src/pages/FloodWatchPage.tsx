@@ -6,8 +6,10 @@ const FloodWatchMap = lazy(() => import("@/components/maps/FloodWatchMap"));
 const FloodReportForm = lazy(() => import("@/components/FloodReportForm"));
 const FloodReportDetail = lazy(() => import("@/components/FloodReportDetail"));
 
+const LOCALES = ["en", "fil", "ilo"] as const;
+
 export default function FloodWatchPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [reports, setReports] = useState<FloodReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FloodReport | null>(null);
@@ -33,16 +35,71 @@ export default function FloodWatchPage() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [fetchReports]);
 
+  if (showForm) {
+    return (
+      <div className="flex h-dvh flex-col bg-base">
+        <header className="flex items-center gap-3 border-b border-neutral-400/20 bg-secondary px-4 py-3">
+          <button
+            onClick={() => setShowForm(false)}
+            className="rounded-lg p-1 text-neutral-400 hover:text-neutral-50"
+            aria-label={t("FloodWatch.backToMap")}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <h2 className="text-lg font-semibold text-neutral-50">
+            {t("FloodWatch.formTitle")}
+          </h2>
+        </header>
+        <div className="flex-1 overflow-y-auto">
+          <Suspense fallback={null}>
+            <FloodReportForm
+              onSubmitted={() => {
+                setShowForm(false);
+                fetchReports();
+              }}
+            />
+          </Suspense>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-dvh flex-col bg-base">
-      {/* Header bar */}
-      <header className="flex items-center justify-between border-b border-neutral-400/20 bg-secondary px-4 py-3">
-        <h1 className="text-lg font-bold text-neutral-50">
-          {t("FloodWatch.title")}
-        </h1>
-        <span className="text-xs text-neutral-400">
-          {t("FloodWatch.subtitle")}
-        </span>
+      {/* Header bar — matches main app styling */}
+      <header className="bg-secondary shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+        <div className="flex items-center px-6 py-4">
+          <div className="flex flex-1 items-center">
+            <h1 className="text-xl font-bold text-white">
+              {t("FloodWatch.title")}
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex gap-0.5 rounded-lg border border-neutral-400/20 bg-secondary p-0.5">
+              {LOCALES.map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => i18n.changeLanguage(loc)}
+                  className={`rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                    i18n.language === loc
+                      ? "bg-primary text-neutral-50"
+                      : "text-neutral-400 hover:text-neutral-50"
+                  }`}
+                >
+                  {loc.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowForm(true)}
+              className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white shadow-[0_0_12px_rgba(14,154,167,0.3)] transition-all duration-200 hover:bg-primary/80 hover:shadow-[0_0_16px_rgba(14,154,167,0.4)]"
+            >
+              {t("FloodWatch.addMediaButton")}
+            </button>
+          </div>
+        </div>
       </header>
 
       {/* Map */}
@@ -57,58 +114,29 @@ export default function FloodWatchPage() {
           </Suspense>
         )}
 
-        {/* Report button (FAB) */}
-        {!showForm && !selected && (
+        {/* Add Media FAB */}
+        {!selected && (
           <button
             onClick={() => setShowForm(true)}
-            className="absolute bottom-6 left-1/2 z-[500] -translate-x-1/2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-neutral-50 shadow-lg hover:bg-primary/80"
+            className="absolute bottom-6 left-1/2 z-[500] flex -translate-x-1/2 items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-neutral-50 shadow-lg hover:bg-primary/80"
           >
-            {t("FloodWatch.reportButton")}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            {t("FloodWatch.addMediaButton")}
           </button>
         )}
+
+        {/* Detail panel (inside map container) */}
+        {selected && (
+          <Suspense fallback={null}>
+            <FloodReportDetail
+              report={selected}
+              onClose={() => setSelected(null)}
+            />
+          </Suspense>
+        )}
       </div>
-
-      {/* Form modal */}
-      {showForm && (
-        <>
-          <div className="fixed inset-0 z-[999] bg-base/60" onClick={() => setShowForm(false)} aria-hidden="true" />
-          <div className="fixed inset-x-0 bottom-0 z-[1000] mx-auto max-w-lg animate-slide-up rounded-t-2xl border border-neutral-400/20 bg-secondary shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center justify-between px-5 pt-4 pb-2">
-              <h2 className="text-lg font-semibold text-neutral-50">
-                {t("FloodWatch.formTitle")}
-              </h2>
-              <button
-                onClick={() => setShowForm(false)}
-                className="rounded-lg p-1 text-neutral-400 hover:text-neutral-50"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-            <div className="max-h-[70vh] overflow-y-auto px-5 pb-5">
-              <Suspense fallback={null}>
-                <FloodReportForm
-                  onSubmitted={() => {
-                    setShowForm(false);
-                    fetchReports();
-                  }}
-                />
-              </Suspense>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Detail sheet */}
-      {selected && (
-        <Suspense fallback={null}>
-          <FloodReportDetail
-            report={selected}
-            onClose={() => setSelected(null)}
-          />
-        </Suspense>
-      )}
     </div>
   );
 }

@@ -43,6 +43,7 @@ function report(id: string, lat: number, lng: number): FloodReport {
     weatherEvent: null,
     description: null,
     status: "approved",
+    eventDate: null,
     photoTakenAt: null,
     createdAt: "2026-08-15T22:14:23.17426+00:00",
     reporterName: null,

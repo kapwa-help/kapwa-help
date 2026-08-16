@@ -89,6 +89,19 @@ h1, h2, h3, h4, h5, h6 {
   animation: slide-up 0.3s ease-out;
 }
 
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 @keyframes pulse-critical {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.6); }
   50% { box-shadow: 0 0 0 6px rgba(255, 107, 107, 0); }
