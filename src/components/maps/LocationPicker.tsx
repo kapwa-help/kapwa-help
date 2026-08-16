@@ -28,12 +28,18 @@ function MapClickHandler({ onChange }: Pick<Props, "onChange">) {
   return null;
 }
 
+function validCoords(coords: { lat: number; lng: number } | null): coords is { lat: number; lng: number } {
+  return coords != null && Number.isFinite(coords.lat) && Number.isFinite(coords.lng);
+}
+
 function FlyToCoords({ coords }: { coords: { lat: number; lng: number } | null }) {
   const map = useMap();
   const hasFlown = useRef(false);
 
   useEffect(() => {
-    if (!coords || hasFlown.current) return;
+    if (!validCoords(coords) || hasFlown.current) return;
+    const size = map.getSize();
+    if (size.x === 0 || size.y === 0) return;
     hasFlown.current = true;
     map.flyTo([coords.lat, coords.lng], PLACED_ZOOM, { duration: 0.8 });
   }, [map, coords]);
@@ -42,6 +48,8 @@ function FlyToCoords({ coords }: { coords: { lat: number; lng: number } | null }
 }
 
 export default function LocationPicker({ coords, onChange, readOnly }: Props) {
+  const safe = validCoords(coords);
+
   const handleDragEnd = useCallback(
     (e: L.DragEndEvent) => {
       const latlng = (e.target as L.Marker).getLatLng();
@@ -52,8 +60,8 @@ export default function LocationPicker({ coords, onChange, readOnly }: Props) {
 
   return (
     <MapContainer
-      center={coords ? [coords.lat, coords.lng] : LA_UNION_CENTER}
-      zoom={coords ? PLACED_ZOOM : DEFAULT_ZOOM}
+      center={safe ? [coords.lat, coords.lng] : LA_UNION_CENTER}
+      zoom={safe ? PLACED_ZOOM : DEFAULT_ZOOM}
       zoomControl={false}
       className="h-full w-full rounded-xl"
     >
@@ -63,7 +71,7 @@ export default function LocationPicker({ coords, onChange, readOnly }: Props) {
       />
       {!readOnly && <MapClickHandler onChange={onChange} />}
       <FlyToCoords coords={coords} />
-      {coords && (
+      {safe && (
         <Marker
           position={[coords.lat, coords.lng]}
           icon={pinIcon}

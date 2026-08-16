@@ -123,7 +123,7 @@ export default function FloodWatchPage() {
           </div>
         ) : (
           <Suspense fallback={<div className="flex h-full items-center justify-center text-neutral-400">{t("App.loading")}</div>}>
-            <FloodWatchMap reports={reports} onSelect={setSelected} />
+            <FloodWatchMap reports={reports} selectedId={selected?.id} onSelect={setSelected} />
           </Suspense>
         )}
 

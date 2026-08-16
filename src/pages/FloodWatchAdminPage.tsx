@@ -158,6 +158,7 @@ export default function FloodWatchAdminPage() {
             report={selected}
             onClose={() => setSelected(null)}
             onStatusChange={handleStatusChange}
+            showLocation
           />
         </Suspense>
       )}

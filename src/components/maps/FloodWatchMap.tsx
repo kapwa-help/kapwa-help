@@ -13,8 +13,19 @@ const floodIcon = L.divIcon({
   iconAnchor: [7, 7],
 });
 
+const selectedFloodIcon = L.divIcon({
+  className: "",
+  html: `<div style="position:relative;width:22px;height:22px">
+    <div style="position:absolute;inset:0;border-radius:50%;background:#80CED7;opacity:0.3;animation:flood-ping 1.5s cubic-bezier(0,0,0.2,1) infinite"></div>
+    <div style="position:absolute;inset:3px;border-radius:50%;background:#80CED7;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>
+  </div>`,
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
+
 interface Props {
   reports: FloodReport[];
+  selectedId?: string | null;
   onSelect: (report: FloodReport) => void;
 }
 
@@ -38,7 +49,7 @@ function FitApprovedReports({ reports }: Pick<Props, "reports">) {
   return null;
 }
 
-export default function FloodWatchMap({ reports, onSelect }: Props) {
+export default function FloodWatchMap({ reports, selectedId, onSelect }: Props) {
   return (
     <MapContainer
       center={LA_UNION_CENTER}
@@ -56,7 +67,8 @@ export default function FloodWatchMap({ reports, onSelect }: Props) {
         <Marker
           key={report.id}
           position={[report.lat, report.lng]}
-          icon={floodIcon}
+          icon={report.id === selectedId ? selectedFloodIcon : floodIcon}
+          zIndexOffset={report.id === selectedId ? 1000 : 0}
           eventHandlers={{ click: () => onSelect(report) }}
         >
           <Tooltip direction="top" offset={[0, -8]}>

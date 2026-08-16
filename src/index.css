@@ -118,3 +118,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.5);
   }
 }
+
+@keyframes flood-ping {
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
