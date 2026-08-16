@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
 import type { FloodReport } from "@/lib/flood-queries";
 import { updateFloodReportStatus } from "@/lib/flood-queries";
 import { useAuthContext } from "@/lib/auth-context";
 import { AdminOnly } from "@/components/AdminOnly";
+
+const LocationPicker = lazy(() => import("@/components/maps/LocationPicker"));
 
 interface Props {
   report: FloodReport;
@@ -86,6 +88,23 @@ export default function FloodReportDetail({ report, onClose, onStatusChange }: P
             <p className="text-neutral-50">{report.description}</p>
           </div>
         )}
+      </div>
+
+      {/* Location mini-map */}
+      <div className="mb-4">
+        <span className="text-sm text-neutral-400">{t("FloodWatch.locationTitle")}</span>
+        <div className="mt-1 h-[180px] overflow-hidden rounded-xl border border-neutral-400/10">
+          <Suspense fallback={<div className="flex h-full items-center justify-center text-neutral-400">{t("App.loading")}</div>}>
+            <LocationPicker
+              coords={{ lat: report.lat, lng: report.lng }}
+              onChange={() => {}}
+              readOnly
+            />
+          </Suspense>
+        </div>
+        <p className="mt-1 font-mono text-xs text-neutral-400">
+          {report.lat.toFixed(4)}, {report.lng.toFixed(4)}
+        </p>
       </div>
 
       {/* Admin-only: PII + actions */}

@@ -72,7 +72,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
   function handleCoordInputChange(raw: string) {
     setCoordInput(raw);
     const parsed = parseCoordString(raw);
-    if (parsed) setSelectedCoords(parsed);
+    setSelectedCoords(parsed);
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -136,7 +136,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!mediaFile || !selectedCoords) return;
+    if (!mediaFile || !selectedCoords || !eventDate) return;
     setSubmitting(true);
     setError(null);
 
@@ -290,6 +290,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
               type="date"
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
+              required
             />
             <p className="mt-1 text-xs text-neutral-400">{t("FloodWatch.eventDateHint")}</p>
           </div>
@@ -354,7 +355,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
           {/* Mini-map */}
           <div className="mb-3 h-[450px] overflow-hidden rounded-xl border border-neutral-400/10">
             <Suspense fallback={<div className="flex h-full min-h-[220px] items-center justify-center text-neutral-400">{t("App.loading")}</div>}>
-              <LocationPicker coords={selectedCoords} onChange={handleCoordsChange} />
+              <LocationPicker coords={selectedCoords} onChange={handleCoordsChange} readOnly={exifLocationStatus === "found"} />
             </Suspense>
           </div>
 
@@ -404,7 +405,7 @@ export default function FloodReportForm({ onSubmitted }: Props) {
           <FormError message={error} />
           <button
             type="submit"
-            disabled={submitting || !mediaFile || !selectedCoords}
+            disabled={submitting || !mediaFile || !selectedCoords || !eventDate}
             className="mt-5 w-full rounded-xl bg-primary px-7 py-3 text-sm font-semibold text-neutral-50 hover:bg-primary/80 disabled:cursor-not-allowed disabled:bg-primary/25 disabled:text-neutral-50/40"
           >
             {submitting ? t("FloodWatch.submitting") : t("FloodWatch.submit")}

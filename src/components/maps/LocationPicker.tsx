@@ -16,6 +16,7 @@ const pinIcon = L.divIcon({
 interface Props {
   coords: { lat: number; lng: number } | null;
   onChange: (coords: { lat: number; lng: number }) => void;
+  readOnly?: boolean;
 }
 
 function MapClickHandler({ onChange }: Pick<Props, "onChange">) {
@@ -40,7 +41,7 @@ function FlyToCoords({ coords }: { coords: { lat: number; lng: number } | null }
   return null;
 }
 
-export default function LocationPicker({ coords, onChange }: Props) {
+export default function LocationPicker({ coords, onChange, readOnly }: Props) {
   const handleDragEnd = useCallback(
     (e: L.DragEndEvent) => {
       const latlng = (e.target as L.Marker).getLatLng();
@@ -60,14 +61,14 @@ export default function LocationPicker({ coords, onChange }: Props) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
-      <MapClickHandler onChange={onChange} />
+      {!readOnly && <MapClickHandler onChange={onChange} />}
       <FlyToCoords coords={coords} />
       {coords && (
         <Marker
           position={[coords.lat, coords.lng]}
           icon={pinIcon}
-          draggable
-          eventHandlers={{ dragend: handleDragEnd }}
+          draggable={!readOnly}
+          eventHandlers={readOnly ? {} : { dragend: handleDragEnd }}
         />
       )}
     </MapContainer>

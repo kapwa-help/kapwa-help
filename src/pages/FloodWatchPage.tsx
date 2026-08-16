@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
 import { getApprovedFloodReports, type FloodReport } from "@/lib/flood-queries";
+import { useAuthContext } from "@/lib/auth-context";
 
 const FloodWatchMap = lazy(() => import("@/components/maps/FloodWatchMap"));
 const FloodReportForm = lazy(() => import("@/components/FloodReportForm"));
@@ -10,6 +11,7 @@ const LOCALES = ["en", "fil", "ilo"] as const;
 
 export default function FloodWatchPage() {
   const { t, i18n } = useTranslation();
+  const { isAdmin } = useAuthContext();
   const [reports, setReports] = useState<FloodReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FloodReport | null>(null);
@@ -77,6 +79,17 @@ export default function FloodWatchPage() {
             </h1>
           </div>
           <div className="flex items-center gap-4">
+            {isAdmin && (
+              <a
+                href="/floodwatch/admin"
+                className="rounded-lg p-2 text-neutral-400 transition-colors hover:text-neutral-50"
+                title={t("FloodWatch.adminTitle")}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </a>
+            )}
             <div className="flex gap-0.5 rounded-lg border border-neutral-400/20 bg-secondary p-0.5">
               {LOCALES.map((loc) => (
                 <button

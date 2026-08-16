@@ -10,8 +10,8 @@ paths:
 # Flood Watch geolocation
 
 - Photo EXIF GPS is the primary location source whenever it is available.
-- Start acquiring device location when the report form opens; do not wait for media selection.
-- Wait for EXIF parsing after photo selection; use device/browser geolocation only when the photo has no valid GPS metadata.
-- Do not add manual coordinates or map-based overrides; submissions require an automated location source.
-- Keep device and EXIF request state independent so media-selection races cannot choose the wrong source.
+- When EXIF GPS is found, lock the map to read-only — no manual override of EXIF coordinates.
+- When EXIF GPS is missing (or media is a video), fall back to manual location selection via map click/drag or coordinate text input.
+- Do not use device/browser geolocation (`navigator.geolocation`) — most users upload photos after leaving the site, so device location does not reflect the flood location.
+- Invalid coordinate text input must clear the selected location and disable submission.
 - When approved reports exist, fit the public map to their coordinates; use La Union only as the empty-map default.

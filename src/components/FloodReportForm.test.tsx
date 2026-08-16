@@ -1,8 +1,7 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { StrictMode } from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import FloodReportForm from "./FloodReportForm";
-import { extractExifGps, type ExifGpsResult } from "@/lib/exif-gps";
+import { extractExifGps } from "@/lib/exif-gps";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -21,46 +20,6 @@ vi.mock("@/lib/flood-queries", () => ({
   insertFloodReport: vi.fn(),
 }));
 
-type SuccessCallback = (position: GeolocationPosition) => void;
-type ErrorCallback = (error: GeolocationPositionError) => void;
-
-let locationSuccess: SuccessCallback | undefined;
-let locationError: ErrorCallback | undefined;
-
-const getCurrentPosition = vi.fn(
-  (success: SuccessCallback, error: ErrorCallback) => {
-    locationSuccess = success;
-    locationError = error;
-  },
-);
-
-function position(lat: number, lng: number): GeolocationPosition {
-  return {
-    coords: {
-      latitude: lat,
-      longitude: lng,
-      accuracy: 10,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null,
-      toJSON: () => ({}),
-    },
-    timestamp: Date.now(),
-    toJSON: () => ({}),
-  };
-}
-
-function geolocationError(code: number): GeolocationPositionError {
-  return {
-    code,
-    message: "test error",
-    PERMISSION_DENIED: 1,
-    POSITION_UNAVAILABLE: 2,
-    TIMEOUT: 3,
-  };
-}
-
 function selectPhoto() {
   const input = document.querySelector<HTMLInputElement>("#flood-media");
   expect(input).not.toBeNull();
@@ -70,20 +29,19 @@ function selectPhoto() {
   fireEvent.change(input!, { target: { files: [file] } });
 }
 
+function selectVideo() {
+  const input = document.querySelector<HTMLInputElement>("#flood-media");
+  expect(input).not.toBeNull();
+  const file = new File([new Uint8Array(100)], "flood.mp4", {
+    type: "video/mp4",
+  });
+  fireEvent.change(input!, { target: { files: [file] } });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
-  locationSuccess = undefined;
-  locationError = undefined;
   vi.mocked(extractExifGps).mockResolvedValue(null);
 
-  Object.defineProperty(window, "isSecureContext", {
-    configurable: true,
-    value: true,
-  });
-  Object.defineProperty(navigator, "geolocation", {
-    configurable: true,
-    value: { getCurrentPosition },
-  });
   Object.defineProperty(URL, "createObjectURL", {
     configurable: true,
     value: vi.fn(() => "blob:test"),
@@ -94,44 +52,16 @@ beforeEach(() => {
   });
 });
 
-describe("FloodReportForm geolocation", () => {
-  it("requests device location as soon as the form opens", () => {
-    render(
-      <StrictMode>
-        <FloodReportForm />
-      </StrictMode>,
-    );
-
-    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
-    expect(getCurrentPosition).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function),
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
-    );
-    expect(screen.getByText("FloodWatch.locationAcquiring")).toBeInTheDocument();
-  });
-
-  it("waits for EXIF and prefers photo location when device location is available", async () => {
-    let resolveExif: (result: ExifGpsResult | null) => void = () => {};
-    vi.mocked(extractExifGps).mockImplementation(
-      () => new Promise((resolve) => { resolveExif = resolve; }),
-    );
-    render(<FloodReportForm />);
-
-    act(() => locationSuccess?.(position(14.5995, 120.9842)));
-    expect(screen.getByText("FloodWatch.locationBrowser")).toBeInTheDocument();
-
-    selectPhoto();
-    await waitFor(() => expect(extractExifGps).toHaveBeenCalled());
-
-    expect(screen.getByText("FloodWatch.locationPhotoChecking")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeDisabled();
-
-    act(() => resolveExif({
+describe("FloodReportForm location", () => {
+  it("auto-populates location from EXIF GPS and shows exif label", async () => {
+    vi.mocked(extractExifGps).mockResolvedValue({
       lat: 16.5,
       lng: 120.75,
       takenAt: new Date("2024-06-15T10:30:00"),
-    }));
+    });
+    render(<FloodReportForm />);
+
+    selectPhoto();
 
     await waitFor(() => {
       expect(screen.getByText("FloodWatch.locationExif")).toBeInTheDocument();
@@ -140,20 +70,61 @@ describe("FloodReportForm geolocation", () => {
     expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeEnabled();
   });
 
-  it("falls back to device location when the photo has no EXIF GPS", async () => {
+  it("shows manual location prompt when photo has no EXIF GPS", async () => {
+    vi.mocked(extractExifGps).mockResolvedValue(null);
     render(<FloodReportForm />);
 
-    act(() => locationSuccess?.(position(14.5995, 120.9842)));
     selectPhoto();
 
     await waitFor(() => {
-      expect(screen.getByText("FloodWatch.locationBrowser")).toBeInTheDocument();
+      expect(screen.getByText("FloodWatch.locationPrompt")).toBeInTheDocument();
     });
-    expect(screen.getByText("14.5995, 120.9842")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeDisabled();
   });
 
-  it("uses EXIF when device location is unavailable", async () => {
+  it("shows manual location prompt for video files", async () => {
+    render(<FloodReportForm />);
+
+    selectVideo();
+
+    await waitFor(() => {
+      expect(screen.getByText("FloodWatch.locationPrompt")).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeDisabled();
+  });
+
+  it("does not call navigator.geolocation", () => {
+    const getCurrentPosition = vi.fn();
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+
+    render(<FloodReportForm />);
+    selectPhoto();
+
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it("auto-fills event date from EXIF timestamp", async () => {
+    vi.mocked(extractExifGps).mockResolvedValue({
+      lat: 16.5,
+      lng: 120.75,
+      takenAt: new Date("2024-06-15T10:30:00"),
+    });
+    render(<FloodReportForm />);
+
+    selectPhoto();
+
+    await waitFor(() => {
+      const dateInput = document.querySelector<HTMLInputElement>("#flood-date");
+      expect(dateInput?.value).toBe("2024-06-15");
+    });
+  });
+});
+
+describe("FloodReportForm validation", () => {
+  it("disables submit when event date is cleared", async () => {
     vi.mocked(extractExifGps).mockResolvedValue({
       lat: 16.5,
       lng: 120.75,
@@ -161,28 +132,15 @@ describe("FloodReportForm geolocation", () => {
     });
     render(<FloodReportForm />);
 
-    act(() => locationError?.(geolocationError(2)));
     selectPhoto();
 
     await waitFor(() => {
-      expect(screen.getByText("FloodWatch.locationExif")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeEnabled();
     });
-    expect(screen.getByText("16.5000, 120.7500")).toBeInTheDocument();
-    expect(screen.getByText("FloodWatch.locationUnavailable")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeEnabled();
-  });
 
-  it("shows a permission-specific error and retries device location", () => {
-    render(<FloodReportForm />);
+    const dateInput = document.querySelector<HTMLInputElement>("#flood-date")!;
+    fireEvent.change(dateInput, { target: { value: "" } });
 
-    act(() => locationError?.(geolocationError(1)));
-
-    expect(screen.getByText("FloodWatch.locationPermissionDenied")).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: "FloodWatch.locationRetry" }),
-    );
-
-    expect(getCurrentPosition).toHaveBeenCalledTimes(2);
-    expect(screen.getByText("FloodWatch.locationAcquiring")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "FloodWatch.submit" })).toBeDisabled();
   });
 });
