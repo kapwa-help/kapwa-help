@@ -67,4 +67,19 @@ describe('useAuth (strict mode)', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.isAdmin).toBe(false);
   });
+
+  it('returns synchronously from auth state changes before checking admin access', async () => {
+    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
+    mockAdminRow('uid-3');
+    const { result } = renderHook(() => useAuth());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const callback = (supabase.auth.onAuthStateChange as any).mock.calls[0][0];
+    const callbackResult = callback('SIGNED_IN', {
+      user: { id: 'uid-3', email: 'admin@example.com' },
+    });
+
+    expect(callbackResult).toBeUndefined();
+    await waitFor(() => expect(result.current.isAdmin).toBe(true));
+  });
 });

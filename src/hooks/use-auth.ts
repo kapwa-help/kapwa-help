@@ -46,7 +46,12 @@ export function useAuth(): UseAuthState {
         if (active) setLoading(false);
       });
     const { data: { subscription } } =
-      supabase.auth.onAuthStateChange((_evt, session) => handle(session));
+      supabase.auth.onAuthStateChange((_evt, session) => {
+        // Supabase invokes auth listeners while holding an exclusive lock.
+        // Defer database work until the listener returns so it cannot deadlock
+        // while trying to read the current session for the request.
+        setTimeout(() => void handle(session), 0);
+      });
 
     return () => {
       active = false;
