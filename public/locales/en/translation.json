@@ -323,7 +323,7 @@
     "status_pending": "Pending",
     "status_approved": "Approved",
     "status_rejected": "Rejected",
-    "adminTitle": "Flood Watch — Review",
+    "adminTitle": "Flood Watch Admin",
     "adminRequired": "Admin access required",
     "tabPending": "Pending",
     "tabAll": "All Reports",
