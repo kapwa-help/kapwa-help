@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/lib/auth-context";
 import { getPendingFloodReports, getAllFloodReports, type FloodReport } from "@/lib/flood-queries";
+import { InviteAdminModal } from "@/components/InviteAdminModal";
 
 const FloodReportDetail = lazy(() => import("@/components/FloodReportDetail"));
 
@@ -14,6 +15,7 @@ export default function FloodWatchAdminPage() {
   const [reports, setReports] = useState<FloodReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FloodReport | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -61,11 +63,20 @@ export default function FloodWatchAdminPage() {
   return (
     <div className="min-h-dvh bg-base">
       {/* Header */}
-      <header className="border-b border-neutral-400/20 bg-secondary px-4 py-3">
+      <header className="flex items-center justify-between border-b border-neutral-400/20 bg-secondary px-4 py-3">
         <h1 className="text-lg font-bold text-neutral-50">
           {t("FloodWatch.adminTitle")}
         </h1>
+        <button
+          type="button"
+          onClick={() => setInviteOpen(true)}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-neutral-50 transition-colors hover:bg-primary/80"
+        >
+          Invite admin
+        </button>
       </header>
+
+      <InviteAdminModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
 
       {/* Tabs */}
       <div className="flex border-b border-neutral-400/20">
