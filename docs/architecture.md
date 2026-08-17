@@ -15,11 +15,11 @@ Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) clie
            ▼
 ┌─────────────────────┐
 │   Service Worker     │  Workbox GenerateSW
-│   (vite-plugin-pwa)  │  precaches shell, NetworkFirst for API
+│   (vite-plugin-pwa)  │  precaches shell and public map tiles
 └─────────────────────┘
 ```
 
-**Data flow:** React components call query functions in `src/lib/queries.ts` → Supabase client (`src/lib/supabase.ts`) fetches from Postgres using the anon key → the app shell is precached by the Workbox service worker → Supabase API calls use NetworkFirst caching → OSM map tiles use CacheFirst (200 tiles, 30-day expiry).
+**Data flow:** React components call query functions in `src/lib/queries.ts` → Supabase client (`src/lib/supabase.ts`) fetches from Postgres using the anon key → the app shell is precached by the Workbox service worker → OSM map tiles use CacheFirst caching. Supabase requests are never cached by the service worker because their responses can depend on the caller's authorization token.
 
 The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access. Admins authenticate via Supabase magic link; the `admin_users` table gates write access to sensitive records (donations, purchases, deployments, need-lifecycle updates).
 
