@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { supabase } from '../lib/supabase';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [message, setMessage] = useState('Signing you in…');
 
   useEffect(() => {
+    const destination = searchParams.get('returnTo') || '/demo/en';
+
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        navigate('/demo/en', { replace: true });
+        navigate(destination, { replace: true });
       } else {
         const { data: { subscription } } =
           supabase.auth.onAuthStateChange((_evt, session) => {
             if (session) {
               subscription.unsubscribe();
-              navigate('/demo/en', { replace: true });
+              navigate(destination, { replace: true });
             }
           });
         setTimeout(() => {
@@ -23,7 +26,7 @@ export default function AuthCallbackPage() {
         }, 10_000);
       }
     });
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-base px-4">

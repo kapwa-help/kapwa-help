@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router';
 import { useAuthContext } from '../lib/auth-context';
 
 export default function LoginPage() {
   const { login } = useAuthContext();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -10,7 +13,7 @@ export default function LoginPage() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStatus('sending');
-    const { error } = await login(email.trim());
+    const { error } = await login(email.trim(), returnTo ?? undefined);
     if (error) {
       setStatus('error');
       setErrorMsg(error.message);
