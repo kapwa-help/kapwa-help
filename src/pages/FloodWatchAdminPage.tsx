@@ -49,7 +49,7 @@ export default function FloodWatchAdminPage() {
       <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-base">
         <p className="text-neutral-400">{t("FloodWatch.adminRequired")}</p>
         <a
-          href="/demo/en/login"
+          href="/demo/en/login?returnTo=/floodwatch/admin"
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-neutral-50 hover:bg-primary/80"
         >
           {t("FloodWatch.login")}

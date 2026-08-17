@@ -7,7 +7,7 @@ export type UseAuthState = {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
-  login: (email: string) => Promise<{ error: Error | null }>;
+  login: (email: string, returnTo?: string) => Promise<{ error: Error | null }>;
   logout: () => Promise<void>;
 };
 
@@ -54,10 +54,12 @@ export function useAuth(): UseAuthState {
     };
   }, []);
 
-  const login = async (email: string) => {
+  const login = async (email: string, returnTo?: string) => {
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (returnTo) callbackUrl.searchParams.set('returnTo', returnTo);
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: callbackUrl.toString() },
     });
     return { error: error ?? null };
   };
