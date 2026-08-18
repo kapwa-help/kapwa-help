@@ -51,16 +51,57 @@ serve(async (req) => {
   const email = body.email?.trim();
   if (!email) return json({ error: 'email_required' }, 400);
 
-  // Use service role to send the invite email and pre-attach role metadata.
   const adminClient = createClient(url, serviceKey);
-  const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
-    data: {
-      role: 'admin',
-      invited_by: userData.user.id,
-      display_name: body.display_name ?? null,
-    },
-  });
+  const displayName = body.display_name ?? null;
 
-  if (error) return json({ error: error.message }, 400);
-  return json({ ok: true, user_id: data.user?.id });
+  // Check if user already exists (re-invite case).
+  const { data: existing } = await adminClient.auth.admin.listUsers();
+  const existingUser = existing?.users?.find(
+    (u) => u.email?.toLowerCase() === email.toLowerCase(),
+  );
+
+  let userId: string;
+
+  if (existingUser) {
+    // User exists — send a fresh magic link via signInWithOtp (which
+    // actually delivers the email, unlike admin.generateLink).
+    const anonClient = createClient(url, anonKey);
+    const redirectTo = new URL('/auth/callback', req.headers.get('origin') || url).toString();
+    const { error: otpErr } = await anonClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo },
+    });
+    if (otpErr) return json({ error: otpErr.message }, 400);
+    userId = existingUser.id;
+  } else {
+    // New user — send invite with proper redirect.
+    const redirectTo = new URL('/auth/callback', req.headers.get('origin') || url).toString();
+    const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      data: {
+        role: 'admin',
+        invited_by: userData.user.id,
+        display_name: displayName,
+      },
+      redirectTo,
+    });
+    if (error) return json({ error: error.message }, 400);
+    userId = data.user?.id ?? '';
+  }
+
+  // Directly upsert admin_users — the DB trigger is unreliable because
+  // inviteUserByEmail populates metadata after the INSERT trigger fires.
+  const { error: upsertErr } = await adminClient
+    .from('admin_users')
+    .upsert(
+      {
+        user_id: userId,
+        email,
+        invited_by: userData.user.id,
+        display_name: displayName,
+      },
+      { onConflict: 'user_id' },
+    );
+  if (upsertErr) return json({ error: upsertErr.message }, 500);
+
+  return json({ ok: true, user_id: userId, reinvite: !!existingUser });
 });
