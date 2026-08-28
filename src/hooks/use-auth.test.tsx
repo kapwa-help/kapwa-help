@@ -8,13 +8,12 @@ vi.mock('../lib/supabase', () => ({
       onAuthStateChange: vi.fn(() => ({
         data: { subscription: { unsubscribe: vi.fn() } },
       })),
-      signInWithOtp: vi.fn(),
+      signInWithPassword: vi.fn(),
       signOut: vi.fn(),
     },
     from: vi.fn(),
   },
 }));
-vi.mock('../lib/auth-mode', () => ({ AUTH_MODE: 'strict' }));
 
 import { supabase } from '../lib/supabase';
 import { useAuth } from './use-auth';
@@ -37,7 +36,7 @@ const mockAdminRow = (userId: string) => {
   });
 };
 
-describe('useAuth (strict mode)', () => {
+describe('useAuth', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('isAdmin=false and user=null when no session', async () => {
@@ -68,6 +67,24 @@ describe('useAuth (strict mode)', () => {
     expect(result.current.isAdmin).toBe(false);
   });
 
+  it('login calls signInWithPassword with the credentials', async () => {
+    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
+    (supabase.auth.signInWithPassword as any).mockResolvedValue({ error: null });
+    mockNoAdminRow();
+    const { result } = renderHook(() => useAuth());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const { error } = await result.current.login('a@b.co', 'hunter2');
+
+    expect(error).toBeNull();
+    expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'a@b.co',
+      password: 'hunter2',
+    });
+  });
+
+  // Regression guard for 731ad03: Supabase runs auth listeners while holding an
+  // exclusive lock; the callback must return synchronously.
   it('returns synchronously from auth state changes before checking admin access', async () => {
     (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
     mockAdminRow('uid-3');
