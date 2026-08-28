@@ -26,6 +26,8 @@
 | `src/pages/LoginPage.tsx` | Delete | Replaced by FloodWatchLoginPage |
 | `src/pages/AuthCallbackPage.tsx` | Delete | Route becomes a redirect |
 | `src/router.tsx` | Rewrite | Host-aware routes + legacy redirects |
+| `src/router.test.tsx` | Create | Route config per host branch |
+| `tests/e2e/smoke.spec.ts` | Modify | Legacy login redirect now lands on Flood Watch login |
 | `src/main.tsx` | Modify | AuthProvider scoping moves to router (Task 7) |
 | `src/pages/FloodWatchAdminPage.tsx` | Modify | Drop invite UI; add logout; Link to login |
 | `src/pages/FloodWatchAdminPage.test.tsx` | Rewrite | Admin/non-admin states, no invite |
@@ -48,7 +50,7 @@
 | `.env.example` | Modify | Drop `VITE_AUTH_MODE` |
 | `.Codex/rules/auth.md`, `.claude/rules/supabase.md` | Modify | Document new auth |
 
-Task order keeps the build green after every task: flood-host → use-auth → login page → router → admin page/Header → flood components → demo cleanup → script/SQL → vercel/docs → verification.
+Task order: flood-host → use-auth → login page → router → admin page/Header → flood components → demo cleanup → script/SQL → vercel/docs → verification. **Tasks 2–4 are one atomic commit** — the `login(email, password)` API change and its consumers (old LoginPage deletion, router rewrite) must land together or intermediate commits fail typecheck. Every commit point in the plan is preceded by a green `npm run build && npm test`.
 
 ---
 
@@ -129,7 +131,7 @@ git commit -m "feat(auth): add host-aware Flood Watch path helper"
 
 ---
 
-### Task 2: Rewrite `use-auth` for password login
+### Task 2: Rewrite `use-auth` for password login (atomic with Tasks 3–4 — do not commit until the end of Task 4)
 
 **Files:**
 - Rewrite: `src/hooks/use-auth.ts`
@@ -339,18 +341,11 @@ git rm src/hooks/use-auth-open.test.tsx
 Run: `npx vitest run src/hooks/use-auth.test.tsx`
 Expected: PASS (5 tests)
 
-- [ ] **Step 6: Commit**
-
-```bash
-git add src/hooks/use-auth.ts src/hooks/use-auth.test.tsx
-git commit -m "feat(auth): replace magic-link login with email+password"
-```
-
-Known temporary breakage (fixed in Tasks 4–5): `LoginPage.tsx` still calls `login(email)` with one argument — TypeScript will flag it. Do NOT run `npm run build` as a gate for this task; the suite gate is the hook tests.
+Do NOT commit yet and do NOT run `npm run build` as a gate here — the old `LoginPage.tsx` still calls `login(email)` with one argument, which is exactly why Tasks 2–4 form one atomic commit (made at the end of Task 4).
 
 ---
 
-### Task 3: Flood Watch login page
+### Task 3: Flood Watch login page (atomic with Tasks 2 and 4 — no commit here)
 
 **Files:**
 - Create: `src/pages/FloodWatchLoginPage.tsx`
@@ -504,21 +499,16 @@ export default function FloodWatchLoginPage() {
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/pages/FloodWatchLoginPage.test.tsx`
-Expected: PASS (2 tests)
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/pages/FloodWatchLoginPage.tsx src/pages/FloodWatchLoginPage.test.tsx
-git commit -m "feat(auth): add Flood Watch password login page"
-```
+Expected: PASS (2 tests). No commit yet — continue straight to Task 4.
 
 ---
 
-### Task 4: Host-aware router + legacy redirects
+### Task 4: Host-aware router + legacy redirects (completes the atomic commit for Tasks 2–4)
 
 **Files:**
 - Rewrite: `src/router.tsx`
+- Create: `src/router.test.tsx`
+- Modify: `tests/e2e/smoke.spec.ts`
 - Delete: `src/pages/LoginPage.tsx`, `src/pages/AuthCallbackPage.tsx`
 
 - [ ] **Step 1: Rewrite the router**
@@ -546,21 +536,26 @@ const withAuth = (page: ReactNode) => <AuthProvider>{page}</AuthProvider>;
 
 // Flood Watch is served at clean paths on its subdomain and under /floodwatch
 // on every other host (main domain, localhost, Vercel previews).
-const floodWatchRoutes = isFloodWatchHost()
-  ? [
-      { path: "/", element: withAuth(<FloodWatchPage />) },
-      { path: "/admin", element: withAuth(<FloodWatchAdminPage />) },
-      { path: "/login", element: withAuth(<FloodWatchLoginPage />) },
-      { path: "/floodwatch", element: <Navigate to="/" replace /> },
-      { path: "/floodwatch/admin", element: <Navigate to="/admin" replace /> },
-      { path: "/floodwatch/login", element: <Navigate to="/login" replace /> },
-    ]
-  : [
-      { path: "/", element: <LandingPage /> },
-      { path: "/floodwatch", element: withAuth(<FloodWatchPage />) },
-      { path: "/floodwatch/admin", element: withAuth(<FloodWatchAdminPage />) },
-      { path: "/floodwatch/login", element: withAuth(<FloodWatchLoginPage />) },
-    ];
+// Exported for unit tests — the host branch can't be exercised in a browser test.
+export function floodWatchRouteConfig(onFloodHost: boolean) {
+  return onFloodHost
+    ? [
+        { path: "/", element: withAuth(<FloodWatchPage />) },
+        { path: "/admin", element: withAuth(<FloodWatchAdminPage />) },
+        { path: "/login", element: withAuth(<FloodWatchLoginPage />) },
+        { path: "/floodwatch", element: <Navigate to="/" replace /> },
+        { path: "/floodwatch/admin", element: <Navigate to="/admin" replace /> },
+        { path: "/floodwatch/login", element: <Navigate to="/login" replace /> },
+      ]
+    : [
+        { path: "/", element: <LandingPage /> },
+        { path: "/floodwatch", element: withAuth(<FloodWatchPage />) },
+        { path: "/floodwatch/admin", element: withAuth(<FloodWatchAdminPage />) },
+        { path: "/floodwatch/login", element: withAuth(<FloodWatchLoginPage />) },
+      ];
+}
+
+const floodWatchRoutes = floodWatchRouteConfig(isFloodWatchHost());
 
 function LegacyLocaleRedirect() {
   const { locale } = useParams<{ locale: string }>();
@@ -603,7 +598,40 @@ Notes:
 - `main.tsx` keeps its global `AuthProvider` until Task 7 (demo components still consume the context); the nested provider is harmless — the app already double-wraps flood routes today.
 - The old `/:locale/login` legacy chain still works: `/en/login` → `/demo/en/login` → flood login.
 
-- [ ] **Step 2: Delete the replaced pages**
+- [ ] **Step 2: Write the router config unit test**
+
+```tsx
+// src/router.test.tsx
+import { describe, expect, it } from 'vitest';
+import { floodWatchRouteConfig } from './router';
+
+describe('floodWatchRouteConfig', () => {
+  it('serves clean paths (plus legacy redirects) on the flood watch host', () => {
+    expect(floodWatchRouteConfig(true).map((r) => r.path)).toEqual([
+      '/',
+      '/admin',
+      '/login',
+      '/floodwatch',
+      '/floodwatch/admin',
+      '/floodwatch/login',
+    ]);
+  });
+
+  it('serves the landing page plus /floodwatch paths on other hosts', () => {
+    expect(floodWatchRouteConfig(false).map((r) => r.path)).toEqual([
+      '/',
+      '/floodwatch',
+      '/floodwatch/admin',
+      '/floodwatch/login',
+    ]);
+  });
+});
+```
+
+Run: `npx vitest run src/router.test.tsx`
+Expected: PASS (2 tests)
+
+- [ ] **Step 3: Delete the replaced pages**
 
 ```bash
 git rm src/pages/LoginPage.tsx src/pages/AuthCallbackPage.tsx
@@ -611,21 +639,41 @@ git rm src/pages/LoginPage.tsx src/pages/AuthCallbackPage.tsx
 
 `AdminOnly.tsx`'s `redirect-to-login` fallback references `/en/login` — that redirect chain still resolves, and `AdminOnly` itself is deleted in Task 7. No other file imports `LoginPage` or `AuthCallbackPage` (only the router did).
 
-- [ ] **Step 3: Type-check and run the full unit suite**
+- [ ] **Step 4: Update the legacy-login smoke test**
 
-Run: `npm run build && npm test`
-Expected: build passes (the `login(email)` single-arg call died with LoginPage.tsx); all unit tests pass except `FloodWatchAdminPage.test.tsx` MAY still pass (it mocks contexts) — if anything unrelated fails, stop and investigate before continuing.
+In `tests/e2e/smoke.spec.ts` (~line 142), replace:
 
-- [ ] **Step 4: Smoke-test routes**
+```ts
+test("old /:locale/login redirects to /demo/:locale/login", async ({ page }) => {
+  await page.goto("/en/login");
+  await expect(page).toHaveURL(/\/demo\/en\/login$/);
+});
+```
 
-Run: `npm run verify`
-Expected: 16/16 Playwright smoke tests pass (demo routes unaffected).
+with:
 
-- [ ] **Step 5: Commit**
+```ts
+test("old /:locale/login redirects to the Flood Watch login", async ({ page }) => {
+  await page.goto("/en/login");
+  await expect(page).toHaveURL(/\/floodwatch\/login$/);
+});
+
+test("legacy /auth/callback redirects to the Flood Watch login", async ({ page }) => {
+  await page.goto("/auth/callback");
+  await expect(page).toHaveURL(/\/floodwatch\/login$/);
+});
+```
+
+- [ ] **Step 5: Type-check and run everything**
+
+Run: `npm run build && npm test && npm run verify`
+Expected: build passes (the `login(email)` single-arg call died with LoginPage.tsx); all unit tests pass; all Playwright smoke tests pass, including the two updated/new redirect tests. If anything unrelated fails, stop and investigate before continuing.
+
+- [ ] **Step 6: Commit (the atomic Tasks 2–4 commit)**
 
 ```bash
-git add src/router.tsx
-git commit -m "feat(auth): host-aware Flood Watch routes; retire magic-link pages"
+git add -A src/ tests/
+git commit -m "feat(auth): email+password login, host-aware Flood Watch routes"
 ```
 
 ---
@@ -643,7 +691,7 @@ git commit -m "feat(auth): host-aware Flood Watch routes; retire magic-link page
 Replace `src/pages/FloodWatchAdminPage.test.tsx` entirely with:
 
 ```tsx
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -686,22 +734,24 @@ describe('FloodWatchAdminPage', () => {
     expect(link).toHaveAttribute('href', '/floodwatch/login');
   });
 
-  it('offers logout when signed in but not an admin', () => {
+  it('offers a working logout when signed in but not an admin', () => {
     authState.user = { id: 'uid-9' };
     renderPage();
     expect(screen.getByText('FloodWatch.adminRequired')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Log out' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    expect(authState.logout).toHaveBeenCalled();
   });
 
-  it('renders the moderation queue with a logout button for admins', async () => {
+  it('renders the moderation queue with a working logout button for admins', async () => {
     authState.isAdmin = true;
     authState.user = { id: 'uid-1' };
     renderPage();
     await waitFor(() =>
       expect(screen.getByText('FloodWatch.noPending')).toBeInTheDocument(),
     );
-    expect(screen.getByRole('button', { name: 'Log out' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Invite admin' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    expect(authState.logout).toHaveBeenCalled();
   });
 });
 ```
@@ -875,7 +925,7 @@ Confirm nothing else consumes auth outside flood pages: `grep -rn "useAuthContex
 - [ ] **Step 5: Full unit suite + build + smoke tests**
 
 Run: `npm test && npm run build && npm run verify`
-Expected: all unit tests pass; build clean; 16/16 smoke tests pass (this is the gate that proves the demo pages didn't regress).
+Expected: all unit tests pass; build clean; all smoke tests pass (this is the gate that proves the demo pages didn't regress).
 
 - [ ] **Step 6: Commit**
 
@@ -927,7 +977,12 @@ const existing = list.users.find((u) => u.email?.toLowerCase() === email.toLower
 
 let userId: string;
 if (existing) {
-  const { error } = await admin.auth.admin.updateUserById(existing.id, { password });
+  // email_confirm matters here: invite-era users may still be unconfirmed,
+  // and unconfirmed accounts cannot password-login.
+  const { error } = await admin.auth.admin.updateUserById(existing.id, {
+    password,
+    email_confirm: true,
+  });
   if (error) {
     console.error('Password update failed:', error.message);
     process.exit(1);
@@ -1000,7 +1055,13 @@ VITE_AUTH_MODE=open
 - [ ] **Step 6: Verify and commit**
 
 Run: `npm run build && npm run lint`
-Expected: clean (script is type-checked by tsx at runtime, not by the app build; lint covers it).
+Then type-check the script explicitly (`scripts/` is outside `tsconfig.json`'s include, so the app build never sees it):
+
+```bash
+npx tsc --noEmit --strict --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --types node scripts/create-admin.ts
+```
+
+Expected: all clean. (No mocked unit tests for this script — it is a linear service-role call sequence with no logic to oracle against; the behavioral safeguard is the Jacob-first rollout order below.)
 
 ```bash
 git add -A
@@ -1143,9 +1204,9 @@ Start: `npm run preview` (production build, service worker active). With Playwri
 ## Manual rollout steps (after code review — Supabase writes need Jacob's explicit go)
 
 1. **Read-only precheck** (no approval needed): confirm `admin_users` table and `is_admin()` exist on the live project (`supabase db query --linked`), and list current rows/users.
-2. **Provision admins** (approval): run `npm run create:admin` twice against the live project — Jacob (`jacobaskey@gmail.com`) and Hannah (`hapaguila@alum.up.edu.ph`) with strong temp passwords. Send Hannah hers via WhatsApp; she signs in at `https://floodwatch.kapwahelp.org/login`.
+2. **Provision admins** (approval): run `npm run create:admin` against the live project for **Jacob first** (`jacobaskey@gmail.com`) and verify a real sign-in on the live login page works end-to-end. Only then provision Hannah (`hapaguila@alum.up.edu.ph`) with a strong temp password. Send Hannah hers via WhatsApp; she signs in at `https://floodwatch.kapwahelp.org/login`.
 3. **DB cleanup** (approval): run `supabase/auth-password-migration.sql` against the live project.
 4. **Dashboard hygiene** (approval): Supabase Auth settings — ensure the email provider allows password sign-in (enabled by default) and **disable new user signups** (Auth → Sign In / Up), so `signUp` calls from strangers are rejected.
 5. **Edge function** (approval): `supabase functions delete invite-admin --project-ref iwhpypwefpdztfyrdngc`.
-6. **Vercel** (approval): `vercel env rm VITE_AUTH_MODE` (all environments); confirm `floodwatch.kapwahelp.org` is attached as a domain of the `kapwa-help` project; deploy `main` after merge.
+6. **Vercel** (approval): `vercel env rm VITE_AUTH_MODE` (all environments); confirm `floodwatch.kapwahelp.org` is attached as a domain of the `kapwa-help` project; deploy `main` after merge. Then verify the host redirects live: `curl -sI https://kapwahelp.org/floodwatch/admin` → 308 to `https://floodwatch.kapwahelp.org/admin`, and the three clean subdomain routes render.
 7. **Post-deploy smoke test**: sign in as Hannah's account on the live subdomain, approve a test report, log out.
