@@ -2,7 +2,7 @@
 
 ## System Overview
 
-Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with magic-link auth gating admin writes.
+Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with email+password auth gating Flood Watch admin actions.
 
 ```
 ┌─────────────────────┐   client fetch    ┌──────────────┐
@@ -21,25 +21,31 @@ Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) clie
 
 **Data flow:** React components call query functions in `src/lib/queries.ts` → Supabase client (`src/lib/supabase.ts`) fetches from Postgres using the anon key → the app shell is precached by the Workbox service worker → OSM map tiles use CacheFirst caching. Supabase requests are never cached by the service worker because their responses can depend on the caller's authorization token.
 
-The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access. Admins authenticate via Supabase magic link; the `admin_users` table gates write access to sensitive records (donations, purchases, deployments, need-lifecycle updates).
+The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access. Flood Watch admins authenticate via email+password; the `admin_users` table would gate write access to sensitive relief-ops records under the stricter `rls-prod.sql` policy set (see below) — the deployed demo project currently runs the permissive `rls-demo.sql` for those tables instead. `admin_users` DOES gate live today for Flood Watch report review: `supabase/flood-watch-rls.sql` requires the `is_admin()` helper (from `rls-prod.sql`) to let admins read and update `flood_reports`.
 
 ### Code Splitting
 
-Route pages (`ReliefMapPage`, `TransparencyPage`, `ReportPage`, `LoginPage`, `AuthCallbackPage`) are lazy-loaded via `React.lazy` + `lazyWithReload` to keep the main bundle small and to recover gracefully from stale chunk hashes after a deploy. The PWA service worker precaches all chunks, so splitting primarily improves first-visit performance.
+Route pages (`ReliefMapPage`, `TransparencyPage`, `ReportPage`, `FloodWatchPage`, `FloodWatchAdminPage`, `FloodWatchLoginPage`) are lazy-loaded via `React.lazy` + `lazyWithReload` to keep the main bundle small and to recover gracefully from stale chunk hashes after a deploy. The PWA service worker precaches all chunks, so splitting primarily improves first-visit performance.
 
 ## Routes
 
-Client-side routing via react-router v7. Locale-prefixed under `/:locale`.
+Client-side routing via react-router v7. See `src/router.tsx` for the source of truth.
 
 | Route | Page | Purpose |
 |-------|------|---------|
-| `/` | redirect | → `/en` |
-| `/:locale` | Relief Map | Full-screen map: need pins, hazard markers, hub markers, legend, summary bar |
-| `/:locale/dashboard` | Transparency | Donation totals, inventory levels, barangay equity, recent activity |
-| `/:locale/transparency` | redirect | → `/:locale/dashboard` (legacy URL, preserved for external links) |
-| `/:locale/report` | Report | Multi-form reporter — need / hazard, plus donation / purchase for admins |
-| `/:locale/login` | Login | Magic-link sign-in for admins |
-| `/auth/callback` | Auth callback | Supabase OAuth redirect target |
+| `/` | Landing | Marketing/landing page |
+| `/demo/:locale` | Relief Map | Full-screen map: need pins, hazard markers, hub markers, legend, summary bar |
+| `/demo/:locale/dashboard` | Transparency | Donation totals, inventory levels, barangay equity, recent activity |
+| `/demo/:locale/transparency` | redirect | → `/demo/:locale/dashboard` (legacy URL, preserved for external links) |
+| `/demo/:locale/report` | Report | Multi-form reporter — need / hazard / donation / purchase |
+| `/demo/:locale/login` | redirect | → `/floodwatch/login` (admin sign-in moved to Flood Watch) |
+| `/floodwatch` | Flood Watch | Public flood/damage report map |
+| `/floodwatch/admin` | Flood Watch Admin | Report moderation queue — requires admin login |
+| `/floodwatch/login` | Flood Watch Login | Email+password sign-in for Flood Watch admins |
+| `/auth/callback` | redirect | Legacy magic-link email URL; kept working by redirecting to `/floodwatch/login` |
+| `/:locale/*` | redirect | Legacy locale-prefixed URLs → equivalent `/demo/:locale/*` route |
+
+On `floodwatch.kapwahelp.org`, Flood Watch is served at clean paths instead: `/` (public map), `/admin` (moderation), `/login` (sign-in); `/floodwatch*` paths on that host redirect to their clean equivalents.
 
 Supported locales: `en` (English), `fil` (Filipino), `ilo` (Ilocano).
 
@@ -72,10 +78,10 @@ Fourteen tables total — thirteen event-scoped + `admin_users` (global). All pr
 
 Two policy sets:
 
-- **`supabase/rls-demo.sql`** — demo project, permissive. Anon can SELECT/INSERT/UPDATE across all tables.
-- **`supabase/rls-prod.sql`** — prod project, auth-gated. Anon reads go through PII-stripped views (`needs_public`, `hazards_public`); anon can only INSERT `needs` / `need_categories` / `hazards`; donations, purchases, deployments, and need-lifecycle updates are admin-only via the `is_admin()` helper.
+- **`supabase/rls-demo.sql`** — demo project, permissive, currently deployed for the relief-ops tables. Anon can SELECT/INSERT/UPDATE across all base tables directly (including `needs` and `hazards` — not through views).
+- **`supabase/rls-prod.sql`** — its relief-ops table policies are a dormant future-hardening profile, not applied to any deployed project: anon reads would go through PII-stripped views (`needs_public`, `hazards_public`); anon could only INSERT `needs` / `need_categories` / `hazards`; donations, purchases, deployments, and need-lifecycle updates would be admin-only. The exception is `is_admin()` itself and the `admin_users` read policies in this file — those ARE applied live, because `supabase/flood-watch-rls.sql` depends on `is_admin()` to gate Flood Watch report review.
 
-Admins are provisioned via an invite-only flow: edge function → `auth.admin.inviteUserByEmail` → `handle_new_user` trigger (gated on `invited_at IS NOT NULL`) inserts into `admin_users`.
+Admins are provisioned manually via `npm run create:admin` (`scripts/create-admin.ts`, a service-role script that creates or updates the `auth.users` row and upserts `admin_users` directly — no database trigger involved).
 
 ### RPC Functions
 
@@ -105,8 +111,10 @@ Demo data: `supabase/seed-demo.sql` (self-contained, idempotent).
 1. Drop all tables
 2. Run `supabase/schema.sql`
 3. Run `supabase/rpc-functions.sql`
-4. Run `supabase/rls-demo.sql` (or `rls-prod.sql` for auth-gated)
-5. Run `supabase/seed-demo.sql`
+4. From `supabase/rls-prod.sql`, run the `is_admin()` helper AND the `admin_users` RLS block (`ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY` plus its read policies, ~lines 79-82) — both are needed by Flood Watch review. The rest of that file's relief-ops table policies are an unused future-hardening profile and can be skipped.
+5. Run `supabase/flood-watch-schema.sql` then `supabase/flood-watch-rls.sql`
+6. Run `supabase/rls-demo.sql` (the deployed relief-ops profile)
+7. Run `supabase/seed-demo.sql`
 
 Historical KML data from Typhoon Emong relief operations is archived under `data/Emong_relief_operations.kml`.
 
@@ -122,7 +130,7 @@ Historical KML data from Typhoon Emong relief operations is archived under `data
 | Primary keys | UUIDs | Collision-free IDs for offline sync from multiple devices |
 | Schema shape | Event-scoped, junction-table categories | Events scope all data. Multi-category selects via junctions avoid denormalization |
 | Multi-row writes | Postgres RPC functions | Transaction safety — parent + junction rows insert atomically |
-| Auth | Supabase magic link + `admin_users` gate | No password UX; admin status is a DB-level concern not a claim in the JWT |
+| Auth | Email+password (Flood Watch admins only) + `admin_users` gate | Magic-link emails were unreliable — institutional mail scanners consumed single-use tokens; admin status is a DB-level concern not a claim in the JWT |
 | Categories | 9 unified aid categories | Hannah's consolidated list replaces separate dashboard/gap categories |
 
 ## Offline Strategy

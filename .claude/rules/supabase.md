@@ -22,10 +22,13 @@ row.organizations as unknown as { name: string }
 
 ## RLS Policies
 
-Defined in `supabase/rls-demo.sql` (demo project, permissive) and `supabase/rls-prod.sql` (prod project, auth-gated):
-- **Demo**: anon can SELECT/INSERT/UPDATE as needed across all 12 tables.
-- **Prod**: anon reads go through PII-stripped views (`needs_public`, `hazards_public`); anon can only INSERT `needs`/`need_categories`/`hazards`; everything else (donations, purchases, deployments, need-lifecycle updates) is admin-only via the `is_admin()` helper.
-- **Admin gate**: presence of a row in `admin_users` keyed by `auth.uid()`. Rows are only created by the invite flow (edge function → `auth.admin.inviteUserByEmail` → `handle_new_user` trigger, gated on `invited_at IS NOT NULL`).
+Defined in `supabase/rls-demo.sql` (demo project, permissive, currently deployed) and `supabase/rls-prod.sql` (table policies dormant; its is_admin() helper and admin_users policies are live — flood-watch-rls.sql depends on them):
+- **Demo**: anon can SELECT/INSERT/UPDATE as needed across all 12 relief-ops tables. This is the currently deployed profile for those tables.
+- **Prod**: the relief-ops table policies (PII-stripped views, admin-only donations/purchases/deployments/need-lifecycle) are dormant — not applied to any deployed project. Exception: `is_admin()` and the `admin_users` read policies from this file ARE applied live, because `supabase/flood-watch-rls.sql` requires `is_admin()` to gate Flood Watch report review.
+- **Admin gate**: presence of a row in `admin_users` keyed by `auth.uid()`. Rows are
+  created manually via `npm run create:admin` (service-role script — creates the user
+  with a password and upserts the admin row). Sign-in is email+password on the Flood
+  Watch login page; there is no invite flow or magic-link auth.
 
 ## Schema
 

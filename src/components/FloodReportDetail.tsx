@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import type { FloodReport } from "@/lib/flood-queries";
 import { updateFloodReportStatus } from "@/lib/flood-queries";
 import { useAuthContext } from "@/lib/auth-context";
-import { AdminOnly } from "@/components/AdminOnly";
 
 const LocationPicker = lazy(() => import("@/components/maps/LocationPicker"));
 
@@ -57,7 +56,7 @@ function LocationBlock({ report }: { report: FloodReport }) {
 
 export default function FloodReportDetail({ report, onClose, onStatusChange, showLocation }: Props) {
   const { t } = useTranslation();
-  const { user } = useAuthContext();
+  const { user, isAdmin } = useAuthContext();
   const [updating, setUpdating] = useState(false);
 
   async function handleStatusChange(status: "approved" | "rejected") {
@@ -131,46 +130,44 @@ export default function FloodReportDetail({ report, onClose, onStatusChange, sho
     </>
   );
 
-  const adminSection = (
-    <AdminOnly>
-      <div className="space-y-3 border-t border-neutral-400/20 pt-4">
-        {report.reporterName && (
-          <div className="text-sm">
-            <span className="text-neutral-400">{t("FloodWatch.reporterName")}</span>
-            <p className="text-neutral-50">{report.reporterName}</p>
-          </div>
-        )}
-        {report.reporterPhone && (
-          <div className="text-sm">
-            <span className="text-neutral-400">{t("FloodWatch.reporterPhone")}</span>
-            <p className="text-neutral-50">
-              <a href={`tel:${report.reporterPhone}`} className="text-primary hover:underline">
-                {report.reporterPhone}
-              </a>
-            </p>
-          </div>
-        )}
-        {report.status === "pending" && (
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => handleStatusChange("approved")}
-              disabled={updating}
-              className="flex-1 cursor-pointer rounded-lg bg-success/20 px-4 py-2.5 text-sm font-medium text-success hover:bg-success/30 disabled:opacity-50"
-            >
-              {t("FloodWatch.approve")}
-            </button>
-            <button
-              onClick={() => handleStatusChange("rejected")}
-              disabled={updating}
-              className="flex-1 cursor-pointer rounded-lg bg-error/20 px-4 py-2.5 text-sm font-medium text-error hover:bg-error/30 disabled:opacity-50"
-            >
-              {t("FloodWatch.reject")}
-            </button>
-          </div>
-        )}
-      </div>
-    </AdminOnly>
-  );
+  const adminSection = isAdmin ? (
+    <div className="space-y-3 border-t border-neutral-400/20 pt-4">
+      {report.reporterName && (
+        <div className="text-sm">
+          <span className="text-neutral-400">{t("FloodWatch.reporterName")}</span>
+          <p className="text-neutral-50">{report.reporterName}</p>
+        </div>
+      )}
+      {report.reporterPhone && (
+        <div className="text-sm">
+          <span className="text-neutral-400">{t("FloodWatch.reporterPhone")}</span>
+          <p className="text-neutral-50">
+            <a href={`tel:${report.reporterPhone}`} className="text-primary hover:underline">
+              {report.reporterPhone}
+            </a>
+          </p>
+        </div>
+      )}
+      {report.status === "pending" && (
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={() => handleStatusChange("approved")}
+            disabled={updating}
+            className="flex-1 cursor-pointer rounded-lg bg-success/20 px-4 py-2.5 text-sm font-medium text-success hover:bg-success/30 disabled:opacity-50"
+          >
+            {t("FloodWatch.approve")}
+          </button>
+          <button
+            onClick={() => handleStatusChange("rejected")}
+            disabled={updating}
+            className="flex-1 cursor-pointer rounded-lg bg-error/20 px-4 py-2.5 text-sm font-medium text-error hover:bg-error/30 disabled:opacity-50"
+          >
+            {t("FloodWatch.reject")}
+          </button>
+        </div>
+      )}
+    </div>
+  ) : null;
 
   return (
     <>

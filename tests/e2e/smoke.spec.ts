@@ -139,9 +139,14 @@ test("old /:locale/report redirects to /demo/:locale/report", async ({ page }) =
   await expect(page).toHaveURL(/\/demo\/en\/report$/);
 });
 
-test("old /:locale/login redirects to /demo/:locale/login", async ({ page }) => {
+test("old /:locale/login redirects to the Flood Watch login", async ({ page }) => {
   await page.goto("/en/login");
-  await expect(page).toHaveURL(/\/demo\/en\/login$/);
+  await expect(page).toHaveURL(/\/floodwatch\/login$/);
+});
+
+test("legacy /auth/callback redirects to the Flood Watch login", async ({ page }) => {
+  await page.goto("/auth/callback");
+  await expect(page).toHaveURL(/\/floodwatch\/login$/);
 });
 
 test("legacy /:locale/transparency redirects to /demo/:locale/dashboard", async ({ page }) => {

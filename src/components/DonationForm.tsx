@@ -20,7 +20,6 @@ import {
   FormSuccess,
   FormSuccessButton,
 } from "@/components/forms/form-fields";
-import { AdminOnly } from "@/components/AdminOnly";
 
 interface Organization {
   id: string;
@@ -142,7 +141,6 @@ export default function DonationForm() {
 
   if (submitted) {
     return (
-      <AdminOnly>
       <FormSuccess>
         <h2 className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}>
           {t(savedOffline ? "DonationForm.savedTitle" : "DonationForm.success")}
@@ -162,12 +160,10 @@ export default function DonationForm() {
           {t("ReportForm.reportDonation")}
         </FormSuccessButton>
       </FormSuccess>
-      </AdminOnly>
     );
   }
 
   return (
-    <AdminOnly>
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       <div>
         <FormLabel htmlFor="donation_type" required>
@@ -282,6 +278,5 @@ export default function DonationForm() {
         {submitting ? t("SubmitForm.submitting") : t("DonationForm.submit")}
       </FormSubmitButton>
     </form>
-    </AdminOnly>
   );
 }

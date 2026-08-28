@@ -9,4 +9,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Password-only auth: never mint a session from URL tokens (legacy
+    // magic-link/invite emails), only from explicit signInWithPassword.
+    detectSessionInUrl: false,
+  },
+});

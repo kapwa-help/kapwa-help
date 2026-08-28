@@ -16,11 +16,9 @@ import {
   getHazards,
 } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
-import { useAuthContext } from "@/lib/auth-context";
 
 export default function ReliefMapPage() {
   const { t } = useTranslation();
-  const { isAdmin } = useAuthContext();
   const [data, setData] = useState<ReliefMapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,9 +30,9 @@ export default function ReliefMapPage() {
       const activeEvent = await getActiveEvent();
 
       const [needsPoints, hubs, hazards] = await Promise.all([
-        activeEvent ? getNeedsMapPoints(activeEvent.id, isAdmin) : Promise.resolve([]),
+        activeEvent ? getNeedsMapPoints(activeEvent.id) : Promise.resolve([]),
         activeEvent ? getDeploymentHubs(activeEvent.id) : Promise.resolve([]),
-        activeEvent ? getHazards(activeEvent.id, isAdmin) : Promise.resolve([]),
+        activeEvent ? getHazards(activeEvent.id) : Promise.resolve([]),
       ]);
 
       const freshData: ReliefMapData = {
@@ -56,7 +54,7 @@ export default function ReliefMapPage() {
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, []);
 
   useEffect(() => {
     async function init() {

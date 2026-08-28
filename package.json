@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "translate": "tsx scripts/translate.ts",
-    "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
+    "create:admin": "tsx scripts/create-admin.ts",
     "perf": "tsx scripts/perf.ts",
     "perf:mobile": "tsx scripts/perf-mobile.ts",
     "compress-photos": "tsx scripts/compress-hazard-photos.ts",

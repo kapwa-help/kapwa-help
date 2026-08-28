@@ -1,26 +1,43 @@
 import { createBrowserRouter, Navigate, useParams, useLocation } from "react-router";
+import type { ReactNode } from "react";
 import { RootLayout } from "./components/RootLayout";
 import { lazyWithReload } from "@/lib/lazy-reload";
 import { AuthProvider } from "@/lib/auth-context";
+import { floodPath, isFloodWatchHost } from "@/lib/flood-host";
 const LandingPage = lazyWithReload(() => import("./pages/LandingPage"));
 
 const ReliefMapPage = lazyWithReload(() => import("./pages/ReliefMapPage"));
 const TransparencyPage = lazyWithReload(() => import("./pages/TransparencyPage"));
 const ReportPage = lazyWithReload(() => import("./pages/ReportPage"));
-const LoginPage = lazyWithReload(() => import("./pages/LoginPage"));
-const AuthCallbackPage = lazyWithReload(() => import("./pages/AuthCallbackPage"));
 const FloodWatchPage = lazyWithReload(() => import("./pages/FloodWatchPage"));
 const FloodWatchAdminPage = lazyWithReload(() => import("./pages/FloodWatchAdminPage"));
+const FloodWatchLoginPage = lazyWithReload(() => import("./pages/FloodWatchLoginPage"));
 
-const FLOOD_WATCH_HOST = "floodwatch.kapwahelp.org";
+// Only Flood Watch pages need auth; demo relief pages are public.
+const withAuth = (page: ReactNode) => <AuthProvider>{page}</AuthProvider>;
 
-function RootRedirect() {
-  const isFloodWatch =
-    typeof window !== "undefined" &&
-    window.location.hostname === FLOOD_WATCH_HOST;
-  if (isFloodWatch) return <Navigate to="/floodwatch" replace />;
-  return <LandingPage />;
+// Flood Watch is served at clean paths on its subdomain and under /floodwatch
+// on every other host (main domain, localhost, Vercel previews).
+// Exported for unit tests — the host branch can't be exercised in a browser test.
+export function floodWatchRouteConfig(onFloodHost: boolean) {
+  return onFloodHost
+    ? [
+        { path: "/", element: withAuth(<FloodWatchPage />) },
+        { path: "/admin", element: withAuth(<FloodWatchAdminPage />) },
+        { path: "/login", element: withAuth(<FloodWatchLoginPage />) },
+        { path: "/floodwatch", element: <Navigate to="/" replace /> },
+        { path: "/floodwatch/admin", element: <Navigate to="/admin" replace /> },
+        { path: "/floodwatch/login", element: <Navigate to="/login" replace /> },
+      ]
+    : [
+        { path: "/", element: <LandingPage /> },
+        { path: "/floodwatch", element: withAuth(<FloodWatchPage />) },
+        { path: "/floodwatch/admin", element: withAuth(<FloodWatchAdminPage />) },
+        { path: "/floodwatch/login", element: withAuth(<FloodWatchLoginPage />) },
+      ];
 }
+
+const floodWatchRoutes = floodWatchRouteConfig(isFloodWatchHost());
 
 function LegacyLocaleRedirect() {
   const { locale } = useParams<{ locale: string }>();
@@ -30,8 +47,9 @@ function LegacyLocaleRedirect() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <RootRedirect /> },
-  { path: "/auth/callback", element: <AuthCallbackPage /> },
+  ...floodWatchRoutes,
+  // Old magic-link emails point here; the URL must keep working.
+  { path: "/auth/callback", element: <Navigate to={floodPath("/login")} replace /> },
   {
     path: "/demo/:locale",
     element: <RootLayout />,
@@ -40,11 +58,10 @@ export const router = createBrowserRouter([
       { path: "dashboard", element: <TransparencyPage /> },
       { path: "transparency", element: <Navigate to="../dashboard" replace /> },
       { path: "report", element: <ReportPage /> },
-      { path: "login", element: <LoginPage /> },
+      // Admin sign-in moved to Flood Watch; keep the old URL redirecting.
+      { path: "login", element: <Navigate to={floodPath("/login")} replace /> },
     ],
   },
-  { path: "/floodwatch", element: <AuthProvider><FloodWatchPage /></AuthProvider> },
-  { path: "/floodwatch/admin", element: <AuthProvider><FloodWatchAdminPage /></AuthProvider> },
   {
     path: "/:locale",
     children: [
