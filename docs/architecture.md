@@ -2,7 +2,7 @@
 
 ## System Overview
 
-Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with magic-link auth gating admin writes.
+Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) client-side and caches the app shell for offline use via a Workbox service worker. The architecture prioritizes simplicity — client-side fetch, render, cache — with email+password auth gating Flood Watch admin actions.
 
 ```
 ┌─────────────────────┐   client fetch    ┌──────────────┐
@@ -21,11 +21,11 @@ Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) clie
 
 **Data flow:** React components call query functions in `src/lib/queries.ts` → Supabase client (`src/lib/supabase.ts`) fetches from Postgres using the anon key → the app shell is precached by the Workbox service worker → OSM map tiles use CacheFirst caching. Supabase requests are never cached by the service worker because their responses can depend on the caller's authorization token.
 
-The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access. Admins authenticate via Supabase magic link; the `admin_users` table gates write access to sensitive records (donations, purchases, deployments, need-lifecycle updates).
+The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access. Flood Watch admins authenticate via email+password; the `admin_users` table would gate write access to sensitive records under the stricter `rls-prod.sql` policy set (see below) — the deployed demo project currently runs the permissive `rls-demo.sql` instead.
 
 ### Code Splitting
 
-Route pages (`ReliefMapPage`, `TransparencyPage`, `ReportPage`, `LoginPage`, `AuthCallbackPage`) are lazy-loaded via `React.lazy` + `lazyWithReload` to keep the main bundle small and to recover gracefully from stale chunk hashes after a deploy. The PWA service worker precaches all chunks, so splitting primarily improves first-visit performance.
+Route pages (`ReliefMapPage`, `TransparencyPage`, `ReportPage`, `FloodWatchPage`, `FloodWatchAdminPage`, `FloodWatchLoginPage`) are lazy-loaded via `React.lazy` + `lazyWithReload` to keep the main bundle small and to recover gracefully from stale chunk hashes after a deploy. The PWA service worker precaches all chunks, so splitting primarily improves first-visit performance.
 
 ## Routes
 
@@ -38,8 +38,8 @@ Client-side routing via react-router v7. Locale-prefixed under `/:locale`.
 | `/:locale/dashboard` | Transparency | Donation totals, inventory levels, barangay equity, recent activity |
 | `/:locale/transparency` | redirect | → `/:locale/dashboard` (legacy URL, preserved for external links) |
 | `/:locale/report` | Report | Multi-form reporter — need / hazard, plus donation / purchase for admins |
-| `/:locale/login` | Login | Magic-link sign-in for admins |
-| `/auth/callback` | Auth callback | Supabase OAuth redirect target |
+| `/:locale/login` | redirect | → Flood Watch login (admin sign-in moved to Flood Watch) |
+| `/auth/callback` | redirect | Legacy magic-link email URL; kept working by redirecting to the Flood Watch login page |
 
 Supported locales: `en` (English), `fil` (Filipino), `ilo` (Ilocano).
 
@@ -72,10 +72,10 @@ Fourteen tables total — thirteen event-scoped + `admin_users` (global). All pr
 
 Two policy sets:
 
-- **`supabase/rls-demo.sql`** — demo project, permissive. Anon can SELECT/INSERT/UPDATE across all tables.
-- **`supabase/rls-prod.sql`** — prod project, auth-gated. Anon reads go through PII-stripped views (`needs_public`, `hazards_public`); anon can only INSERT `needs` / `need_categories` / `hazards`; donations, purchases, deployments, and need-lifecycle updates are admin-only via the `is_admin()` helper.
+- **`supabase/rls-demo.sql`** — demo project, permissive, currently deployed. Anon can SELECT/INSERT/UPDATE across all base tables directly (including `needs` and `hazards` — not through views).
+- **`supabase/rls-prod.sql`** — an unused future-hardening profile, not applied to any deployed project. Anon reads would go through PII-stripped views (`needs_public`, `hazards_public`); anon could only INSERT `needs` / `need_categories` / `hazards`; donations, purchases, deployments, and need-lifecycle updates would be admin-only via the `is_admin()` helper.
 
-Admins are provisioned via an invite-only flow: edge function → `auth.admin.inviteUserByEmail` → `handle_new_user` trigger (gated on `invited_at IS NOT NULL`) inserts into `admin_users`.
+Admins are provisioned manually via `npm run create:admin` (`scripts/create-admin.ts`, a service-role script that creates or updates the `auth.users` row and upserts `admin_users` directly — no database trigger involved).
 
 ### RPC Functions
 
@@ -105,7 +105,7 @@ Demo data: `supabase/seed-demo.sql` (self-contained, idempotent).
 1. Drop all tables
 2. Run `supabase/schema.sql`
 3. Run `supabase/rpc-functions.sql`
-4. Run `supabase/rls-demo.sql` (or `rls-prod.sql` for auth-gated)
+4. Run `supabase/rls-demo.sql` (the deployed profile; `rls-prod.sql` is an unused future-hardening alternative)
 5. Run `supabase/seed-demo.sql`
 
 Historical KML data from Typhoon Emong relief operations is archived under `data/Emong_relief_operations.kml`.
@@ -122,7 +122,7 @@ Historical KML data from Typhoon Emong relief operations is archived under `data
 | Primary keys | UUIDs | Collision-free IDs for offline sync from multiple devices |
 | Schema shape | Event-scoped, junction-table categories | Events scope all data. Multi-category selects via junctions avoid denormalization |
 | Multi-row writes | Postgres RPC functions | Transaction safety — parent + junction rows insert atomically |
-| Auth | Supabase magic link + `admin_users` gate | No password UX; admin status is a DB-level concern not a claim in the JWT |
+| Auth | Email+password (Flood Watch admins only) + `admin_users` gate | Magic-link emails were unreliable — institutional mail scanners consumed single-use tokens; admin status is a DB-level concern not a claim in the JWT |
 | Categories | 9 unified aid categories | Hannah's consolidated list replaces separate dashboard/gap categories |
 
 ## Offline Strategy
