@@ -15,13 +15,17 @@ All smoke tests should pass. Any failure means a UI regression.
 
 | Route | Page | Key Elements |
 |-------|------|-------------|
-| `/:locale` | Relief Map | Header, map with legend, summary bar, zoom controls |
-| `/:locale/dashboard` | Transparency | Header, `<h1>`, summary cards, inventory, barangay equity |
-| `/:locale/report` | Report | Header, `<h1>`, form-type selector (need / hazard / donation / purchase) |
-| `/:locale/login` | redirect | → Flood Watch login (`/floodwatch/login`), an email+password form |
+| `/demo/:locale` | Relief Map | Header, map with legend, summary bar, zoom controls |
+| `/demo/:locale/dashboard` | Transparency | Header, `<h1>`, summary cards, inventory, barangay equity |
+| `/demo/:locale/report` | Report | Header, `<h1>`, form-type selector (need / hazard / donation / purchase) |
+| `/demo/:locale/login` | redirect | → Flood Watch login (`/floodwatch/login`), an email+password form |
+| `/floodwatch` | Flood Watch | Public flood/damage report map |
+| `/floodwatch/admin` | Flood Watch Admin | Report moderation queue — requires admin login |
+| `/floodwatch/login` | Flood Watch Login | Email+password sign-in form |
 | `/auth/callback` | redirect | → Flood Watch login (`/floodwatch/login`), an email+password form |
+| `/:locale/*` | redirect | Legacy locale-prefixed URLs → equivalent `/demo/:locale/*` route |
 
-Supported locales: `en`, `fil`, `ilo`. The `/:locale/transparency` path 302s to `/:locale/dashboard` for legacy links.
+Supported locales: `en`, `fil`, `ilo`. The `/demo/:locale/transparency` path 302s to `/demo/:locale/dashboard` for legacy links. On `floodwatch.kapwahelp.org`, Flood Watch pages are served at clean paths: `/`, `/admin`, `/login`.
 
 ## Taking Screenshots
 

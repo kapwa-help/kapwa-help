@@ -29,17 +29,23 @@ Route pages (`ReliefMapPage`, `TransparencyPage`, `ReportPage`, `FloodWatchPage`
 
 ## Routes
 
-Client-side routing via react-router v7. Locale-prefixed under `/:locale`.
+Client-side routing via react-router v7. See `src/router.tsx` for the source of truth.
 
 | Route | Page | Purpose |
 |-------|------|---------|
-| `/` | redirect | → `/en` |
-| `/:locale` | Relief Map | Full-screen map: need pins, hazard markers, hub markers, legend, summary bar |
-| `/:locale/dashboard` | Transparency | Donation totals, inventory levels, barangay equity, recent activity |
-| `/:locale/transparency` | redirect | → `/:locale/dashboard` (legacy URL, preserved for external links) |
-| `/:locale/report` | Report | Multi-form reporter — need / hazard / donation / purchase |
-| `/:locale/login` | redirect | → Flood Watch login (admin sign-in moved to Flood Watch) |
-| `/auth/callback` | redirect | Legacy magic-link email URL; kept working by redirecting to the Flood Watch login page |
+| `/` | Landing | Marketing/landing page |
+| `/demo/:locale` | Relief Map | Full-screen map: need pins, hazard markers, hub markers, legend, summary bar |
+| `/demo/:locale/dashboard` | Transparency | Donation totals, inventory levels, barangay equity, recent activity |
+| `/demo/:locale/transparency` | redirect | → `/demo/:locale/dashboard` (legacy URL, preserved for external links) |
+| `/demo/:locale/report` | Report | Multi-form reporter — need / hazard / donation / purchase |
+| `/demo/:locale/login` | redirect | → `/floodwatch/login` (admin sign-in moved to Flood Watch) |
+| `/floodwatch` | Flood Watch | Public flood/damage report map |
+| `/floodwatch/admin` | Flood Watch Admin | Report moderation queue — requires admin login |
+| `/floodwatch/login` | Flood Watch Login | Email+password sign-in for Flood Watch admins |
+| `/auth/callback` | redirect | Legacy magic-link email URL; kept working by redirecting to `/floodwatch/login` |
+| `/:locale/*` | redirect | Legacy locale-prefixed URLs → equivalent `/demo/:locale/*` route |
+
+On `floodwatch.kapwahelp.org`, Flood Watch is served at clean paths instead: `/` (public map), `/admin` (moderation), `/login` (sign-in); `/floodwatch*` paths on that host redirect to their clean equivalents.
 
 Supported locales: `en` (English), `fil` (Filipino), `ilo` (Ilocano).
 
@@ -105,7 +111,7 @@ Demo data: `supabase/seed-demo.sql` (self-contained, idempotent).
 1. Drop all tables
 2. Run `supabase/schema.sql`
 3. Run `supabase/rpc-functions.sql`
-4. Run the `is_admin()` helper from `supabase/rls-prod.sql` (needed by Flood Watch review — the rest of that file's relief-ops policies are an unused future-hardening profile and can be skipped)
+4. From `supabase/rls-prod.sql`, run the `is_admin()` helper AND the `admin_users` RLS block (`ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY` plus its read policies, ~lines 79-82) — both are needed by Flood Watch review. The rest of that file's relief-ops table policies are an unused future-hardening profile and can be skipped.
 5. Run `supabase/flood-watch-schema.sql` then `supabase/flood-watch-rls.sql`
 6. Run `supabase/rls-demo.sql` (the deployed relief-ops profile)
 7. Run `supabase/seed-demo.sql`
