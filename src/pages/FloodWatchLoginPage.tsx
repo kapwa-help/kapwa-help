@@ -14,12 +14,17 @@ export default function FloodWatchLoginPage() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
-    const { error } = await login(email.trim(), password);
-    if (error) {
+    try {
+      const { error } = await login(email.trim(), password);
+      if (error) {
+        setStatus('error');
+        setErrorMsg(error.message);
+      } else {
+        navigate(floodPath('/admin'), { replace: true });
+      }
+    } catch (err) {
       setStatus('error');
-      setErrorMsg(error.message);
-    } else {
-      navigate(floodPath('/admin'), { replace: true });
+      setErrorMsg(err instanceof Error ? err.message : 'Sign-in failed. Please try again.');
     }
   };
 
@@ -61,7 +66,7 @@ export default function FloodWatchLoginPage() {
           >
             {status === 'submitting' ? 'Signing in…' : 'Sign in'}
           </button>
-          {status === 'error' && <p className="text-sm text-error">{errorMsg}</p>}
+          {status === 'error' && <p role="alert" className="text-sm text-error">{errorMsg}</p>}
         </form>
       </div>
     </div>
