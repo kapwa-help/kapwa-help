@@ -1,8 +1,17 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+
+const authState = {
+  isAdmin: false,
+  loading: false,
+  user: null as { id: string } | null,
+  login: vi.fn(),
+  logout: vi.fn(),
+};
 
 vi.mock('@/lib/auth-context', () => ({
-  useAuthContext: () => ({ isAdmin: true, loading: false }),
+  useAuthContext: () => authState,
 }));
 
 vi.mock('@/lib/flood-queries', () => ({
@@ -10,23 +19,45 @@ vi.mock('@/lib/flood-queries', () => ({
   getAllFloodReports: vi.fn(() => Promise.resolve([])),
 }));
 
-vi.mock('@/lib/supabase', () => ({
-  supabase: { functions: { invoke: vi.fn() } },
-}));
-
 import FloodWatchAdminPage from './FloodWatchAdminPage';
 
+const renderPage = () =>
+  render(
+    <MemoryRouter>
+      <FloodWatchAdminPage />
+    </MemoryRouter>,
+  );
+
 describe('FloodWatchAdminPage', () => {
-  it('opens the admin invitation form from the Flood Watch header', async () => {
-    render(<FloodWatchAdminPage />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    authState.isAdmin = false;
+    authState.user = null;
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Invite admin' }));
+  it('offers the login link when signed out', () => {
+    renderPage();
+    const link = screen.getByRole('link', { name: 'FloodWatch.login' });
+    expect(link).toHaveAttribute('href', '/floodwatch/login');
+  });
 
-    expect(
-      screen.getByRole('heading', { name: 'Invite admin' }),
-    ).toBeInTheDocument();
+  it('offers a working logout when signed in but not an admin', () => {
+    authState.user = { id: 'uid-9' };
+    renderPage();
+    expect(screen.getByText('FloodWatch.adminRequired')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    expect(authState.logout).toHaveBeenCalled();
+  });
+
+  it('renders the moderation queue with a working logout button for admins', async () => {
+    authState.isAdmin = true;
+    authState.user = { id: 'uid-1' };
+    renderPage();
     await waitFor(() =>
-      expect(screen.queryByText('App.loading')).not.toBeInTheDocument(),
+      expect(screen.getByText('FloodWatch.noPending')).toBeInTheDocument(),
     );
+    expect(screen.queryByRole('button', { name: 'Invite admin' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    expect(authState.logout).toHaveBeenCalled();
   });
 });

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { useAuthContext } from "@/lib/auth-context";
+import { floodPath } from "@/lib/flood-host";
 import { getPendingFloodReports, getAllFloodReports, type FloodReport } from "@/lib/flood-queries";
-import { InviteAdminModal } from "@/components/InviteAdminModal";
 
 const FloodReportDetail = lazy(() => import("@/components/FloodReportDetail"));
 
@@ -10,12 +11,11 @@ type Tab = "pending" | "all";
 
 export default function FloodWatchAdminPage() {
   const { t } = useTranslation();
-  const { isAdmin, loading: authLoading } = useAuthContext();
+  const { isAdmin, loading: authLoading, user, logout } = useAuthContext();
   const [tab, setTab] = useState<Tab>("pending");
   const [reports, setReports] = useState<FloodReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FloodReport | null>(null);
-  const [inviteOpen, setInviteOpen] = useState(false);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -50,12 +50,22 @@ export default function FloodWatchAdminPage() {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-base">
         <p className="text-neutral-400">{t("FloodWatch.adminRequired")}</p>
-        <a
-          href="/demo/en/login?returnTo=/floodwatch/admin"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-neutral-50 hover:bg-primary/80"
-        >
-          {t("FloodWatch.login")}
-        </a>
+        {user ? (
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-neutral-50 hover:bg-primary/80"
+          >
+            Log out
+          </button>
+        ) : (
+          <Link
+            to={floodPath("/login")}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-neutral-50 hover:bg-primary/80"
+          >
+            {t("FloodWatch.login")}
+          </Link>
+        )}
       </div>
     );
   }
@@ -69,14 +79,12 @@ export default function FloodWatchAdminPage() {
         </h1>
         <button
           type="button"
-          onClick={() => setInviteOpen(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-neutral-50 transition-colors hover:bg-primary/80"
+          onClick={() => logout()}
+          className="rounded-lg border border-neutral-400/20 px-4 py-2 text-sm font-medium text-neutral-400 transition-colors hover:text-neutral-50"
         >
-          Invite admin
+          Log out
         </button>
       </header>
-
-      <InviteAdminModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
 
       {/* Tabs */}
       <div className="flex border-b border-neutral-400/20">
