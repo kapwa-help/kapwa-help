@@ -23,6 +23,42 @@
       "has": [{ "type": "host", "value": "www.kapwahelp.org" }],
       "destination": "https://floodwatch.kapwahelp.org/:path*",
       "permanent": true
+    },
+    {
+      "source": "/auth/callback",
+      "has": [{ "type": "host", "value": "kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/login",
+      "permanent": false
+    },
+    {
+      "source": "/auth/callback",
+      "has": [{ "type": "host", "value": "www.kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/login",
+      "permanent": false
+    },
+    {
+      "source": "/demo/:locale/login",
+      "has": [{ "type": "host", "value": "kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/login",
+      "permanent": false
+    },
+    {
+      "source": "/demo/:locale/login",
+      "has": [{ "type": "host", "value": "www.kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/login",
+      "permanent": false
+    },
+    {
+      "source": "/:locale/login",
+      "has": [{ "type": "host", "value": "kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/login",
+      "permanent": false
+    },
+    {
+      "source": "/:locale/login",
+      "has": [{ "type": "host", "value": "www.kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/login",
+      "permanent": false
     }
   ],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
