@@ -1,5 +1,29 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "redirects": [
+    {
+      "source": "/floodwatch",
+      "has": [{ "type": "host", "value": "kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/",
+      "permanent": true
+    },
+    {
+      "source": "/floodwatch/:path*",
+      "has": [{ "type": "host", "value": "kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/floodwatch",
+      "has": [{ "type": "host", "value": "www.kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/",
+      "permanent": true
+    },
+    {
+      "source": "/floodwatch/:path*",
+      "has": [{ "type": "host", "value": "www.kapwahelp.org" }],
+      "destination": "https://floodwatch.kapwahelp.org/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
