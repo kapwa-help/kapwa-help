@@ -24,8 +24,8 @@ CREATE TABLE events (
 );
 
 -- === Admin Users ===
--- Presence in this table = admin. Rows are only created by the invite flow
--- (via the handle_new_user trigger below reading role='admin' metadata).
+-- Presence in this table = admin. Rows are created manually via
+-- scripts/create-admin.ts (service-role script).
 
 CREATE TABLE admin_users (
   user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -34,33 +34,6 @@ CREATE TABLE admin_users (
   invited_by uuid REFERENCES admin_users(user_id),
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
--- Trigger to auto-provision an admin_users row when invite metadata is set.
--- SECURITY: gate on new.invited_at IS NOT NULL — only users created via
--- auth.admin.inviteUserByEmail (service role) have this set. This prevents
--- a self-signup from claiming admin by passing role='admin' in user metadata
--- even if signup is accidentally enabled in the Supabase dashboard.
-CREATE OR REPLACE FUNCTION handle_new_user() RETURNS trigger
-  LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
-AS $$
-BEGIN
-  IF new.invited_at IS NOT NULL
-     AND COALESCE(new.raw_user_meta_data ->> 'role', '') = 'admin' THEN
-    INSERT INTO public.admin_users (user_id, email, invited_by, display_name)
-    VALUES (
-      new.id,
-      new.email,
-      NULLIF(new.raw_user_meta_data ->> 'invited_by', '')::uuid,
-      new.raw_user_meta_data ->> 'display_name'
-    );
-  END IF;
-  RETURN new;
-END;
-$$;
-
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
 -- Organizations (financial/accountability layer)
 CREATE TABLE organizations (
