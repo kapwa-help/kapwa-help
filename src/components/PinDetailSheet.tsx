@@ -191,7 +191,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         </div>
       )}
 
-      {/* Interactive status stepper — admin only */}
+      {/* Interactive status stepper */}
       <div className="mb-2">
         {!isOnline && (
           <p className="mb-2 text-center text-xs text-warning">
@@ -245,7 +245,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         )}
       </div>
 
-      {/* Claim form — verified pins only (admin only) */}
+      {/* Claim form — verified pins only */}
       {point.status === "verified" && (
         <div className="mt-4">
           <ClaimForm
@@ -255,7 +255,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         </div>
       )}
 
-      {/* Confirm delivery — in_transit pins: photo required to confirm (admin only) */}
+      {/* Confirm delivery — in_transit pins: photo required to confirm */}
       {point.status === "in_transit" && (
         <div className="mt-4 space-y-2">
           {!photoFile ? (

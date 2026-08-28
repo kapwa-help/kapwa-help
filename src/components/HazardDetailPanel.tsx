@@ -107,7 +107,7 @@ export default function HazardDetailPanel({ hazard, onClose, onResolve, variant 
         </div>
       </div>
 
-      {/* Resolve button — admin only */}
+      {/* Resolve button */}
       <button
         onClick={handleResolve}
         disabled={resolving}

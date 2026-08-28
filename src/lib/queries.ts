@@ -116,10 +116,10 @@ export async function getActiveEvent() {
 
 // --- Needs queries ---
 
-// Raw row shapes returned by Supabase. .from(source).select(fields) with
-// dynamic source/fields is inherently untyped from Supabase's side — these
-// interfaces name the shapes we explicitly ask for above each query.
-interface NeedRowBase {
+// Raw row shape returned by Supabase. .select(fields) with a string literal
+// of fields is inherently untyped from Supabase's side — this interface
+// names the shape we explicitly ask for below.
+interface NeedRow {
   id: string;
   lat: number | string;
   lng: number | string;
@@ -131,9 +131,6 @@ interface NeedRowBase {
   hub_id: string | null;
   delivery_photo_url: string | null;
   created_at: string;
-}
-
-interface NeedRowAdmin extends NeedRowBase {
   contact_name: string;
   contact_phone: string | null;
   need_categories: {
@@ -142,18 +139,16 @@ interface NeedRowAdmin extends NeedRowBase {
 }
 
 export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
-  const source = "needs";
-  const fields =
-    "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))";
-
   const { data, error } = await supabase
-    .from(source)
-    .select(fields)
+    .from("needs")
+    .select(
+      "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))"
+    )
     .eq("event_id", eventId)
     .in("status", ["pending", "verified", "in_transit"]);
   if (error) throw error;
 
-  const rows = (data ?? []) as unknown as NeedRowAdmin[];
+  const rows = (data ?? []) as unknown as NeedRow[];
   return rows.map((row) => ({
     id: row.id,
     lat: Number(row.lat),
@@ -261,7 +256,7 @@ export async function getHubs(eventId: string) {
 
 // --- Hazard queries ---
 
-interface HazardRowBase {
+interface HazardRow {
   id: string;
   description: string;
   photo_url: string | null;
@@ -269,26 +264,21 @@ interface HazardRowBase {
   longitude: number | string;
   status: string;
   created_at: string;
-}
-
-interface HazardRowAdmin extends HazardRowBase {
   reported_by: string | null;
   contact_phone: string | null;
 }
 
 export async function getHazards(eventId: string): Promise<HazardPoint[]> {
-  const source = "hazards";
-  const fields =
-    "id, description, photo_url, latitude, longitude, status, reported_by, contact_phone, created_at";
-
   const { data, error } = await supabase
-    .from(source)
-    .select(fields)
+    .from("hazards")
+    .select(
+      "id, description, photo_url, latitude, longitude, status, reported_by, contact_phone, created_at"
+    )
     .eq("event_id", eventId)
     .eq("status", "active");
   if (error) throw error;
 
-  const rows = (data ?? []) as unknown as HazardRowAdmin[];
+  const rows = (data ?? []) as unknown as HazardRow[];
   return rows.map((row) => ({
     id: row.id,
     description: row.description,
