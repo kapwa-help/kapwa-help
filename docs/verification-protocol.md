@@ -18,8 +18,8 @@ All smoke tests should pass. Any failure means a UI regression.
 | `/:locale` | Relief Map | Header, map with legend, summary bar, zoom controls |
 | `/:locale/dashboard` | Transparency | Header, `<h1>`, summary cards, inventory, barangay equity |
 | `/:locale/report` | Report | Header, `<h1>`, form-type selector (need / hazard / donation / purchase) |
-| `/:locale/login` | Login | Magic-link email input |
-| `/auth/callback` | Auth callback | Handles Supabase redirect |
+| `/:locale/login` | redirect | → Flood Watch login (`/floodwatch/login`), an email+password form |
+| `/auth/callback` | redirect | → Flood Watch login (`/floodwatch/login`), an email+password form |
 
 Supported locales: `en`, `fil`, `ilo`. The `/:locale/transparency` path 302s to `/:locale/dashboard` for legacy links.
 

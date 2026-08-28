@@ -21,7 +21,7 @@ Kapwa Help is a Vite + React SPA that fetches data from Supabase (Postgres) clie
 
 **Data flow:** React components call query functions in `src/lib/queries.ts` → Supabase client (`src/lib/supabase.ts`) fetches from Postgres using the anon key → the app shell is precached by the Workbox service worker → OSM map tiles use CacheFirst caching. Supabase requests are never cached by the service worker because their responses can depend on the caller's authorization token.
 
-The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access. Flood Watch admins authenticate via email+password; the `admin_users` table would gate write access to sensitive records under the stricter `rls-prod.sql` policy set (see below) — the deployed demo project currently runs the permissive `rls-demo.sql` instead.
+The Supabase anon key is safe for browser use — Row Level Security (RLS) policies control access. Flood Watch admins authenticate via email+password; the `admin_users` table would gate write access to sensitive relief-ops records under the stricter `rls-prod.sql` policy set (see below) — the deployed demo project currently runs the permissive `rls-demo.sql` for those tables instead. `admin_users` DOES gate live today for Flood Watch report review: `supabase/flood-watch-rls.sql` requires the `is_admin()` helper (from `rls-prod.sql`) to let admins read and update `flood_reports`.
 
 ### Code Splitting
 
@@ -37,7 +37,7 @@ Client-side routing via react-router v7. Locale-prefixed under `/:locale`.
 | `/:locale` | Relief Map | Full-screen map: need pins, hazard markers, hub markers, legend, summary bar |
 | `/:locale/dashboard` | Transparency | Donation totals, inventory levels, barangay equity, recent activity |
 | `/:locale/transparency` | redirect | → `/:locale/dashboard` (legacy URL, preserved for external links) |
-| `/:locale/report` | Report | Multi-form reporter — need / hazard, plus donation / purchase for admins |
+| `/:locale/report` | Report | Multi-form reporter — need / hazard / donation / purchase |
 | `/:locale/login` | redirect | → Flood Watch login (admin sign-in moved to Flood Watch) |
 | `/auth/callback` | redirect | Legacy magic-link email URL; kept working by redirecting to the Flood Watch login page |
 
@@ -72,8 +72,8 @@ Fourteen tables total — thirteen event-scoped + `admin_users` (global). All pr
 
 Two policy sets:
 
-- **`supabase/rls-demo.sql`** — demo project, permissive, currently deployed. Anon can SELECT/INSERT/UPDATE across all base tables directly (including `needs` and `hazards` — not through views).
-- **`supabase/rls-prod.sql`** — an unused future-hardening profile, not applied to any deployed project. Anon reads would go through PII-stripped views (`needs_public`, `hazards_public`); anon could only INSERT `needs` / `need_categories` / `hazards`; donations, purchases, deployments, and need-lifecycle updates would be admin-only via the `is_admin()` helper.
+- **`supabase/rls-demo.sql`** — demo project, permissive, currently deployed for the relief-ops tables. Anon can SELECT/INSERT/UPDATE across all base tables directly (including `needs` and `hazards` — not through views).
+- **`supabase/rls-prod.sql`** — its relief-ops table policies are a dormant future-hardening profile, not applied to any deployed project: anon reads would go through PII-stripped views (`needs_public`, `hazards_public`); anon could only INSERT `needs` / `need_categories` / `hazards`; donations, purchases, deployments, and need-lifecycle updates would be admin-only. The exception is `is_admin()` itself and the `admin_users` read policies in this file — those ARE applied live, because `supabase/flood-watch-rls.sql` depends on `is_admin()` to gate Flood Watch report review.
 
 Admins are provisioned manually via `npm run create:admin` (`scripts/create-admin.ts`, a service-role script that creates or updates the `auth.users` row and upserts `admin_users` directly — no database trigger involved).
 
@@ -105,8 +105,10 @@ Demo data: `supabase/seed-demo.sql` (self-contained, idempotent).
 1. Drop all tables
 2. Run `supabase/schema.sql`
 3. Run `supabase/rpc-functions.sql`
-4. Run `supabase/rls-demo.sql` (the deployed profile; `rls-prod.sql` is an unused future-hardening alternative)
-5. Run `supabase/seed-demo.sql`
+4. Run the `is_admin()` helper from `supabase/rls-prod.sql` (needed by Flood Watch review — the rest of that file's relief-ops policies are an unused future-hardening profile and can be skipped)
+5. Run `supabase/flood-watch-schema.sql` then `supabase/flood-watch-rls.sql`
+6. Run `supabase/rls-demo.sql` (the deployed relief-ops profile)
+7. Run `supabase/seed-demo.sql`
 
 Historical KML data from Typhoon Emong relief operations is archived under `data/Emong_relief_operations.kml`.
 
