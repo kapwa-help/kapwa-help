@@ -2,6 +2,9 @@
 // Usage:
 //   SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… \
 //   ADMIN_EMAIL=… ADMIN_PASSWORD=… [ADMIN_NAME=…] npm run create:admin
+// Tip: `read -s ADMIN_PASSWORD` (or a leading space before the command, on
+// shells that support HISTCONTROL=ignorespace) keeps the password out of
+// shell history.
 import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.SUPABASE_URL;
@@ -19,6 +22,7 @@ if (!url || !serviceKey || !email || !password) {
 
 const admin = createClient(url, serviceKey);
 
+// Single page is fine at this project's scale (a handful of admins).
 const { data: list, error: listErr } = await admin.auth.admin.listUsers({ perPage: 1000 });
 if (listErr) {
   console.error('listUsers failed:', listErr.message);
@@ -57,10 +61,15 @@ if (existing) {
 
 // Upsert the admin row directly — no trigger involved (the invite-era trigger
 // was unreliable and is dropped by supabase/auth-password-migration.sql).
-const { error: upsertErr } = await admin.from('admin_users').upsert(
-  { user_id: userId, email, display_name: displayName },
-  { onConflict: 'user_id' },
-);
+// Only touch display_name when ADMIN_NAME is explicitly set, so a
+// password-reset rerun without it doesn't null out a previously stored name.
+const row: { user_id: string; email: string; display_name?: string | null } = {
+  user_id: userId,
+  email,
+};
+if (process.env.ADMIN_NAME !== undefined) row.display_name = displayName;
+
+const { error: upsertErr } = await admin.from('admin_users').upsert(row, { onConflict: 'user_id' });
 if (upsertErr) {
   console.error('admin_users upsert failed:', upsertErr.message);
   process.exit(1);
