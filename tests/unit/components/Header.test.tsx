@@ -46,7 +46,7 @@ describe("Header", () => {
     expect(screen.getByText("Kapwa Help")).toBeInTheDocument();
     const reportLink = screen.getByRole("link", { name: "Navigation.report" });
     expect(reportLink).toBeInTheDocument();
-    expect(reportLink).toHaveAttribute("href", "/en/report");
+    expect(reportLink).toHaveAttribute("href", "/demo/en/report");
     expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
 
@@ -93,8 +93,8 @@ describe("Header", () => {
   it("navigation links point to locale-prefixed routes", () => {
     renderHeader();
     // Check the desktop nav links (first of each pair)
-    expect(screen.getAllByRole("link", { name: "Navigation.reliefMap" })[0]).toHaveAttribute("href", "/en");
-    expect(screen.getAllByRole("link", { name: "Navigation.dashboard" })[0]).toHaveAttribute("href", "/en/dashboard");
+    expect(screen.getAllByRole("link", { name: "Navigation.reliefMap" })[0]).toHaveAttribute("href", "/demo/en");
+    expect(screen.getAllByRole("link", { name: "Navigation.dashboard" })[0]).toHaveAttribute("href", "/demo/en/dashboard");
   });
 
   it("renders a hamburger menu button on mobile", () => {
