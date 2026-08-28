@@ -4,7 +4,6 @@ import { updateNeedStatus } from "@/lib/queries";
 import type { NeedPoint } from "@/lib/queries";
 import { compressPhoto, uploadPhoto } from "@/lib/photo";
 import ClaimForm from "@/components/ClaimForm";
-import { AdminOnly } from "@/components/AdminOnly";
 
 const STATUS_ORDER = ["pending", "verified", "in_transit", "confirmed"] as const;
 
@@ -152,21 +151,19 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
           <span className="text-neutral-400">{t("PinDetail.contactName")}</span>
           <p className="text-neutral-50">{point.contactName}</p>
         </div>
-        <AdminOnly>
-          {point.contactPhone && (
-            <div>
-              <span className="text-neutral-400">{t("PinDetail.contactPhone")}</span>
-              <p className="text-neutral-50">
-                <a
-                  href={`tel:${point.contactPhone}`}
-                  className="text-primary hover:text-primary/80"
-                >
-                  {point.contactPhone}
-                </a>
-              </p>
-            </div>
-          )}
-        </AdminOnly>
+        {point.contactPhone && (
+          <div>
+            <span className="text-neutral-400">{t("PinDetail.contactPhone")}</span>
+            <p className="text-neutral-50">
+              <a
+                href={`tel:${point.contactPhone}`}
+                className="text-primary hover:text-primary/80"
+              >
+                {point.contactPhone}
+              </a>
+            </p>
+          </div>
+        )}
         <div>
           <span className="text-neutral-400">{t("PinDetail.submitted")}</span>
           <p className="text-neutral-50">{relativeTime}</p>
@@ -195,8 +192,7 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
       )}
 
       {/* Interactive status stepper — admin only */}
-      <AdminOnly>
-        <div className="mb-2">
+      <div className="mb-2">
         {!isOnline && (
           <p className="mb-2 text-center text-xs text-warning">
             {t("PinDetail.offlineMessage")}
@@ -247,24 +243,20 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
         {error && (
           <p className="mt-2 text-center text-xs text-error">{error}</p>
         )}
-        </div>
-      </AdminOnly>
+      </div>
 
       {/* Claim form — verified pins only (admin only) */}
       {point.status === "verified" && (
-        <AdminOnly>
-          <div className="mt-4">
-            <ClaimForm
-              point={point}
-              onClaimed={() => onStatusChange(point.id, "in_transit")}
-            />
-          </div>
-        </AdminOnly>
+        <div className="mt-4">
+          <ClaimForm
+            point={point}
+            onClaimed={() => onStatusChange(point.id, "in_transit")}
+          />
+        </div>
       )}
 
       {/* Confirm delivery — in_transit pins: photo required to confirm (admin only) */}
       {point.status === "in_transit" && (
-        <AdminOnly>
         <div className="mt-4 space-y-2">
           {!photoFile ? (
             <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-400/20 bg-base/30 py-2.5 text-sm text-neutral-400 hover:text-neutral-50 hover:border-neutral-400/40">
@@ -308,7 +300,6 @@ export default function PinDetailSheet({ point, onClose, onStatusChange, variant
             </>
           )}
         </div>
-        </AdminOnly>
       )}
     </>
   );

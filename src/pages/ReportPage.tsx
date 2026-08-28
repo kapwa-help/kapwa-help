@@ -5,8 +5,6 @@ import SubmitForm from "@/components/SubmitForm";
 import DonationForm from "@/components/DonationForm";
 import PurchaseForm from "@/components/PurchaseForm";
 import HazardForm from "@/components/HazardForm";
-import { AdminOnly } from "@/components/AdminOnly";
-import { useAuthContext } from "@/lib/auth-context";
 
 type FormType = "need" | "donation" | "purchase" | "hazard";
 
@@ -19,14 +17,9 @@ const formOptions: { value: FormType; labelKey: string }[] = [
 
 export default function ReportPage() {
   const { t } = useTranslation();
-  const { isAdmin } = useAuthContext();
   const [formType, setFormType] = useState<FormType | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<"acquiring" | "captured" | "denied" | "idle">("idle");
-
-  const visibleFormOptions = formOptions.filter(
-    (o) => isAdmin || (o.value !== "donation" && o.value !== "purchase")
-  );
 
   const requestLocation = useCallback(() => {
     if (!("geolocation" in navigator)) return;
@@ -57,7 +50,7 @@ export default function ReportPage() {
               {t("ReportForm.selectorLabel")}
             </h1>
             <div className="grid grid-cols-2 gap-3">
-              {visibleFormOptions.map((opt) => (
+              {formOptions.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
@@ -108,16 +101,8 @@ export default function ReportPage() {
 
             {/* Form content */}
             {formType === "need" && <SubmitForm coords={coords} />}
-            {formType === "donation" && (
-              <AdminOnly>
-                <DonationForm />
-              </AdminOnly>
-            )}
-            {formType === "purchase" && (
-              <AdminOnly>
-                <PurchaseForm />
-              </AdminOnly>
-            )}
+            {formType === "donation" && <DonationForm />}
+            {formType === "purchase" && <PurchaseForm />}
             {formType === "hazard" && <HazardForm coords={coords} />}
           </>
         )}

@@ -20,7 +20,6 @@ import {
   FormSuccess,
   FormSuccessButton,
 } from "@/components/forms/form-fields";
-import { AdminOnly } from "@/components/AdminOnly";
 
 interface Organization {
   id: string;
@@ -139,7 +138,6 @@ export default function PurchaseForm() {
 
   if (submitted) {
     return (
-      <AdminOnly>
       <FormSuccess>
         <h2 className={`text-xl font-bold ${savedOffline ? "text-warning" : "text-success"}`}>
           {t(savedOffline ? "PurchaseForm.savedTitle" : "PurchaseForm.success")}
@@ -158,12 +156,10 @@ export default function PurchaseForm() {
           {t("ReportForm.reportPurchase")}
         </FormSuccessButton>
       </FormSuccess>
-      </AdminOnly>
     );
   }
 
   return (
-    <AdminOnly>
     <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
       <div>
         <FormLabel htmlFor="organization_id" required>
@@ -240,6 +236,5 @@ export default function PurchaseForm() {
         {submitting ? t("SubmitForm.submitting") : t("PurchaseForm.submit")}
       </FormSubmitButton>
     </form>
-    </AdminOnly>
   );
 }

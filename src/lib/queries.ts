@@ -141,16 +141,10 @@ interface NeedRowAdmin extends NeedRowBase {
   }[];
 }
 
-type NeedRowPublic = NeedRowBase;
-
-export async function getNeedsMapPoints(
-  eventId: string,
-  isAdmin: boolean,
-): Promise<NeedPoint[]> {
-  const source = isAdmin ? "needs" : "needs_public";
-  const fields = isAdmin
-    ? "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))"
-    : "id, lat, lng, status, access_status, urgency, num_people, notes, hub_id, delivery_photo_url, created_at";
+export async function getNeedsMapPoints(eventId: string): Promise<NeedPoint[]> {
+  const source = "needs";
+  const fields =
+    "id, lat, lng, status, access_status, urgency, num_people, contact_name, contact_phone, notes, hub_id, delivery_photo_url, created_at, need_categories(aid_categories(id, name, icon))";
 
   const { data, error } = await supabase
     .from(source)
@@ -159,38 +153,18 @@ export async function getNeedsMapPoints(
     .in("status", ["pending", "verified", "in_transit"]);
   if (error) throw error;
 
-  if (isAdmin) {
-    const rows = (data ?? []) as unknown as NeedRowAdmin[];
-    return rows.map((row) => ({
-      id: row.id,
-      lat: Number(row.lat),
-      lng: Number(row.lng),
-      status: row.status,
-      categories: row.need_categories.map((nc) => nc.aid_categories),
-      accessStatus: row.access_status,
-      urgency: row.urgency,
-      numPeople: row.num_people,
-      contactName: row.contact_name,
-      contactPhone: row.contact_phone,
-      notes: row.notes,
-      hubId: row.hub_id,
-      deliveryPhotoUrl: row.delivery_photo_url,
-      createdAt: row.created_at,
-    }));
-  }
-
-  const rows = (data ?? []) as unknown as NeedRowPublic[];
+  const rows = (data ?? []) as unknown as NeedRowAdmin[];
   return rows.map((row) => ({
     id: row.id,
     lat: Number(row.lat),
     lng: Number(row.lng),
     status: row.status,
-    categories: [],
+    categories: row.need_categories.map((nc) => nc.aid_categories),
     accessStatus: row.access_status,
     urgency: row.urgency,
     numPeople: row.num_people,
-    contactName: "",
-    contactPhone: null,
+    contactName: row.contact_name,
+    contactPhone: row.contact_phone,
     notes: row.notes,
     hubId: row.hub_id,
     deliveryPhotoUrl: row.delivery_photo_url,
@@ -302,16 +276,10 @@ interface HazardRowAdmin extends HazardRowBase {
   contact_phone: string | null;
 }
 
-type HazardRowPublic = HazardRowBase;
-
-export async function getHazards(
-  eventId: string,
-  isAdmin: boolean,
-): Promise<HazardPoint[]> {
-  const source = isAdmin ? "hazards" : "hazards_public";
-  const fields = isAdmin
-    ? "id, description, photo_url, latitude, longitude, status, reported_by, contact_phone, created_at"
-    : "id, description, photo_url, latitude, longitude, status, created_at";
+export async function getHazards(eventId: string): Promise<HazardPoint[]> {
+  const source = "hazards";
+  const fields =
+    "id, description, photo_url, latitude, longitude, status, reported_by, contact_phone, created_at";
 
   const { data, error } = await supabase
     .from(source)
@@ -320,22 +288,7 @@ export async function getHazards(
     .eq("status", "active");
   if (error) throw error;
 
-  if (isAdmin) {
-    const rows = (data ?? []) as unknown as HazardRowAdmin[];
-    return rows.map((row) => ({
-      id: row.id,
-      description: row.description,
-      photoUrl: row.photo_url,
-      lat: Number(row.latitude),
-      lng: Number(row.longitude),
-      status: row.status,
-      reportedBy: row.reported_by,
-      contactPhone: row.contact_phone,
-      createdAt: row.created_at,
-    }));
-  }
-
-  const rows = (data ?? []) as unknown as HazardRowPublic[];
+  const rows = (data ?? []) as unknown as HazardRowAdmin[];
   return rows.map((row) => ({
     id: row.id,
     description: row.description,
@@ -343,8 +296,8 @@ export async function getHazards(
     lat: Number(row.latitude),
     lng: Number(row.longitude),
     status: row.status,
-    reportedBy: null,
-    contactPhone: null,
+    reportedBy: row.reported_by,
+    contactPhone: row.contact_phone,
     createdAt: row.created_at,
   }));
 }
